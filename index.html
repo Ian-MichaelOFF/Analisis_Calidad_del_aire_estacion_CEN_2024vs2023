@@ -1102,12 +1102,20 @@
 
         const mx = Math.max(d1.length, d2 ? d2.length : 0) || 1;
         const modeIdx = c1.indexOf(Math.max(...c1));
-        const topP = Object.entries(p1).sort((a, b) => b[1] - a[1])[0][0];
+        const riskCounts = Object.fromEntries(
+          Object.keys(p1).map((p) => [p, p1[p] + (d2 ? p2[p] : 0)]),
+        );
+        const topP = Object.entries(riskCounts).sort(
+          (a, b) => b[1] - a[1],
+        )[0][0];
+        const daysAnalyzed = d1.length + (d2 ? d2.length : 0);
+        const daysAtRisk =
+          c1[2] + c1[3] + c1[4] + (d2 ? c2[2] + c2[3] + c2[4] : 0);
 
         $("#kpis").innerHTML = [
           [
-            `${d1.length} días`,
-            isComp ? "Días Analizados (Referencia 2024)" : "Periodo Analizado",
+            `${isComp ? daysAnalyzed : d1.length} días`,
+            isComp ? "Días Analizados (Total)" : "Periodo Analizado",
             "var(--sun)",
           ],
           [
@@ -1117,10 +1125,12 @@
           ],
           [
             P[topP] ? P[topP].n : "N/A",
-            `Principal Riesgo (${p1[topP]} d)`,
+            isComp
+              ? "Principal riesgo en ambos años"
+              : `Principal Riesgo (${p1[topP]} d)`,
             "var(--sky)",
           ],
-          [c1[2] + c1[3] + c1[4], `Días en Riesgo`, "var(--cat-mala)"],
+          [daysAtRisk, `Días en Riesgo`, "var(--cat-mala)"],
         ]
           .map(
             (k) =>
