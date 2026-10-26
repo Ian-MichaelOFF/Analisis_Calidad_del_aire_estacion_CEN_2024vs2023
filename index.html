@@ -1,3120 +1,791 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>
-      AIMAJ · Calidad del Aire Estación Centro (CEN) · Comparativa Marzo 2023 vs
-      2024
-    </title>
-    <meta
-      name="description"
-      content="Dashboard interactivo de calidad del aire según NOM-172-SEMARNAT-2023: comparativa multianual 2023 vs 2024, simulador horario y análisis meteorológico de la estación Centro (CEN) para SIMAJ."
-    />
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIMAJ · Estación Centro (CEN) · Análisis Multianual</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Carga de datos local para evitar CORS -->
+  <script src="Datos/datos_2023.js"></script>
+  <script src="Datos/datos_2024.js"></script>
 
-    <!-- Tipografía moderna y estilizada -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+  <style>
+    :root {
+      color-scheme: dark; /* Fuerza la renderización nativa oscura para desplegables */
+      --bg: #071626; 
+      --bg2: #0B1F33; 
+      --bg-card: #112B44; 
+      --card-border: #1C4468;
+      --line: #25506F; 
+      --tx: #E8F1F8; 
+      --mut: #9DB6CB;
+      --sun: #FFC83D; 
+      --sky: #4CC9F0; 
+      --accent-purple: #9B5DE5;
+      
+      /* Colores NOM-172 */
+      --cat-buena: #2ECC71; 
+      --cat-aceptable: #FFC83D; 
+      --cat-mala: #FF7A2F; 
+      --cat-muymala: #E5484D; 
+      --cat-extrema: #9B5DE5; 
+      --cat-nodata: #4A5B6C;
+      
+      --c-pm10: #D4A373; 
+      --c-pm25: #F28482; 
+      --c-o3: #4CC9F0; 
+      --c-co: #B5A6E0; 
+      
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { background: var(--bg); color: var(--tx); font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; line-height: 1.6; overflow-x: hidden; }
+    h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; font-weight: 700; color: #FFFFFF; line-height: 1.2; }
+    button, select, input { font-family: inherit; color: inherit; }
+    :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 
-    <style>
-      /* ==========================================================================
-       VARIABLES Y SISTEMA DE DISEÑO (TEMA DARK GLASSMORPHIC AIMAJ)
-       ========================================================================== */
-      :root {
-        --bg: #071626;
-        --bg2: #0b1f33;
-        --bg-card: #112b44;
-        --card-border: #1c4468;
-        --line: #25506f;
-        --tx: #e8f1f8;
-        --mut: #9db6cb;
-        --mut-dark: #62829d;
+    /* Navegación */
+    nav { 
+      position: sticky; top: 0; z-index: 100; 
+      background: rgba(7, 22, 38, 0.92); backdrop-filter: blur(12px); 
+      display: flex; gap: 8px; padding: 12px 20px; align-items: center; 
+      border-bottom: 1px solid var(--line); box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+    }
+    nav .brand { font: 800 19px 'Outfit'; color: var(--sun); text-decoration: none; margin-right: 14px; white-space: nowrap; }
+    nav a { color: var(--tx); text-decoration: none; font-size: 13.5px; font-weight: 500; padding: 6px 12px; border-radius: 8px; transition: var(--transition); white-space: nowrap; }
+    nav a:hover { background: var(--bg-card); color: var(--sun); }
+    
+    .view-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; background: var(--bg2); padding: 5px; border-radius: 10px; border: 1px solid var(--line); }
+    
+    /* Corrección UI de Selectores Desplegables */
+    select.btn, select#month-selector { background: var(--bg-card) !important; color: var(--tx) !important; outline: none; border: 1px solid var(--line); }
+    select.btn:focus, select#month-selector:focus { border-color: var(--sun); box-shadow: 0 0 0 3px rgba(255,200,61,0.25); }
+    select option { background: var(--bg-card); color: #FFF; font-weight: 500; }
+    
+    #month-selector { border-radius: 8px; padding: 6px 12px; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+    
+    .btn-y { background: transparent; border: 0; padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--mut); transition: var(--transition); }
+    .btn-y.active { background: var(--sun); color: #071626; box-shadow: 0 2px 8px rgba(255, 200, 61, 0.3); }
+    .btn-y:hover:not(.active) { color: #FFF; background: var(--card-border); }
 
-        /* Acentos de diseño */
-        --sun: #ffc83d;
-        --sky: #4cc9f0;
-        --accent-purple: #9b5de5;
+    /* Layout general */
+    .wrap { max-width: 1200px; margin: auto; padding: 0 16px; }
+    section { padding: 60px 0; border-bottom: 1px solid rgba(37, 80, 111, 0.4); }
+    section:nth-of-type(even) { background: var(--bg2); }
+    
+    .band { margin-bottom: 26px; padding-left: 16px; border-left: 6px solid var(--c, var(--sun)); }
+    .band h2 { font-size: clamp(24px, 3.5vw, 36px); letter-spacing: -0.5px; }
+    .band p { margin: 8px 0 0; color: var(--mut); max-width: 54em; font-size: 15px; }
+    
+    .grid { display: grid; gap: 20px; }
+    .k4 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .k2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    
+    .card { background: rgba(17, 43, 68, 0.75); backdrop-filter: blur(8px); border-radius: 14px; padding: 24px; border: 1px solid var(--card-border); border-top: 4px solid var(--c, var(--sky)); box-shadow: var(--shadow); transition: transform 0.2s ease, border-color 0.2s ease; }
+    
+    .kpi { display: flex; flex-direction: column; justify-content: space-between; }
+    .kpi b { display: block; font: 800 36px 'Outfit'; color: var(--c, var(--sun)); line-height: 1.1; margin: 4px 0 6px; }
+    .kpi small { font-size: 13.5px; color: var(--mut); font-weight: 500; }
 
-        /* Colores oficiales NOM-172-SEMARNAT-2023 */
-        --cat-buena: #2ecc71;
-        --cat-aceptable: #ffc83d;
-        --cat-mala: #ff7a2f;
-        --cat-muymala: #e5484d;
-        --cat-extrema: #9b5de5;
-        --cat-nodata: #4a5b6c;
+    .hero { position: relative; overflow: hidden; padding: 70px 20px; background: radial-gradient(circle at 80% 20%, #153A5B 0%, #081B2E 70%); border-bottom: 1px solid var(--line); }
+    .hero h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 800; max-width: 14em; letter-spacing: -1px; margin-bottom: 16px; }
+    .hero p { max-width: 50em; font-size: 17px; color: #C7D9E8; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; background: var(--sun); color: #071626; font-weight: 700; padding: 4px 14px; border-radius: 99px; font-size: 13px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Colores por contaminante */
-        --c-pm10: #d4a373;
-        --c-pm25: #f28482;
-        --c-o3: #4cc9f0;
-        --c-co: #b5a6e0;
-        --c-temp: #ffc83d;
-        --c-rh: #48cae4;
-        --c-ws: #80ed99;
+    /* Botones estándar (se excluyen los selectores para evitar el color sólido oscurecedor) */
+    button.btn { background: var(--bg-card); border: 1px solid var(--line); color: var(--tx); border-radius: 9px; padding: 8px 16px; cursor: pointer; font-size: 13.5px; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+    button.btn:hover, button.btn.on { background: var(--sun); color: #071626; border-color: var(--sun); box-shadow: 0 2px 10px rgba(255, 200, 61, 0.25); }
+    select.btn { border-radius: 9px; padding: 8px 16px; cursor: pointer; font-size: 13.5px; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+    
+    .tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px; justify-content: space-between; }
+    input[type=range] { accent-color: var(--sun); cursor: pointer; }
 
-        /* Transiciones y sombras */
-        --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-        --glass: rgba(17, 43, 68, 0.75);
-      }
+    .cal-grid { display: grid; gap: 8px; margin-top: 12px; }
+    .cal-item { background: var(--bg-card); border-radius: 10px; padding: 12px 6px; text-align: center; cursor: pointer; border: 1px solid var(--line); transition: transform 0.2s, box-shadow 0.2s; color: #111; position: relative; }
+    .cal-item:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 16px rgba(0,0,0,0.5); z-index: 2; border-color: #FFF; }
+    .cal-item b { display: block; font: 700 18px 'Outfit'; margin-bottom: 2px; }
+    .cal-item small { display: block; font-size: 11px; line-height: 1.2; font-weight: 500; }
+    .cal-item.c2, .cal-item.c3, .cal-item.c4 { color: #fff; }
+    
+    .c0 { background: var(--cat-buena); } .c1 { background: var(--cat-aceptable); } .c2 { background: var(--cat-mala); } .c3 { background: var(--cat-muymala); } .c4 { background: var(--cat-extrema); } .cn { background: var(--cat-nodata); color: #fff; }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        scroll-behavior: smooth;
-        scroll-padding-top: 68px;
-      }
-      body {
-        background: var(--bg);
-        color: var(--tx);
-        font-family:
-          "IBM Plex Sans",
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
-        font-size: 15px;
-        line-height: 1.6;
-        overflow-x: hidden;
-      }
+    /* Tendencias (Nuevas guías visuales integradas en el JS) */
+    .trend-container { background: #091624; border-radius: 10px; border: 1px solid var(--line); padding: 16px 16px 8px 16px; margin-top: 20px; }
+    .trend-legend { display: flex; gap: 16px; justify-content: center; font-size: 13px; font-weight: 600; margin-top: 12px; }
 
-      h1,
-      h2,
-      h3,
-      h4 {
-        font-family: "Outfit", sans-serif;
-        font-weight: 700;
-        line-height: 1.2;
-        color: #ffffff;
-      }
+    .sim-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 20px; }
+    @media(max-width: 900px) { .sim-layout { grid-template-columns: 1fr; } }
+    
+    .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .gc { background: var(--bg-card); padding: 14px; border-radius: 10px; border-left: 5px solid var(--c); border-top: 1px solid var(--card-border); border-right: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border); }
+    .gc small { color: var(--mut); font-size: 12px; font-weight: 500; }
+    .gc b { display: block; font: 700 22px 'Outfit'; margin: 4px 0; }
+    .gb { height: 8px; display: flex; margin-top: 8px; background: #000; position: relative; border-radius: 4px; overflow: hidden; }
+    .gb span { height: 100%; } 
+    .gb i { position: absolute; width: 4px; height: 14px; background: #fff; top: -3px; border-radius: 2px; box-shadow: 0 0 6px #fff; transition: left 0.3s ease; }
+    
+    #sim-ban { background: var(--bg2); padding: 20px; border-radius: 12px; font-size: 14px; border: 1px solid var(--line); margin-bottom: 16px; min-height: 100px; }
+    #tip { position: fixed; background: rgba(8, 27, 46, 0.95); border: 1px solid var(--sun); padding: 10px 14px; font-size: 13px; border-radius: 8px; pointer-events: none; display: none; z-index: 9999; backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+  </style>
+</head>
+<body>
+  <div id="tip"></div>
 
-      button,
-      select,
-      input {
-        font-family: inherit;
-        color: inherit;
-      }
-      :focus-visible {
-        outline: 3px solid var(--sun);
-        outline-offset: 2px;
-      }
+  <!-- NAVEGACIÓN -->
+  <nav aria-label="Navegación principal">
+    <a href="#" class="brand">☀ AIMAJ · SIMAJ</a>
+    <a href="#numeralia">Comportamiento</a>
+    <a href="#calendario">Calendario Analítico</a>
+    <a href="#tendencias">Tendencias</a>
+    <a href="#simulador">Simulador Horario</a>
+    
+    <div class="view-controls">
+      <select id="month-selector">
+        <option value="0" selected>Vista Macro: Todo el año</option>
+        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+      <button class="btn-y btn-y24 active" onclick="setMode(2024)">2024</button>
+      <button class="btn-y btn-y23" onclick="setMode(2023)">2023</button>
+      <button class="btn-y btn-ycomp" onclick="setMode('comp')">⚡ Comparar 23 vs 24</button>
+    </div>
+  </nav>
 
-      /* ==========================================================================
-       BARRA DE NAVEGACIÓN Y SELECTOR DE AÑO
-       ========================================================================== */
-      nav {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: rgba(7, 22, 38, 0.92);
-        backdrop-filter: blur(12px);
-        display: flex;
-        gap: 6px;
-        overflow-x: auto;
-        padding: 10px 18px;
-        align-items: center;
-        border-bottom: 1px solid var(--line);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      }
+  <header class="hero">
+    <div class="wrap">
+      <span class="tag">Ingeniería Informática · Sprint 2</span>
+      <h1>Análisis Multianual CEN</h1>
+      <p>Evaluación de calidad del aire y meteorología bajo la NOM-172-SEMARNAT-2023. Explora tendencias anuales, aísla meses críticos o cruza variables por hora en comparativa directa.</p>
+    </div>
+  </header>
 
-      nav .brand {
-        font: 800 19px "Outfit";
-        color: var(--sun);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-right: 14px;
-        text-decoration: none;
-        white-space: nowrap;
-      }
-
-      nav a {
-        color: var(--tx);
-        text-decoration: none;
-        font-size: 13.5px;
-        font-weight: 500;
-        padding: 6px 12px;
-        border-radius: 8px;
-        white-space: nowrap;
-        transition: var(--transition);
-      }
-      nav a:hover {
-        background: var(--bg-card);
-        color: var(--sun);
-      }
-
-      .nav-year-controls {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: var(--bg2);
-        padding: 3px;
-        border-radius: 10px;
-        border: 1px solid var(--line);
-      }
-
-      .year-btn {
-        background: transparent;
-        border: 0;
-        padding: 5px 12px;
-        border-radius: 7px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        color: var(--mut);
-        transition: var(--transition);
-      }
-      .year-btn.active {
-        background: var(--sun);
-        color: #071626;
-        box-shadow: 0 2px 8px rgba(255, 200, 61, 0.3);
-      }
-      .year-btn:hover:not(.active) {
-        color: #fff;
-        background: var(--card-border);
-      }
-
-      .year-toggle-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        background: #081b2e;
-        padding: 3px;
-        border-radius: 9px;
-        border: 1px solid var(--line);
-      }
-      .year-toggle-pill .year-btn {
-        padding: 4px 11px;
-        font-size: 12.5px;
-      }
-
-      /* ==========================================================================
-       LAYOUT Y CONTENEDORES
-       ========================================================================== */
-      .wrap {
-        max-width: 1200px;
-        margin: auto;
-        padding: 0 16px;
-      }
-      section {
-        padding: 54px 0;
-        border-bottom: 1px solid rgba(37, 80, 111, 0.4);
-      }
-      section:nth-of-type(even) {
-        background: var(--bg2);
-      }
-
-      .band {
-        margin-bottom: 26px;
-        padding-left: 16px;
-        border-left: 6px solid var(--c, var(--sun));
-      }
-      .band h2 {
-        font-size: clamp(24px, 3.5vw, 36px);
-        letter-spacing: -0.5px;
-      }
-      .band p {
-        margin: 6px 0 0;
-        color: var(--mut);
-        max-width: 54em;
-        font-size: 15px;
-      }
-
-      .grid {
-        display: grid;
-        gap: 18px;
-      }
-      .k4 {
-        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      }
-      .k3 {
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      }
-      .k2 {
-        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-      }
-      @media (max-width: 768px) {
-        .k2,
-        .k3 {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .card {
-        background: var(--glass);
-        backdrop-filter: blur(8px);
-        border-radius: 14px;
-        padding: 22px;
-        border: 1px solid var(--card-border);
-        border-top: 4px solid var(--c, var(--sky));
-        box-shadow: var(--shadow);
-        transition:
-          transform 0.2s ease,
-          border-color 0.2s ease;
-      }
-      .card:hover {
-        border-color: rgba(76, 201, 240, 0.4);
-      }
-
-      .kpi {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-      .kpi b {
-        display: block;
-        font: 800 36px "Outfit";
-        color: var(--c, var(--sun));
-        line-height: 1.1;
-        margin: 4px 0 6px;
-      }
-      .kpi span {
-        font-size: 13.5px;
-        color: var(--mut);
-      }
-
-      /* ==========================================================================
-       HERO BANNER
-       ========================================================================== */
-      .hero {
-        position: relative;
-        overflow: hidden;
-        padding: 72px 18px 84px;
-        background: radial-gradient(circle at 80% 20%, #153a5b 0%, #081b2e 70%);
-        border-bottom: 1px solid var(--line);
-      }
-      .hero h1 {
-        font-size: clamp(30px, 5vw, 56px);
-        font-weight: 800;
-        max-width: 14em;
-        letter-spacing: -1px;
-      }
-      .hero p {
-        max-width: 48em;
-        font-size: 17px;
-        color: #c7d9e8;
-        margin-top: 14px;
-      }
-      .hero .tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: var(--sun);
-        color: #071626;
-        font-weight: 700;
-        padding: 4px 14px;
-        border-radius: 99px;
-        font-size: 13px;
-        margin-bottom: 16px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .hero-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 22px;
-      }
-      .data-source-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(76, 201, 240, 0.12);
-        border: 1px solid rgba(76, 201, 240, 0.35);
-        color: var(--sky);
-        font-size: 13px;
-        padding: 5px 12px;
-        border-radius: 8px;
-      }
-      .data-source-badge i {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #2ecc71;
-        display: inline-block;
-        box-shadow: 0 0 8px #2ecc71;
-      }
-
-      /* ==========================================================================
-       CHIPS, BOTONES Y CONTROLES
-       ========================================================================== */
-      .chip {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 99px;
-        font-weight: 600;
-        font-size: 12px;
-        color: #111;
-        white-space: nowrap;
-      }
-      .c0 {
-        background: var(--cat-buena);
-      }
-      .c1 {
-        background: var(--cat-aceptable);
-      }
-      .c2 {
-        background: var(--cat-mala);
-        color: #fff;
-      }
-      .c3 {
-        background: var(--cat-muymala);
-        color: #fff;
-      }
-      .c4 {
-        background: var(--cat-extrema);
-        color: #fff;
-      }
-      .cn {
-        background: var(--cat-nodata);
-        color: #fff;
-      }
-
-      .btn {
-        background: var(--bg-card);
-        border: 1px solid var(--line);
-        color: var(--tx);
-        border-radius: 9px;
-        padding: 7px 14px;
-        cursor: pointer;
-        font-size: 13.5px;
-        font-weight: 600;
-        transition: var(--transition);
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .btn:hover,
-      .btn.on {
-        background: var(--sun);
-        color: #071626;
-        border-color: var(--sun);
-        box-shadow: 0 2px 10px rgba(255, 200, 61, 0.25);
-      }
-      .tools {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        align-items: center;
-        margin-bottom: 16px;
-      }
-      select,
-      input[type="number"] {
-        background: #091d30;
-        border: 1px solid var(--line);
-        color: var(--tx);
-        border-radius: 8px;
-        padding: 7px 12px;
-        font-size: 13.5px;
-      }
-      input[type="range"] {
-        accent-color: var(--sun);
-      }
-
-      /* ==========================================================================
-       GRÁFICAS: DONAS, BARRAS Y CALENDARIOS
-       ========================================================================== */
-      .donutw {
-        display: flex;
-        gap: 24px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .leg {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .leg li {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        margin: 6px 0;
-        cursor: pointer;
-        padding: 4px 10px;
-        border-radius: 8px;
-        transition: background 0.15s;
-      }
-      .leg li:hover {
-        background: rgba(255, 255, 255, 0.08);
-      }
-      .leg i {
-        width: 14px;
-        height: 14px;
-        border-radius: 4px;
-        display: inline-block;
-      }
-
-      .bar {
-        display: grid;
-        grid-template-columns: 80px 1fr 40px;
-        gap: 12px;
-        align-items: center;
-        margin: 8px 0;
-        font-size: 13.5px;
-        cursor: pointer;
-        border-radius: 8px;
-        padding: 4px 8px;
-        transition: background 0.15s;
-      }
-      .bar:hover,
-      .bar.on {
-        background: rgba(76, 201, 240, 0.12);
-      }
-      .bar div {
-        height: 18px;
-        background: rgba(0, 0, 0, 0.35);
-        border-radius: 6px;
-        overflow: hidden;
-      }
-      .bar div i {
-        display: block;
-        height: 100%;
-        border-radius: 6px;
-        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      .cal {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
-        font-size: 12px;
-      }
-      .cal .h {
-        font-weight: 700;
-        text-align: center;
-        color: var(--mut);
-        padding-bottom: 4px;
-        text-transform: uppercase;
-        font-size: 11px;
-      }
-      .day {
-        border: 0;
-        border-radius: 10px;
-        padding: 8px 4px;
-        text-align: center;
-        min-height: 70px;
-        cursor: pointer;
-        color: #111;
-        transition:
-          transform 0.15s,
-          opacity 0.2s,
-          box-shadow 0.2s;
-        position: relative;
-      }
-      .day:hover {
-        transform: translateY(-3px) scale(1.03);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
-        z-index: 2;
-      }
-      .day.dim {
-        opacity: 0.18;
-        transform: none;
-      }
-      .day b {
-        display: block;
-        font: 700 16px "Outfit";
-        margin-bottom: 2px;
-      }
-      .day small {
-        display: block;
-        font-size: 10.5px;
-        line-height: 1.2;
-        word-break: break-word;
-        font-weight: 500;
-      }
-      .day.c2,
-      .day.c3,
-      .day.c4 {
-        color: #fff;
-      }
-
-      /* ==========================================================================
-       TABLAS ESTILIZADAS
-       ========================================================================== */
-      .tw {
-        overflow-x: auto;
-        border-radius: 10px;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        font-size: 13.5px;
-      }
-      th {
-        background: #081b2e;
-        text-align: left;
-        padding: 10px 12px;
-        font: 700 13px "Outfit";
-        color: #fff;
-        white-space: nowrap;
-        border-bottom: 2px solid var(--line);
-      }
-      th.s {
-        cursor: pointer;
-        user-select: none;
-      }
-      th.s:hover {
-        color: var(--sun);
-      }
-      td {
-        padding: 9px 12px;
-        border-bottom: 1px solid rgba(37, 80, 111, 0.4);
-        vertical-align: middle;
-      }
-      tbody tr:hover {
-        background: rgba(76, 201, 240, 0.08);
-      }
-      tr.cl2r {
-        cursor: pointer;
-      }
-      tr.now {
-        background: rgba(76, 201, 240, 0.2) !important;
-        font-weight: 600;
-      }
-      tr.fut {
-        opacity: 0.45;
-      }
-
-      /* ==========================================================================
-       SIMULADOR HORARIO
-       ========================================================================== */
-      .sim {
-        display: grid;
-        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-        gap: 18px;
-      }
-      @media (max-width: 900px) {
-        .sim {
-          grid-template-columns: 1fr;
-        }
-      }
-      #sky {
-        width: 100%;
-        display: block;
-        border-radius: 14px;
-        background: #0a1428;
-        box-shadow: var(--shadow);
-      }
-      .gauges {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .gc {
-        background: var(--bg-card);
-        border-radius: 12px;
-        padding: 12px;
-        border-left: 5px solid var(--c);
-        border: 1px solid var(--card-border);
-        border-left-width: 5px;
-      }
-      .gc small {
-        color: var(--mut);
-        font-size: 11.5px;
-        font-weight: 500;
-      }
-      .gc b {
-        display: block;
-        font: 700 22px "Outfit";
-        margin: 2px 0 4px;
-      }
-      .gb {
-        position: relative;
-        display: flex;
-        height: 8px;
-        border-radius: 4px;
-        overflow: hidden;
-        margin-top: 6px;
-        background: #000;
-      }
-      .gb span {
-        height: 100%;
-      }
-      .gb i {
-        position: absolute;
-        top: -3px;
-        width: 3px;
-        height: 14px;
-        background: #fff;
-        border-radius: 2px;
-        transition: left 0.4s;
-        box-shadow: 0 0 6px #fff;
-      }
-
-      .ban {
-        border-radius: 14px;
-        padding: 16px 20px;
-        margin-top: 14px;
-        color: #111;
-        transition: background 0.4s;
-      }
-      .ban h3 {
-        font-size: 22px;
-      }
-      .ban p {
-        margin: 4px 0 0;
-        font-size: 14px;
-      }
-      .ban.c2,
-      .ban.c3,
-      .ban.c4 {
-        color: #fff;
-      }
-
-      .log {
-        list-style: none;
-        padding: 0;
-        margin: 8px 0 0;
-        font-size: 13px;
-        max-height: 160px;
-        overflow-y: auto;
-      }
-      .log li {
-        padding: 5px 0;
-        border-bottom: 1px solid rgba(37, 80, 111, 0.4);
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
-      /* ==========================================================================
-       SECCIÓN COMPARATIVA (2024 vs 2023)
-       ========================================================================== */
-      .comp-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 20px;
-      }
-      .diff-badge {
-        font-size: 12px;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-      .diff-good {
-        background: rgba(46, 204, 113, 0.2);
-        color: #2ecc71;
-        border: 1px solid rgba(46, 204, 113, 0.4);
-      }
-      .diff-bad {
-        background: rgba(229, 72, 77, 0.2);
-        color: #e5484d;
-        border: 1px solid rgba(229, 72, 77, 0.4);
-      }
-      .diff-neutral {
-        background: rgba(76, 201, 240, 0.2);
-        color: #4cc9f0;
-        border: 1px solid rgba(76, 201, 240, 0.4);
-      }
-
-      /* Tooltip Flotante */
-      #tip {
-        position: fixed;
-        pointer-events: none;
-        background: rgba(8, 27, 46, 0.95);
-        border: 1px solid var(--sun);
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 12.5px;
-        z-index: 9999;
-        display: none;
-        max-width: 250px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
-      }
-
-      /* Footer */
-      footer {
-        background: #05101c;
-        color: var(--mut);
-        padding: 44px 18px;
-        font-size: 13.5px;
-        border-top: 1px solid var(--line);
-      }
-      footer b {
-        color: var(--tx);
-      }
-    </style>
-
-    <!-- Carga externa de respaldo local (garantiza funcionamiento sin servidor web) -->
-    <script src="Datos/datos_dashboard_marzo.js"></script>
-  </head>
-  <body>
-    <!-- Tooltip flotante global -->
-    <div id="tip"></div>
-
-    <!-- NAVEGACIÓN PRINCIPAL CON SELECTOR DE AÑO -->
-    <nav aria-label="Navegación principal">
-      <a href="#" class="brand">☀ AIMAJ · SIMAJ</a>
-      <a href="#numeralia">Numeralia</a>
-      <a href="#comparativa">Comparativa 23-24</a>
-      <a href="#calendario">Calendario</a>
-      <a href="#simulador">Simulador horario</a>
-      <a href="#mes">Mes completo</a>
-      <a href="#meteorologia">Meteorología</a>
-      <a href="#metodo">NOM-172</a>
-      <a href="#datos">Calidad de datos</a>
-      <a href="#agencia">Interpretación</a>
-      <a href="#alertas">Alertas</a>
-
-      <!-- Selector de año / modo -->
-      <div class="nav-year-controls">
-        <button
-          class="year-btn btn-y24 active"
-          id="btn-y24"
-          onclick="setAppYear(2024)"
-        >
-          2024
-        </button>
-        <button
-          class="year-btn btn-y23"
-          id="btn-y23"
-          onclick="setAppYear(2023)"
-        >
-          2023
-        </button>
-        <button
-          class="year-btn btn-ycomp"
-          id="btn-ycomp"
-          onclick="setAppYear('comp')"
-        >
-          ⚡ Comparar
-        </button>
+  <section id="numeralia" style="--c:var(--sun)">
+    <div class="wrap">
+      <div class="band">
+        <h2>☀ Comportamiento <span class="lbl-ctx">Anual 2024</span></h2>
+        <p>Distribución de categorías y contaminantes relevantes. Identifica los periodos con mejores y peores condiciones a simple vista.</p>
       </div>
-    </nav>
-
-    <!-- HERO SECTION -->
-    <header class="hero">
-      <div class="wrap" style="position: relative; z-index: 2">
-        <span class="tag">AIMAJ → SIMAJ · Sprint 2</span>
-        <h1>Del dato horario a la evaluación multianual</h1>
-        <p>
-          Analistas de Información Meteorológica y Atmosférica de Jalisco
-          (AIMAJ) entrega a SIMAJ el informe ampliado de la estación Centro
-          (CEN): análisis comparativo de marzo 2023 frente a marzo 2024 conforme
-          a la NOM-172-SEMARNAT-2023, correlaciones meteorológicas, simulador
-          dinámico y directrices operativas.
-        </p>
-
-        <div class="hero-badges">
-          <div class="data-source-badge">
-            <i></i>
-            <span id="data-status-text"
-              >Datos cargados desde: Archivos JSON/CSV (2023 & 2024)</span
-            >
-          </div>
-          <div
-            class="data-source-badge"
-            style="border-color: rgba(255, 200, 61, 0.4); color: var(--sun)"
-          >
-            Estación Centro (CEN) · Guadalajara
-          </div>
+      <div class="grid k4" id="kpis" style="margin-bottom: 24px;"></div>
+      <div class="grid k2">
+        <div class="card" style="--c:var(--cat-buena)">
+          <h3>Distribución AIRE Y SALUD</h3>
+          <p style="font-size:13px; color:var(--mut); margin-bottom:16px;">Frecuencia de categorías según el criterio más estricto.</p>
+          <div id="dist-cat"></div>
+        </div>
+        <div class="card" style="--c:var(--sky)">
+          <h3>Impacto de Contaminantes</h3>
+          <p style="font-size:13px; color:var(--mut); margin-bottom:16px;">Días en los que cada contaminante determinó la peor categoría.</p>
+          <div id="dist-pol"></div>
         </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <!-- SECCIÓN 1: NUMERALIA DEL AÑO ACTIVO -->
-    <section id="numeralia" style="--c: var(--sun)">
-      <div class="wrap">
-        <div
-          class="band"
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 12px;
-          "
-        >
-          <div>
-            <h2>☀ Numeralia de marzo <span id="lbl-num-year">2024</span></h2>
-            <p>
-              744 registros horarios consolidados en 31 días según el principio
-              de máximo riesgo de la NOM-172-SEMARNAT-2023. Haz clic en las
-              categorías o contaminantes para filtrar el calendario.
-            </p>
-          </div>
-          <div class="year-toggle-pill" title="Cambiar año en Numeralia">
-            <button class="year-btn btn-y24 active" onclick="setAppYear(2024)">
-              2024
-            </button>
-            <button class="year-btn btn-y23" onclick="setAppYear(2023)">
-              2023
-            </button>
-          </div>
-        </div>
-
-        <!-- Tarjetas KPI -->
-        <div class="grid k4" id="kpis"></div>
-
-        <!-- Gráficos de distribución de categorías y contaminante dominante -->
-        <div class="grid k2" style="margin-top: 18px">
-          <div class="card" style="--c: var(--cat-buena)">
-            <h3>Días por categoría de calidad del aire</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 12px">
-              Distribución mensual según el indicador más restrictivo del día.
-            </p>
-            <div class="donutw">
-              <svg
-                id="donut"
-                viewBox="0 0 200 200"
-                width="190"
-                height="190"
-                role="img"
-                aria-label="Distribución de días por categoría"
-              ></svg>
-              <ul class="leg" id="leg"></ul>
-            </div>
-          </div>
-
-          <div class="card" style="--c: var(--sky)">
-            <h3>Contaminante de mayor impacto</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 12px">
-              Días en los que cada agente determinó la peor categoría del Índice
-              Aire y Salud (los empates suman a ambos).
-            </p>
-            <div id="bars"></div>
-          </div>
-        </div>
-
-        <!-- Días Críticos identificados -->
-        <div
-          class="card"
-          style="margin-top: 18px; --c: var(--cat-mala); padding: 16px 20px"
-        >
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              gap: 12px;
-              flex-wrap: wrap;
-            "
-          >
-            <b>⚠ Días críticos en el mes:</b>
-            <div
-              id="crit"
-              style="display: flex; gap: 8px; flex-wrap: wrap"
-            ></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 2: COMPARATIVA 2024 vs 2023 (REQUERIMIENTO SPRINT 2) -->
-    <section id="comparativa" style="--c: var(--sky)">
-      <div class="wrap">
-        <div class="band">
-          <h2>⚡ Comparativa Multianual: Marzo 2024 vs. Marzo 2023</h2>
-          <p>
-            Evaluación sintética de cambios en condiciones atmosféricas,
-            concentraciones y frecuencia de episodios entre ambos periodos.
-          </p>
-        </div>
-
-        <!-- KPIs comparativos directos -->
-        <div class="grid k4">
-          <div class="card kpi" style="--c: var(--cat-buena)">
-            <small style="color: var(--mut)">Días en categoría "Buena"</small>
-            <b
-              >11
-              <span style="font-size: 20px; color: var(--mut); font-weight: 400"
-                >vs 5</span
-              ></b
-            >
-            <span>En 2024 los días limpios se duplicaron (+120%)</span>
-            <div style="margin-top: 6px">
-              <span class="diff-badge diff-good">+120% días Buena en 2024</span>
-            </div>
-          </div>
-
-          <div class="card kpi" style="--c: var(--cat-mala)">
-            <small style="color: var(--mut)"
-              >Días de Riesgo (Mala + Muy Mala)</small
-            >
-            <b
-              >3
-              <span style="font-size: 20px; color: var(--mut); font-weight: 400"
-                >vs 10</span
-              ></b
-            >
-            <span>Reducción sustancial de episodios agudos</span>
-            <div style="margin-top: 6px">
-              <span class="diff-badge diff-good">-70% días con alerta</span>
-            </div>
-          </div>
-
-          <div class="card kpi" style="--c: var(--c-pm25)">
-            <small style="color: var(--mut)">PM₂.₅ Promedio Mensual</small>
-            <b
-              >13.2
-              <span style="font-size: 20px; color: var(--mut); font-weight: 400"
-                >vs 28.8</span
-              >
-              µg/m³</b
-            >
-            <span>Reducción de más de la mitad en partículas finas</span>
-            <div style="margin-top: 6px">
-              <span class="diff-badge diff-good"
-                >-54.0% en exposición a PM₂.₅</span
-              >
-            </div>
-          </div>
-
-          <div class="card kpi" style="--c: var(--c-o3)">
-            <small style="color: var(--mut)"
-              >Pico Máximo Horario de Ozono</small
-            >
-            <b
-              >0.098
-              <span style="font-size: 20px; color: var(--mut); font-weight: 400"
-                >vs 0.136</span
-              >
-              ppm</b
-            >
-            <span>2023 alcanzó categoría 'Muy Mala' (0.136 ppm)</span>
-            <div style="margin-top: 6px">
-              <span class="diff-badge diff-good">Sin 'Muy Mala' en 2024</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gráfico de distribución de categorías 2023 vs 2024 -->
-        <div class="grid k2" style="margin-top: 18px">
-          <div class="card" style="--c: var(--sun)">
-            <h3>Comparativa de Categorías Aire y Salud</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 14px">
-              Comparación de días por categoría entre marzo 2023 y marzo 2024.
-            </p>
-            <div id="comp-categories-chart"></div>
-          </div>
-
-          <div class="card" style="--c: var(--accent-purple)">
-            <h3>Comparativa de Contaminante Responsable</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 14px">
-              Frecuencia en días en que cada agente determinó la calidad del
-              aire.
-            </p>
-            <div id="comp-pollutants-chart"></div>
-          </div>
-        </div>
-
-        <!-- Gráfica de evolución diaria superpuesta (2023 vs 2024) -->
-        <div class="card" style="margin-top: 18px; --c: var(--sky)">
-          <div class="comp-header">
-            <div>
-              <h3>Evolución Diaria Superpuesta: Marzo 2024 vs. Marzo 2023</h3>
-              <p style="font-size: 13px; color: var(--mut)">
-                Compara la curva día a día (días 1 al 31) para identificar
-                tendencias y divergencias.
-              </p>
-            </div>
-            <div class="tools" style="margin-bottom: 0">
-              <select id="comp-var-sel">
-                <option value="O3_max">Ozono (O₃ Máximo Diario)</option>
-                <option value="PM10_d24h">PM₁₀ (Promedio 24 h)</option>
-                <option value="PM25_d24h">PM₂.₅ (Promedio 24 h)</option>
-                <option value="CO_max8h">CO (Máximo Promedio 8 h)</option>
-                <option value="temp_media">Temperatura Media Diaria</option>
-              </select>
-            </div>
-          </div>
-          <svg
-            id="comp-daily-svg"
-            viewBox="0 0 1000 280"
-            style="width: 100%; height: auto; display: block"
-            role="img"
-            aria-label="Gráfica comparativa diaria 2023 vs 2024"
-          ></svg>
-          <div
-            style="
-              display: flex;
-              justify-content: center;
-              gap: 24px;
-              margin-top: 12px;
-              font-size: 13px;
-            "
-          >
-            <span style="display: inline-flex; align-items: center; gap: 6px"
-              ><i
-                style="
-                  width: 14px;
-                  height: 4px;
-                  background: #4cc9f0;
-                  border-radius: 2px;
-                  display: inline-block;
-                "
-              ></i>
-              Línea sólida: <b>2024</b></span
-            >
-            <span style="display: inline-flex; align-items: center; gap: 6px"
-              ><i
-                style="
-                  width: 14px;
-                  height: 4px;
-                  background: #ffc83d;
-                  border-radius: 2px;
-                  display: inline-block;
-                  border-top: 1px dashed #ffc83d;
-                "
-              ></i>
-              Línea punteada: <b>2023</b></span
-            >
-          </div>
-          <div id="comp-daily-note"></div>
-        </div>
-
-        <!-- Tabla comparativa día por día -->
-        <div class="card tw" style="margin-top: 18px; --c: var(--line)">
-          <h3>Matriz Comparativa Día por Día (1 al 31 de marzo)</h3>
-          <p style="font-size: 13px; color: var(--mut); margin-bottom: 12px">
-            Contraste directo de categoría global y contaminante determinante
-            entre 2023 y 2024.
-          </p>
-          <table>
-            <thead>
-              <tr>
-                <th>Día</th>
-                <th>Cat. 2024</th>
-                <th>Responsable '24</th>
-                <th>PM₁₀ '24</th>
-                <th>O₃ '24</th>
-                <th style="border-left: 2px solid var(--line)">Cat. 2023</th>
-                <th>Responsable '23</th>
-                <th>PM₁₀ '23</th>
-                <th>O₃ '23</th>
-                <th>Diferencia / Variación</th>
-              </tr>
-            </thead>
-            <tbody id="comp-table-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 3: CALENDARIO Y RESUMEN DIARIO -->
-    <section id="calendario" style="--c: var(--cat-mala)">
-      <div class="wrap">
-        <div
-          class="band"
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 12px;
-          "
-        >
-          <div>
-            <h2>
-              🗓 Calendario y Tabla Diaria (<span id="lbl-cal-year">2024</span>)
-            </h2>
-            <p>
-              Muestra la categoría diaria oficial (según el peor contaminante
-              del día). Toca cualquier celda para cargar ese día en el simulador
-              horario.
-            </p>
-          </div>
-          <div class="year-toggle-pill" title="Cambiar año en Calendario">
-            <button class="year-btn btn-y24 active" onclick="setAppYear(2024)">
-              2024
-            </button>
-            <button class="year-btn btn-y23" onclick="setAppYear(2023)">
-              2023
-            </button>
-          </div>
-        </div>
-
+  <section id="calendario" style="--c:var(--cat-mala)">
+    <div class="wrap">
+      <div class="card" style="--c:var(--cat-mala)">
         <div class="tools">
-          <button class="btn" id="clr">Quitar filtros</button>
-          <span id="fl" style="color: var(--mut); font-size: 13.5px"></span>
+          <div>
+            <h3 style="font-size: 24px;">🗓 Calendario Analítico (<span class="lbl-ctx">Anual 2024</span>)</h3>
+            <p style="font-size:14px; color:var(--mut); margin-top:4px;">Haz clic en cualquier bloque para aislar ese periodo en el simulador horario.</p>
+          </div>
+          <div id="granularity-container" style="display: none; background: var(--bg2); padding: 6px; border-radius: 8px; border: 1px solid var(--line);">
+            <label style="font-size: 13px; color: var(--mut); margin-right: 8px; font-weight: 600;">Agrupar por:</label>
+            <select id="sel-granularity" class="btn" style="border: none;">
+              <option value="meses" selected>Meses (12 bloques)</option>
+              <option value="semanas">Semanas (52 bloques)</option>
+              <option value="dias">Días (365 bloques)</option>
+            </select>
+          </div>
         </div>
-
-        <div class="card" style="--c: var(--cat-mala)">
-          <div class="cal" id="cal"></div>
-        </div>
-
-        <div class="card tw" style="margin-top: 18px; --c: var(--sky)">
-          <h3>
-            Indicadores Diarios Completos (clic en encabezado para ordenar)
-          </h3>
-          <table>
-            <thead>
-              <tr id="dth"></tr>
-            </thead>
-            <tbody id="dtb"></tbody>
-          </table>
-        </div>
+        <div id="cal-master"></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- SECCIÓN 4: SIMULADOR HORARIO HORA POR HORA -->
-    <section id="simulador" style="--c: var(--sky)">
-      <div class="wrap">
-        <div class="band">
-          <h2>🌤 Simulador Horario Interactivo</h2>
-          <p>
-            Reproduce la evolución de las 24 horas del día seleccionado con
-            lecturas reales de CEN y cálculo instantáneo de la NOM-172 (NowCast
-            para partículas, promedio 8 h móvil para CO).
-          </p>
-        </div>
-
+  <!-- SECCIÓN TENDENCIAS CONTINUAS ACTUALIZADA -->
+  <section id="tendencias" style="--c:var(--accent-purple)">
+    <div class="wrap">
+      <div class="card" style="--c:var(--accent-purple)">
         <div class="tools">
-          <div
-            class="year-toggle-pill"
-            style="margin-right: 6px"
-            title="Cambiar año del Simulador"
-          >
-            <button class="year-btn btn-y24 active" onclick="setAppYear(2024)">
-              2024
-            </button>
-            <button class="year-btn btn-y23" onclick="setAppYear(2023)">
-              2023
-            </button>
+          <div>
+            <h3 style="font-size: 24px;">📈 Evolución y Tendencias Continuas</h3>
+            <p style="font-size:14px; color:var(--mut); margin-top:4px;">Visualiza el desarrollo diario de los contaminantes y la meteorología en el periodo seleccionado.</p>
           </div>
-          <button class="btn" id="prev" aria-label="Día anterior">
-            ◀ Día anterior
-          </button>
-          <select id="dsel" aria-label="Seleccionar día"></select>
-          <button class="btn" id="next" aria-label="Día siguiente">
-            Día siguiente ▶
-          </button>
-          <button class="btn on" id="play" style="min-width: 120px">
-            ▶ Iniciar
-          </button>
-          <span id="spd"></span>
-          <label
-            style="
-              display: inline-flex;
-              align-items: center;
-              gap: 6px;
-              cursor: pointer;
-              font-size: 13.5px;
-            "
-          >
-            <input type="checkbox" id="auto" /> Seguir automáticamente
-          </label>
+          <div>
+            <select id="sel-trend-var" class="btn" style="background:var(--bg2);">
+              <option value="PM10">Partículas PM₁₀</option>
+              <option value="PM25">Partículas PM₂.₅</option>
+              <option value="O3">Ozono (O₃)</option>
+              <option value="CO">Monóxido de Carbono (CO)</option>
+              <option value="TEMP">Temperatura Media (°C)</option>
+            </select>
+          </div>
         </div>
+        
+        <div class="trend-container">
+          <svg id="trend-chart" viewBox="0 0 800 200" style="width:100%; overflow: visible;"></svg>
+        </div>
+        
+        <div class="trend-legend" id="trend-legend"></div>
+      </div>
+    </div>
+  </section>
 
+  <section id="simulador" style="--c:var(--c-pm10)">
+    <div class="wrap">
+      <div class="card" style="--c:var(--c-pm10)" id="sect-sim">
         <div class="tools">
-          <input
-            type="range"
-            id="hsl"
-            min="0"
-            max="23.99"
-            step="0.01"
-            value="0"
-            aria-label="Hora del día"
-            style="flex: 1"
-          />
-          <b
-            id="clock"
-            style="
-              font: 800 24px &quot;Outfit&quot;;
-              min-width: 70px;
-              color: var(--sun);
-            "
-            >00:00</b
-          >
-        </div>
-
-        <div class="sim">
-          <!-- Columna Izquierda: Cielo animado y gráfica horaria -->
           <div>
-            <svg
-              id="sky"
-              viewBox="0 0 600 260"
-              role="img"
-              aria-label="Escena visual del cielo"
-            ></svg>
-
-            <div class="card" style="margin-top: 14px; --c: var(--sky)">
-              <div class="tools" style="margin-bottom: 8px">
-                <h3 style="margin-right: auto">Evolución horaria</h3>
-                <span id="polb"></span>
-                <label
-                  style="
-                    font-size: 13px;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 4px;
-                    margin-left: 8px;
-                  "
-                >
-                  <input type="checkbox" id="tmp" /> Temp °C
-                </label>
-              </div>
-              <svg
-                id="chart"
-                viewBox="0 0 760 300"
-                style="width: 100%; cursor: pointer"
-                role="img"
-                aria-label="Gráfica horaria del contaminante"
-              ></svg>
-              <div style="font-size: 12px; color: var(--mut); margin-top: 6px">
-                Línea gruesa: indicador oficial (NowCast / 8 h). Línea punteada:
-                concentración horaria cruda. Toca la gráfica para saltar en el
-                tiempo.
-              </div>
-            </div>
+            <h3 style="font-size: 24px;">🌤 Simulador Horario y Meteorología</h3>
+            <p style="font-size:14px; color:var(--mut); margin-top:4px;">Analiza la relación directa entre contaminantes, temperatura y viento hora por hora.</p>
           </div>
-
-          <!-- Columna Derecha: Tacómetros, Alerta activa y Bitácora -->
+          <div style="display:flex; gap:12px; align-items:center;">
+            <select id="sel-sim-day" class="btn" style="background:var(--bg2)"></select>
+            <button class="btn on" id="btn-play" style="min-width: 110px;">▶ Iniciar</button>
+            <span id="sim-clock" style="font:800 24px 'Outfit'; color:var(--sun); min-width:60px;">00:00</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap: wrap;" id="sim-pols"></div>
+        <div class="sim-layout">
           <div>
-            <div class="gauges" id="gauges"></div>
-            <div class="ban" id="ban"></div>
-
-            <div class="card" style="margin-top: 14px; --c: var(--sun)">
-              <h3>Bitácora de eventos y avisos</h3>
-              <p style="font-size: 12.5px; color: var(--mut)">
-                Cambios de categoría detectados durante el día:
-              </p>
-              <ul class="log" id="log"></ul>
+            <svg id="sim-chart" viewBox="0 0 760 260" style="width:100%; background:#091624; border-radius:10px; border: 1px solid var(--line); cursor: crosshair;"></svg>
+            <input type="range" id="sim-range" min="0" max="23.99" step="0.01" value="0" style="width:100%; margin-top:12px;">
+            <div id="sim-legend" style="margin-top: 8px; font-size: 12.5px; text-align: center; color: var(--mut); display: none;">
+              <span style="color:#4CC9F0; font-weight: 700;">■ 2024 (Línea Sólida)</span> &nbsp;&nbsp;&nbsp; 
+              <span style="color:#FFC83D; font-weight: 700;">■ 2023 (Línea Punteada)</span>
             </div>
           </div>
-        </div>
-
-        <!-- Tabla de las 24 horas del día -->
-        <div class="card tw" style="margin-top: 18px; --c: var(--c-pm10)">
-          <h3>
-            Registros Horarios del Día (clic en cualquier fila para saltar a esa
-            hora)
-          </h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Hora</th>
-                <th>PM₁₀ crudo</th>
-                <th>PM₁₀ NowCast</th>
-                <th>PM₂.₅ NowCast</th>
-                <th>O₃ horario</th>
-                <th>CO prom. 8h</th>
-                <th>Temp. Ext.</th>
-                <th>Categoría Aire y Salud</th>
-              </tr>
-            </thead>
-            <tbody id="htb"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 5: SERIE TEMPORAL DE TODO EL MES -->
-    <section id="mes" style="--c: var(--c-pm25)">
-      <div class="wrap">
-        <div
-          class="band"
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 12px;
-          "
-        >
           <div>
-            <h2>
-              🌫 Mes Completo: Serie de las 744 Horas (<span id="lbl-mes-year"
-                >2024</span
-              >)
-            </h2>
-            <p>
-              Inspecciona las 744 lecturas horarias consecutivas. Desplaza el
-              cursor para ver valores en tiempo real o haz clic para explorar
-              esa hora en el simulador.
-            </p>
-          </div>
-          <div class="year-toggle-pill" title="Cambiar año en Mes Completo">
-            <button class="year-btn btn-y24 active" onclick="setAppYear(2024)">
-              2024
-            </button>
-            <button class="year-btn btn-y23" onclick="setAppYear(2023)">
-              2023
-            </button>
-          </div>
-        </div>
-
-        <div class="card" style="--c: var(--c-pm25)">
-          <div class="tools">
-            <select
-              id="msel"
-              aria-label="Seleccionar variable para la serie mensual"
-            ></select>
-          </div>
-          <svg
-            id="mchart"
-            viewBox="0 0 1000 300"
-            style="width: 100%; cursor: crosshair"
-            role="img"
-            aria-label="Serie mensual completa"
-          ></svg>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 6: ANÁLISIS METEOROLÓGICO Y CORRELACIONES -->
-    <section id="meteorologia" style="--c: var(--c-rh)">
-      <div class="wrap">
-        <div class="band">
-          <h2>🌤 Relaciones Meteorológicas: Temperatura, Humedad y Viento</h2>
-          <p>
-            Análisis de las variables atmosféricas locales que modulan la
-            dispersión, estancamiento y reacción fotoquímica en la estación
-            Centro.
-          </p>
-        </div>
-
-        <div class="grid k3">
-          <div class="card" style="--c: var(--sun)">
-            <h3>🌡 Temperatura y Radiación Solar (Ozono)</h3>
-            <p style="font-size: 14px; margin-top: 8px">
-              El <b>Ozono (O₃)</b> presenta un ciclo diurno marcadamente
-              fotoquímico. Entre las 13:00 y las 17:00 h, al registrarse las
-              temperaturas máximas (28 °C a 33 °C en 2023 y 27 °C a 31 °C en
-              2024), la radiación solar detona la disociación de NO₂ y COV,
-              elevando el O₃ a niveles de riesgo. En 2023, temperaturas 0.75 °C
-              más altas propiciaron picos más severos (hasta 0.136 ppm).
-            </p>
-          </div>
-
-          <div class="card" style="--c: var(--c-pm10)">
-            <h3>🌫 Inversión Térmica Matutina (Partículas y CO)</h3>
-            <p style="font-size: 14px; margin-top: 8px">
-              Entre las 06:00 y 09:30 h se observa de forma constante el pico de
-              <b>PM₁₀, PM₂.₅ y CO</b>. Este fenómeno responde a la combinación
-              del encendido del parque vehicular (tráfico matutino) con una capa
-              de mezcla atmosférica muy baja (inversión térmica) y vientos en
-              calma (&lt; 1 m/s), impidiendo la dispersión vertical de
-              emisiones.
-            </p>
-          </div>
-
-          <div class="card" style="--c: var(--c-rh)">
-            <h3>🌬 Régimen de Vientos y Humedad</h3>
-            <p style="font-size: 14px; margin-top: 8px">
-              En 2023 se registraron datos de viento y humedad: las brisas
-              matutinas provienen predominantemente del noreste/este a baja
-              velocidad (&lt; 1.5 m/s), mientras que por la tarde giran hacia el
-              oeste/suroeste aumentando a 3-5 m/s, favoreciendo la ventilación
-              del centro urbano pero transportando la pluma de ozono hacia la
-              zona periférica.
-            </p>
+            <div id="sim-ban"></div>
+            <div class="gauges" id="sim-gauges"></div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- SECCIÓN 7: MÉTODO NORMATIVO NOM-172-SEMARNAT-2023 -->
-    <section id="metodo" style="--c: var(--cat-buena)">
-      <div class="wrap">
-        <div class="band">
-          <h2>📏 Criterios Normativos: NOM-172-SEMARNAT-2023</h2>
-          <p>
-            Umbrales vigentes a nivel nacional (DOF 25/01/2024). Explora la
-            calculadora interactiva para verificar cualquier concentración.
-          </p>
-        </div>
+  <script>
+    const $ = s => document.querySelector(s);
+    const $$ = s => [...document.querySelectorAll(s)];
+    
+    const CAT = ["Buena", "Aceptable", "Mala", "Muy mala", "Extremadamente mala"];
+    const COL = ["#2ECC71", "#FFC83D", "#FF7A2F", "#E5484D", "#9B5DE5"];
+    const mN = ["Anual", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    
+    const P = { 
+      PM10:  { n: "PM₁₀", u: "µg/m³", i: 2, c: "#C9A66B", b: [45, 60, 132, 213], dg: 0 }, 
+      PM25:  { n: "PM₂.₅", u: "µg/m³", i: 3, c: "#F28482", b: [15, 33, 79, 130], dg: 0 }, 
+      O3:    { n: "O₃",   u: "ppm",   i: 0, c: "#4CC9F0", b: [.058, .09, .135, .175], dg: 3 }, 
+      CO:    { n: "CO",   u: "ppm",   i: 1, c: "#B5A6E0", b: [5, 9, 12, 16], dg: 2 } 
+    };
+    const KS = Object.keys(P);
 
-        <div class="grid k2">
-          <div class="card tw" style="--c: var(--cat-buena)">
-            <h3>Límites Oficiales de Concentración</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Contaminante</th>
-                  <th>Buena</th>
-                  <th>Aceptable</th>
-                  <th>Mala</th>
-                  <th>Muy mala</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><b>O₃</b> (ppm, 1 h)</td>
-                  <td>&lt; 0.058</td>
-                  <td>0.058 - 0.090</td>
-                  <td>0.091 - 0.135</td>
-                  <td>0.136 - 0.175</td>
-                </tr>
-                <tr>
-                  <td><b>CO</b> (ppm, prom 8 h)</td>
-                  <td>&lt; 5.0</td>
-                  <td>5.1 - 9.0</td>
-                  <td>9.1 - 12.0</td>
-                  <td>12.1 - 16.0</td>
-                </tr>
-                <tr>
-                  <td><b>PM₁₀</b> (µg/m³, NowCast)</td>
-                  <td>&lt; 45</td>
-                  <td>45 - 60</td>
-                  <td>61 - 132</td>
-                  <td>133 - 213</td>
-                </tr>
-                <tr>
-                  <td><b>PM₂.₅</b> (µg/m³, NowCast)</td>
-                  <td>&lt; 15</td>
-                  <td>15 - 33</td>
-                  <td>34 - 79</td>
-                  <td>80 - 130</td>
-                </tr>
-              </tbody>
-            </table>
+    let activeYear = 2024;      
+    let activeMonth = 0;        
+    let granularity = "meses";  
+    let activeTrendVar = "PM10";
+    
+    let D24 = window.DATA_2024 ? window.DATA_2024.d : [];
+    let H24 = window.DATA_2024 ? window.DATA_2024.h : [];
+    let D23 = window.DATA_2023 ? window.DATA_2023.d : [];
+    let H23 = window.DATA_2023 ? window.DATA_2023.h : [];
 
-            <!-- Calculadora instantánea -->
-            <div
-              style="
-                margin-top: 18px;
-                padding-top: 14px;
-                border-top: 1px solid var(--line);
-              "
-            >
-              <div
-                style="font-size: 13.5px; font-weight: 600; margin-bottom: 8px"
-              >
-                Calculadora de categoría interactiva:
+    function getD(y) { return activeMonth === 0 ? (y===2024 ? D24 : D23) : (y===2024 ? D24 : D23).filter(x => x.m === activeMonth); }
+    function getH(y) { return activeMonth === 0 ? (y===2024 ? H24 : H23) : (y===2024 ? H24 : H23).filter(x => x[11] === activeMonth); }
+    function cat(k, v) { if (v == null) return -1; let b = P[k].b; if (v < b[0]) return 0; for (let i = 1; i < 4; i++) if (v <= b[i]) return i; return 4; }
+    
+    function getModeCat(arr) { 
+      const counts = {}; let maxCount = 0, maxVal = -1; 
+      arr.forEach(val => { 
+        if (val >= 0) { 
+          counts[val] = (counts[val] || 0) + 1; 
+          if (counts[val] > maxCount) { maxCount = counts[val]; maxVal = val; } 
+        } 
+      }); 
+      return maxVal; 
+    }
+
+    $("#month-selector").addEventListener("change", e => { activeMonth = parseInt(e.target.value); renderAll(); });
+    $("#sel-granularity").addEventListener("change", e => { granularity = e.target.value; renderCal(activeYear === 'comp'); });
+    $("#sel-trend-var").addEventListener("change", e => { activeTrendVar = e.target.value; renderTrend(activeYear === 'comp'); });
+    
+    function setMode(modeStr) { 
+      activeYear = modeStr; 
+      $$(".btn-y").forEach(b => b.classList.remove("active")); 
+      $(`.btn-y${modeStr === 'comp' ? 'comp' : (modeStr === 2024 ? '24' : '23')}`).classList.add("active"); 
+      renderAll(); 
+    }
+
+    function renderAll() {
+      if (!D24.length || !D23.length) { alert("Asegúrate de haber generado los archivos datos_2023.js y datos_2024.js"); return; }
+      const isComp = activeYear === 'comp';
+      const ctxText = (activeMonth === 0 ? "Anual" : mN[activeMonth]) + " " + (isComp ? "(Comparativa 2024 vs 2023)" : activeYear);
+      $$(".lbl-ctx").forEach(el => el.textContent = ctxText);
+      $("#granularity-container").style.display = (isComp && activeMonth === 0) ? "flex" : "none";
+      
+      renderResumen(isComp); 
+      renderCal(isComp);
+      renderTrend(isComp); 
+      initSim(isComp);
+    }
+
+    function renderResumen(isComp) {
+      const d1 = getD(isComp ? 2024 : activeYear);
+      const d2 = isComp ? getD(2023) : null;
+      
+      const c1 = [0,0,0,0,0], p1 = { PM10:0, PM25:0, O3:0, CO:0 }; 
+      d1.forEach(x => { if(x.c >= 0) c1[x.c]++; x.r.forEach(p => { if(p1[p] != null) p1[p]++; }); });
+      
+      const c2 = [0,0,0,0,0], p2 = { PM10:0, PM25:0, O3:0, CO:0 }; 
+      if (d2) d2.forEach(x => { if(x.c >= 0) c2[x.c]++; x.r.forEach(p => { if(p2[p] != null) p2[p]++; }); });
+      
+      const mx = Math.max(d1.length, d2 ? d2.length : 0) || 1;
+      const modeIdx = c1.indexOf(Math.max(...c1));
+      const topP = Object.entries(p1).sort((a,b) => b[1] - a[1])[0][0];
+      
+      $("#kpis").innerHTML = [
+        [`${d1.length} días`, isComp ? "Días Analizados (Referencia 2024)" : "Periodo Analizado", "var(--sun)"], 
+        [CAT[modeIdx] || "N/A", `Calidad Predominante`, COL[modeIdx] || "#fff"], 
+        [P[topP] ? P[topP].n : "N/A", `Principal Riesgo (${p1[topP]} d)`, "var(--sky)"], 
+        [c1[2] + c1[3] + c1[4], `Días en Riesgo`, "var(--cat-mala)"]
+      ].map(k => `<div class="card kpi" style="--c:${k[2]}"><small>${k[1]}</small><b>${k[0]}</b></div>`).join("");
+
+      $("#dist-cat").innerHTML = CAT.map((n, i) => {
+        if (!c1[i] && (!d2 || !c2[i])) return "";
+        return `
+          <div style="margin-bottom: 12px; font-size: 14px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>${n}</span>
+              <span><b>${c1[i]} d</b> ${d2 ? `<span style="color:var(--mut)">/ ${c2[i]} d ('23)</span>` : ''}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <div style="width:100%; background:rgba(0,0,0,0.3); height:12px; border-radius:4px; overflow:hidden;">
+                <div style="width:${c1[i]/mx*100}%; background:${COL[i]}; height:100%;"></div>
               </div>
-              <div class="tools">
-                <select id="ck"></select>
-                <input
-                  type="range"
-                  id="cr"
-                  aria-label="Concentración"
-                  style="flex: 1"
-                />
-                <b
-                  id="cv"
-                  style="min-width: 75px; font-size: 17px; color: var(--sun)"
-                ></b>
-                <span id="cc"></span>
+              ${d2 ? `<div style="width:100%; background:rgba(0,0,0,0.3); height:8px; border-radius:4px; overflow:hidden;">
+                        <div style="width:${c2[i]/mx*100}%; background:rgba(255,255,255,0.5); border-bottom: 2px solid ${COL[i]}; height:100%;"></div>
+                      </div>` : ''}
+            </div>
+          </div>`;
+      }).join("");
+
+      $("#dist-pol").innerHTML = KS.map(k => {
+        if (!p1[k] && (!d2 || !p2[k])) return "";
+        return `
+          <div style="margin-bottom: 12px; font-size: 14px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>${P[k].n}</span>
+              <span><b>${p1[k]} d</b> ${d2 ? `<span style="color:var(--mut)">/ ${p2[k]} d ('23)</span>` : ''}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <div style="width:100%; background:rgba(0,0,0,0.3); height:12px; border-radius:4px; overflow:hidden;">
+                <div style="width:${p1[k]/mx*100}%; background:${P[k].c}; height:100%;"></div>
               </div>
+              ${d2 ? `<div style="width:100%; background:rgba(0,0,0,0.3); height:8px; border-radius:4px; overflow:hidden;">
+                        <div style="width:${p2[k]/mx*100}%; background:rgba(255,255,255,0.5); border-bottom: 2px solid ${P[k].c}; height:100%;"></div>
+                      </div>` : ''}
             </div>
-          </div>
+          </div>`;
+      }).join("");
+    }
 
-          <div class="card" style="--c: var(--sun)">
-            <h3>Reglas de Integración de Indicadores</h3>
-            <ul
-              style="
-                padding-left: 18px;
-                font-size: 14px;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-              "
-            >
-              <li>
-                <b>Partículas (NowCast 12 h):</b> Ponderación exponencial de las
-                12 horas previas, dando mayor peso a las lecturas recientes ante
-                variaciones bruscas.
-              </li>
-              <li>
-                <b>Monóxido de Carbono (Promedio 8 h):</b> Promedio móvil de las
-                8 horas previas (requiere al menos 6 lecturas válidas, 75%).
-              </li>
-              <li>
-                <b>Ozono (Directo 1 h):</b> Concentración horaria directa para
-                protección inmediata contra picos fotoquímicos.
-              </li>
-              <li>
-                <b>Principio de Máximo Riesgo:</b> La categoría global (horaria
-                o diaria) corresponde siempre al contaminante que represente el
-                mayor riesgo a la salud.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 8: CALIDAD Y DISPONIBILIDAD DE DATOS -->
-    <section id="datos" style="--c: var(--c-co)">
-      <div class="wrap">
-        <div class="band">
-          <h2>🔎 Calidad de Datos y Registro de Atípicos</h2>
-          <p>
-            Disponibilidad por sensor en la estación CEN y auditoría de
-            consistencia generada en los reportes de atípicos.
-          </p>
-        </div>
-
-        <div class="grid k2">
-          <div class="card" style="--c: var(--c-co)">
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 8px;
-                margin-bottom: 12px;
-              "
-            >
-              <h3 style="margin: 0">
-                Disponibilidad de Sensores (<span id="lbl-dat-year">2024</span>)
-              </h3>
-              <div
-                class="year-toggle-pill"
-                title="Cambiar año en Disponibilidad"
-              >
-                <button
-                  class="year-btn btn-y24 active"
-                  onclick="setAppYear(2024)"
-                >
-                  2024
-                </button>
-                <button class="year-btn btn-y23" onclick="setAppYear(2023)">
-                  2023
-                </button>
+    function renderCal(isComp) {
+      const master = $("#cal-master");
+      master.innerHTML = "";
+      
+      if (!isComp) {
+        const d = getD(activeYear);
+        const cols = activeMonth === 0 ? "repeat(auto-fill, minmax(65px, 1fr))" : "repeat(7, 1fr)";
+        master.innerHTML = `
+          <div class="cal-grid" style="grid-template-columns: ${cols};">
+            ${d.map((x, i) => `
+              <div class="cal-item c${x.c}" onclick="setSimDay(${i}, true)" onmouseenter="showTip(event, '${x.d} de ${mN[x.m]}<br>Categoría: ${CAT[x.c]}')" onmouseleave="hideTip()">
+                <b>${x.d}</b><small>${mN[x.m]}</small>
               </div>
-            </div>
-            <div id="av"></div>
-          </div>
-
-          <div class="grid" style="align-content: start; gap: 14px">
-            <div class="card" style="--c: var(--cat-mala)">
-              <h3>Auditoría de Atípicos: 2023 vs 2024</h3>
-              <p style="font-size: 14px">
-                Ambos periodos cuentan con su archivo oficial de auditoría:
-                <br />• <b>2024:</b>
-                <code>Reporte_Atipicos_CEN_marzo.xlsx</code> (166 outliers, 176
-                faltantes). <br />• <b>2023:</b>
-                <code>Reporte_Atipicos_CEN_marzo2023.xlsx</code> (300 outliers,
-                1,997 faltantes).
-              </p>
-              <p style="font-size: 13px; color: var(--mut); margin-top: 6px">
-                En 2023 se registraron más faltantes debido a interrupciones en
-                el sensor de PM₂.₅ (60.9% disponibilidad frente a 97.2% en
-                2024).
-              </p>
-            </div>
-
-            <div class="card" style="--c: var(--cat-buena)">
-              <h3>Criterio de Conservación de Datos</h3>
-              <p style="font-size: 14px">
-                Conforme a las recomendaciones técnicas de AIMAJ,
-                <b>los atípicos matutinos en CO y PM se conservaron íntegros</b>
-                al demostrar correspondencia física real con el ciclo de
-                movilidad vehicular e inversión térmica, evitando sesgos por
-                eliminación injustificada.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 9: INTERPRETACIÓN DESDE LA PERSPECTIVA DE LA AGENCIA -->
-    <section id="agencia" style="--c: var(--sun)">
-      <div class="wrap">
-        <div class="band">
-          <h2>
-            🏛 Interpretación desde la Perspectiva de la Agencia (AIMAJ → SIMAJ)
-          </h2>
-          <p>
-            Análisis institucional estructurado para la toma de decisiones
-            basada en evidencia.
-          </p>
-        </div>
-
-        <div class="grid k2">
-          <div class="card" style="--c: var(--sun)">
-            <h3>1. ¿Qué cambió entre 2023 y 2024?</h3>
-            <p style="font-size: 14px">
-              <b>Hallazgo respaldado por datos:</b> La calidad del aire mejoró
-              notablemente en marzo de 2024. Los días en categoría
-              <i>Buena</i> se duplicaron (11 vs. 5), los días de riesgo cayeron
-              70% (3 vs. 10) y no se registró ningún día en <i>Muy Mala</i> (en
-              2023 hubo 1 día extremo). Además, la concentración promedio de
-              PM₂.₅ se redujo en más del 50%.
-            </p>
-          </div>
-
-          <div class="card" style="--c: var(--sky)">
-            <h3>2. ¿Cuáles fueron los periodos más relevantes?</h3>
-            <p style="font-size: 14px">
-              <b>Hallazgo respaldado por datos:</b> El día
-              <b>28 de marzo</b> fue el episodio más agudo en ambos años. En
-              2023 alcanzó categoría <i>Muy Mala</i> (O₃ horario de 0.136 ppm y
-              PM₁₀ de 114 µg/m³), mientras que en 2024 fue el único día donde O₃
-              y PM₁₀ empataron simultáneamente en categoría <i>Mala</i>.
-            </p>
-          </div>
-
-          <div class="card" style="--c: var(--cat-mala)">
-            <h3>3. Patrones Diarios y Estructurales</h3>
-            <p style="font-size: 14px">
-              <b>Bimodalidad diaria clara:</b> Patrón matutino (06:00 - 09:30 h)
-              dominado por PM₁₀ y CO debido a tráfico e inversión térmica;
-              patrón vespertino (13:00 - 17:00 h) dominado por O₃ debido a
-              radiación solar y altas temperaturas. En ambos años, el
-              <b>Ozono fue el principal responsable</b> de la pérdida de calidad
-              del aire.
-            </p>
-          </div>
-
-          <div class="card" style="--c: var(--cat-buena)">
-            <h3>4. Información Clave para Toma de Decisiones</h3>
-            <p style="font-size: 14px">
-              <b>Recomendaciones prioritarias:</b>
-              <br />• Difusión horaria en tiempo real (evitar boletines diarios
-              que promedian y enmascaran picos). <br />• Adelantar actividades
-              escolares y deportivas al aire libre a antes de las 12:00 h para
-              proteger a niños de la exposición al ozono. <br />• Mantenimiento
-              predictivo a los sensores de PM₂.₅ para evitar los vacíos
-              registrados en 2023.
-            </p>
-          </div>
-        </div>
-
-        <!-- Distinción formal requerida por el prompt -->
-        <div
-          class="card"
-          style="
-            margin-top: 18px;
-            --c: var(--accent-purple);
-            background: rgba(155, 93, 229, 0.08);
-          "
-        >
-          <h3 style="color: var(--accent-purple)">
-            Distinción: Hallazgos Comprobados vs. Hipótesis sin Demostrar
-          </h3>
-          <div class="grid k2" style="margin-top: 10px">
-            <div>
-              <b>✔ Hallazgos Respaldados por Datos:</b>
-              <ul
-                style="font-size: 13.5px; padding-left: 16px; margin-top: 4px"
-              >
-                <li>
-                  Reducción objetiva en la frecuencia e intensidad de O₃ y PM₂.₅
-                  en 2024.
-                </li>
-                <li>
-                  Sincronía estricta de atípicos de CO y PM con las horas pico
-                  de tráfico matutino.
-                </li>
-                <li>
-                  Mayor disponibilidad de sensores meteorológicos en 2023 vs
-                  2024.
-                </li>
-              </ul>
-            </div>
-            <div>
-              <b>⚠ Interpretaciones que Requieren Confirmación Externa:</b>
-              <ul
-                style="font-size: 13.5px; padding-left: 16px; margin-top: 4px"
-              >
-                <li>
-                  Atribuir la mejora de 2024 a políticas públicas específicas o
-                  cambio en parque vehicular (requiere inventario de emisiones).
-                </li>
-                <li>
-                  Concluir que los vacíos en sensores fueron fallas de hardware
-                  y no cortes de suministro eléctrico.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECCIÓN 10: ALERTAS Y PROTOCOLOS OPERATIVOS -->
-    <section id="alertas" style="--c: var(--cat-mala)">
-      <div class="wrap">
-        <div class="band">
-          <h2>🚨 Catálogo de Alertas y Protocolos que AIMAJ Entrega a SIMAJ</h2>
-          <p>
-            Mecanismos automáticos y criterios de alertamiento para la
-            protección de la salud pública.
-          </p>
-        </div>
-
-        <div class="tools" id="af"></div>
-
-        <div class="card tw" style="--c: var(--cat-mala)">
-          <table>
-            <thead>
-              <tr>
-                <th>Protocolo</th>
-                <th>Detonante / Criterio</th>
-                <th>Contenido del Aviso</th>
-                <th>Población Objetivo</th>
-              </tr>
-            </thead>
-            <tbody id="atb"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-      <div class="wrap">
-        <b>AIMAJ · Universidad de Guadalajara, CUCEI</b><br />
-        Análisis y Visualización de la Información 2026B · MC. Nayeli Areli
-        Pérez Padilla<br />
-        Equipo de Desarrollo: Manzo Mejía Susana Rubí, Castellanos Zuñiga Ian
-        Michael, Montero González José Antonio, Melendez González Ángel Leonel,
-        Anaya Valladolid Luis Rafael, Magaña Mojica Jesús Ismael.<br />
-        Fuente Oficial: SIMAJ · NOM-172-SEMARNAT-2023 (DOF 25/01/2024). Datos
-        procesados para estación Centro (CEN) marzo 2023 y 2024.
-      </div>
-    </footer>
-
-    <!-- ==========================================================================
-       LÓGICA JAVASCRIPT: ESTRUCTURADA, MODULAR Y ALTAMENTE LEGIBLE
-       ========================================================================== -->
-    <script>
-      /* ==========================================================================
-       1. CONSTANTES GLOBALES Y CONFIGURACIÓN NOM-172
-       ========================================================================== */
-      const $ = (s) => document.querySelector(s);
-      const $$ = (s) => [...document.querySelectorAll(s)];
-
-      const CAT = [
-        "Buena",
-        "Aceptable",
-        "Mala",
-        "Muy mala",
-        "Extremadamente mala",
-      ];
-      const COL = ["#2ECC71", "#FFC83D", "#FF7A2F", "#E5484D", "#9B5DE5"];
-      const DN = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
-      const dow = (d) => DN[(d + 3) % 7];
-
-      const P = {
-        PM10: {
-          n: "PM₁₀",
-          u: "µg/m³",
-          i: 2,
-          r: 4,
-          c: "#C9A66B",
-          br: [45, 60, 132, 213],
-          dg: 0,
-        },
-        PM25: {
-          n: "PM₂.₅",
-          u: "µg/m³",
-          i: 3,
-          r: 5,
-          c: "#F28482",
-          br: [15, 33, 79, 130],
-          dg: 0,
-        },
-        O3: {
-          n: "O₃",
-          u: "ppm",
-          i: 0,
-          r: 0,
-          c: "#4CC9F0",
-          br: [0.058, 0.09, 0.135, 0.175],
-          dg: 3,
-        },
-        CO: {
-          n: "CO",
-          u: "ppm",
-          i: 1,
-          r: 6,
-          c: "#B5A6E0",
-          br: [5, 9, 12, 16],
-          dg: 2,
-        },
-      };
-      const KS = Object.keys(P);
-
-      // Estado global de la aplicación
-      let currentYear = 2024;
-      let RAW_DATA = { 2023: null, 2024: null };
-      let H = [],
-        D = [],
-        GL = [],
-        AV = [];
-      let filterCat = null,
-        filterPol = null;
-
-      /* ==========================================================================
-       2. CARGADOR DE DATOS (DATA LOADER): EXTERNO CON RESPALDO
-       ========================================================================== */
-      async function initDataLoader() {
-        const statusText = $("#data-status-text");
-
-        // Intentar cargar via fetch los JSONs externos
-        try {
-          const [res24, res23] = await Promise.all([
-            fetch("./Datos/dashboard_2024.json"),
-            fetch("./Datos/dashboard_2023.json"),
-          ]);
-
-          if (res24.ok && res23.ok) {
-            RAW_DATA[2024] = await res24.json();
-            RAW_DATA[2023] = await res23.json();
-            if (statusText)
-              statusText.textContent =
-                "Datos cargados desde: Archivos JSON/CSV (2023 & 2024)";
-          } else {
-            throw new Error("HTTP Fetch response not OK");
-          }
-        } catch (err) {
-          // Respaldo transparente si se abre por file://
-          if (window.DATA_2024 && window.DATA_2023) {
-            RAW_DATA[2024] = window.DATA_2024;
-            RAW_DATA[2023] = window.DATA_2023;
-            if (statusText)
-              statusText.textContent =
-                "Datos cargados desde: Archivos JSON/CSV (2023 & 2024)";
-          } else {
-            console.error("Error crítico cargando datos:", err);
-            if (statusText)
-              statusText.textContent = "Error al leer archivos de datos.";
-            return;
-          }
-        }
-
-        // Inicializar vista con 2024
-        setAppYear(2024);
-        buildComparativaSection();
-        initAlertsTable();
-      }
-
-      /* ==========================================================================
-       3. GESTIÓN DE AÑO ACTIVO Y CONMUTACIÓN
-       ========================================================================== */
-      function setAppYear(yr) {
-        currentYear = yr;
-
-        $$(".btn-y24").forEach((b) =>
-          b.classList.toggle("active", yr === 2024),
-        );
-        $$(".btn-y23").forEach((b) =>
-          b.classList.toggle("active", yr === 2023),
-        );
-        $$(".btn-ycomp").forEach((b) =>
-          b.classList.toggle("active", yr === "comp"),
-        );
-
-        if (yr === "comp") {
-          $("#comparativa").scrollIntoView({ behavior: "smooth" });
-          return;
-        }
-
-        const dObj = RAW_DATA[yr];
-        if (!dObj) return;
-
-        H = dObj.h;
-        D = dObj.d;
-        AV = dObj.av || [];
-
-        // Calcular clasificaciones horarias según NOM-172
-        GL = H.map((x) => {
-          let b = -1,
-            dm = [];
-          KS.forEach((k) => {
-            const val = x[P[k].i];
-            const c = cat(k, val);
-            if (c > b) {
-              b = c;
-              dm = [k];
-            } else if (c === b && c >= 0) {
-              dm.push(k);
+            `).join("")}
+          </div>`;
+      } else {
+        const d4 = getD(2024);
+        const d3 = getD(2023);
+        
+        const renderBlock = (dataArr, yearLabel, color) => {
+          let html = `
+            <div style="margin-top: 16px;">
+              <h4 style="color: ${color}; border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 12px; font-size: 18px;">Evolución ${yearLabel}</h4>
+              <div class="cal-grid" style="grid-template-columns: repeat(auto-fill, minmax(${granularity==='meses' && activeMonth===0 ? '80px' : '65px'}, 1fr));">`;
+          
+          if (activeMonth !== 0 || granularity === "dias") {
+            html += dataArr.map((x, i) => `
+              <div class="cal-item c${x.c}" onclick="setSimDay(${i}, true)" onmouseenter="showTip(event, '${x.d} de ${mN[x.m]} ${yearLabel}<br>Categoría: ${CAT[x.c]}')" onmouseleave="hideTip()">
+                <b>${x.d}</b><small>${mN[x.m]}</small>
+              </div>`).join("");
+          } else if (granularity === "meses") {
+            for (let m = 1; m <= 12; m++) {
+              const mData = dataArr.filter(x => x.m === m);
+              if (!mData.length) continue;
+              const v = getModeCat(mData.map(x => x.c));
+              const firstDayIdx = dataArr.findIndex(x => x.m === m);
+              html += `
+                <div class="cal-item c${v}" onclick="setSimDay(${Math.max(0, firstDayIdx)}, true)" onmouseenter="showTip(event, '${mN[m]} ${yearLabel}<br>Cat. predominante: ${CAT[v]}')" onmouseleave="hideTip()">
+                  <b style="font-size:16px; margin-top:6px">${mN[m]}</b>
+                </div>`;
             }
-          });
-          return { c: b, dom: dm };
-        });
-
-        // Actualizar etiquetas en la UI
-        $("#lbl-num-year").textContent = yr;
-        $("#lbl-cal-year").textContent = yr;
-        $("#lbl-mes-year").textContent = yr;
-        $("#lbl-dat-year").textContent = yr;
-
-        // Renderizar módulos
-        renderNumeralia();
-        renderCalendario();
-        renderDisponibilidad();
-        initSimulador();
-        drawFullMonthChart();
-      }
-
-      /* Helper: cálculo de categoría */
-      function cat(k, v) {
-        if (v == null || isNaN(v)) return -1;
-        const b = P[k].br;
-        if (v < b[0]) return 0;
-        for (let i = 1; i < 4; i++) {
-          if (v <= b[i]) return i;
-        }
-        return 4;
-      }
-
-      function chip(c) {
-        return c < 0
-          ? '<span class="chip cn">Sin dato</span>'
-          : `<span class="chip c${c}">${CAT[c]}</span>`;
-      }
-
-      /* ==========================================================================
-       4. SECCIÓN NUMERALIA
-       ========================================================================== */
-      function renderNumeralia() {
-        const cnt = [0, 0, 0, 0, 0];
-        const dom = { PM10: 0, PM25: 0, O3: 0, CO: 0 };
-
-        D.forEach((x) => {
-          if (x.c >= 0) cnt[x.c]++;
-          x.r.forEach((p) => {
-            if (dom[p] !== undefined) dom[p]++;
-          });
-        });
-
-        const topP = Object.entries(dom).sort((a, b) => b[1] - a[1])[0][0];
-        const mode = cnt.indexOf(Math.max(...cnt));
-        const critDays = D.map((x, i) =>
-          x.c === 2 || x.c === 3 ? i + 1 : 0,
-        ).filter(Boolean);
-
-        // Render KPIs
-        $("#kpis").innerHTML = [
-          ["CEN " + currentYear, "Estación Centro, Guadalajara", "var(--sun)"],
-          [
-            CAT[mode],
-            `Categoría predominante (${cnt[mode]} de 31 días)`,
-            COL[mode],
-          ],
-          [
-            P[topP].n,
-            `Contaminante principal: ${dom[topP]} días responsable`,
-            "var(--sky)",
-          ],
-          [
-            cnt[2] + cnt[3],
-            `Días en riesgo (${cnt[2]} Mala, ${cnt[3]} Muy Mala)`,
-            "var(--cat-mala)",
-          ],
-        ]
-          .map(
-            (k) => `
-        <div class="card kpi" style="--c:${k[2]}">
-          <small style="color:var(--mut)">${k[1]}</small>
-          <b>${k[0]}</b>
-          <span>NOM-172-SEMARNAT-2023</span>
-        </div>
-      `,
-          )
-          .join("");
-
-        // Render botones de días críticos
-        $("#crit").innerHTML = critDays.length
-          ? critDays
-              .map(
-                (d) =>
-                  `<button class="btn" style="padding:4px 10px; font-size:12px;" onclick="goDay(${d})">${d} de marzo</button>`,
-              )
-              .join(" ")
-          : '<span style="color:var(--cat-buena); font-size:13px;">Ningún día en categoría crítica</span>';
-
-        // Gráfica de Dona SVG
-        let st = 0;
-        const R = 70,
-          C = 2 * Math.PI * R;
-        $("#donut").innerHTML =
-          cnt
-            .map((n, cIdx) => {
-              if (!n) return "";
-              const l = (n / 31) * C;
-              const s = `
-          <circle data-c="${cIdx}" cx="100" cy="100" r="${R}" fill="none"
-                  stroke="${COL[cIdx]}" stroke-width="26"
-                  stroke-dasharray="${l} ${C - l}" stroke-dashoffset="${-st}"
-                  transform="rotate(-90 100 100)" style="cursor:pointer; transition:stroke-width .2s"/>
-        `;
-              st += l;
-              return s;
-            })
-            .join("") +
-          `
-        <text id="dn" x="100" y="104" text-anchor="middle" font-size="34" font-weight="800" fill="#E8F1F8">31</text>
-        <text id="dl" x="100" y="124" text-anchor="middle" font-size="12" fill="#9DB6CB">días analizados</text>
-      `;
-
-        // Eventos Dona
-        $$("#donut circle").forEach((e) => {
-          const cIdx = +e.dataset.c;
-          e.onmouseenter = () => {
-            e.setAttribute("stroke-width", 32);
-            $("#dn").textContent = cnt[cIdx];
-            $("#dl").textContent = CAT[cIdx];
-          };
-          e.onmouseleave = () => {
-            e.setAttribute("stroke-width", 26);
-            $("#dn").textContent = 31;
-            $("#dl").textContent = "días analizados";
-          };
-          e.onclick = () => setFilter("c", cIdx);
-        });
-
-        // Leyenda
-        $("#leg").innerHTML = cnt
-          .map((n, cIdx) =>
-            n
-              ? `
-        <li onclick="setFilter('c', ${cIdx})">
-          <i style="background:${COL[cIdx]}"></i>
-          <span>${CAT[cIdx]}: <b>${n}</b> (${Math.round((n / 31) * 100)}%)</span>
-        </li>
-      `
-              : "",
-          )
-          .join("");
-
-        // Barras de contaminantes
-        $("#bars").innerHTML = KS.map(
-          (k) => `
-        <div class="bar" data-k="${k}" onclick="setFilter('p', '${k}')">
-          <span>${P[k].n}</span>
-          <div><i style="width:${(dom[k] / 31) * 100}%; background:${P[k].c}"></i></div>
-          <b>${dom[k]} d</b>
-        </div>
-      `,
-        ).join("");
-      }
-
-      function setFilter(type, val) {
-        if (type === "c") filterCat = filterCat === val ? null : val;
-        if (type === "p") filterPol = filterPol === val ? null : val;
-        applyFilters();
-      }
-
-      function applyFilters() {
-        $$(".day").forEach((e) => {
-          const i = +e.dataset.d - 1;
-          const x = D[i];
-          const matchC = filterCat == null || x.c === filterCat;
-          const matchP = filterPol == null || x.r.includes(filterPol);
-          e.classList.toggle("dim", !(matchC && matchP));
-        });
-
-        $$(".bar").forEach((e) =>
-          e.classList.toggle("on", e.dataset.k === filterPol),
-        );
-
-        const flText = [];
-        if (filterCat != null) flText.push(CAT[filterCat]);
-        if (filterPol) flText.push(P[filterPol].n);
-        $("#fl").textContent = flText.length
-          ? "Filtro activo: " + flText.join(" + ")
-          : "";
-      }
-
-      $("#clr").onclick = () => {
-        filterCat = null;
-        filterPol = null;
-        applyFilters();
-      };
-
-      /* ==========================================================================
-       5. CALENDARIO Y TABLA DIARIA
-       ========================================================================== */
-      function renderCalendario() {
-        $("#cal").innerHTML =
-          DN.map((d) => `<div class="h">${d}</div>`).join("") +
-          "<div></div>".repeat(currentYear === 2024 ? 4 : 2) + // Desplazamiento según día 1 mar
-          D.map(
-            (x, i) => `
-          <button class="day c${x.c}" data-d="${i + 1}" onclick="goDay(${i + 1})"
-                  onmousemove="showTip(event, '<b>${i + 1} de marzo ${currentYear}</b><br>Categoría: <b>${CAT[x.c]}</b><br>Agente determinante: ${x.r.map((p) => (P[p] ? P[p].n : p)).join(" + ")}')"
-                  onmouseleave="hideTip()">
-            <b>${i + 1}</b>
-            <small>${CAT[x.c]}<br>${x.r.map((p) => (P[p] ? P[p].n : p)).join("+")}</small>
-          </button>
-        `,
-          ).join("");
-
-        renderDailyTable();
-      }
-
-      let sortCol = 0,
-        sortDir = 1;
-      const tableCols = [
-        ["Día", (x) => x.d],
-        ["Categoría", (x) => x.c],
-        ["PM₁₀ (24h)", (x) => x.v[0] ?? -1],
-        ["PM₂.₅ (24h)", (x) => x.v[1] ?? -1],
-        ["O₃ Máx", (x) => x.v[2] ?? -1],
-        ["CO Máx 8h", (x) => x.v[3] ?? -1],
-        ["Temp Media", (x) => x.temp ?? -1],
-        ["Responsable", (x) => x.r.join("+")],
-      ];
-
-      function renderDailyTable() {
-        const rows = D.map((x, i) => ({ ...x, d: i + 1 }));
-        rows.sort((a, b) => {
-          const vA = tableCols[sortCol][1](a);
-          const vB = tableCols[sortCol][1](b);
-          return (vA < vB ? -1 : vA > vB ? 1 : 0) * sortDir || a.d - b.d;
-        });
-
-        $("#dth").innerHTML = tableCols
-          .map(
-            (c, i) => `
-        <th class="s" data-i="${i}">
-          ${c[0]}${i === sortCol ? (sortDir > 0 ? " ▲" : " ▼") : ""}
-        </th>
-      `,
-          )
-          .join("");
-
-        $$("#dth th").forEach((t) => {
-          t.onclick = () => {
-            const i = +t.dataset.i;
-            sortDir = i === sortCol ? -sortDir : 1;
-            sortCol = i;
-            renderDailyTable();
-          };
-        });
-
-        $("#dtb").innerHTML = rows
-          .map(
-            (x) => `
-        <tr class="cl2r" onclick="goDay(${x.d})">
-          <td><b>${x.d} mar</b></td>
-          <td>${chip(x.c)}</td>
-          <td>${x.v[0] != null ? x.v[0].toFixed(1) + " µg/m³" : "—"}</td>
-          <td>${x.v[1] != null ? x.v[1].toFixed(1) + " µg/m³" : "—"}</td>
-          <td>${x.v[2] != null ? x.v[2].toFixed(3) + " ppm" : "—"}</td>
-          <td>${x.v[3] != null ? x.v[3].toFixed(2) + " ppm" : "—"}</td>
-          <td>${x.temp != null ? x.temp.toFixed(1) + " °C" : "—"}</td>
-          <td>${x.r.map((p) => (P[p] ? P[p].n : p)).join(" + ")}</td>
-        </tr>
-      `,
-          )
-          .join("");
-      }
-
-      /* ==========================================================================
-       6. SECCIÓN COMPARATIVA (2024 vs 2023)
-       ========================================================================== */
-      function buildComparativaSection() {
-        const d23 = RAW_DATA[2023];
-        const d24 = RAW_DATA[2024];
-        if (!d23 || !d24) return;
-
-        // 1. Gráfica de Categorías lado a lado
-        const cnt23 = [0, 0, 0, 0, 0];
-        const cnt24 = [0, 0, 0, 0, 0];
-        d23.d.forEach((x) => {
-          if (x.c >= 0) cnt23[x.c]++;
-        });
-        d24.d.forEach((x) => {
-          if (x.c >= 0) cnt24[x.c]++;
-        });
-
-        $("#comp-categories-chart").innerHTML =
-          CAT.map((name, i) => {
-            const v24 = cnt24[i],
-              v23 = cnt23[i];
-            if (v24 === 0 && v23 === 0) return "";
-            return `
-          <div style="margin-bottom:12px;">
-            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
-              <span><b>${name}</b></span>
-              <span>2024: <b>${v24} d</b> (${Math.round((v24 / 31) * 100)}%) vs 2023: <b>${v23} d</b> (${Math.round((v23 / 31) * 100)}%)</span>
-            </div>
-            <div style="display:flex; height:12px; gap:4px;">
-              <div style="width:${(v24 / 31) * 100}%; background:#4CC9F0; border-radius:4px;" title="2024: ${v24} días"></div>
-              <div style="width:${(v23 / 31) * 100}%; background:#FFC83D; border-radius:4px; opacity:0.85;" title="2023: ${v23} días"></div>
-            </div>
-          </div>
-        `;
-          }).join("") +
-          `
-        <div style="display:flex; gap:18px; font-size:12px; margin-top:10px; color:var(--mut);">
-          <span><i style="display:inline-block; width:12px; height:12px; background:#4CC9F0; border-radius:3px;"></i> Azul: 2024</span>
-          <span><i style="display:inline-block; width:12px; height:12px; background:#FFC83D; border-radius:3px;"></i> Amarillo: 2023</span>
-        </div>
-      `;
-
-        // 2. Gráfica de Contaminante Responsable lado a lado
-        const dom23 = { O3: 0, PM10: 0, PM25: 0, CO: 0 };
-        const dom24 = { O3: 0, PM10: 0, PM25: 0, CO: 0 };
-        d23.d.forEach((x) =>
-          x.r.forEach((p) => {
-            if (dom23[p] !== undefined) dom23[p]++;
-          }),
-        );
-        d24.d.forEach((x) =>
-          x.r.forEach((p) => {
-            if (dom24[p] !== undefined) dom24[p]++;
-          }),
-        );
-
-        $("#comp-pollutants-chart").innerHTML =
-          KS.map((k) => {
-            const v24 = dom24[k],
-              v23 = dom23[k];
-            return `
-          <div style="margin-bottom:12px;">
-            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
-              <span><b>${P[k].n}</b></span>
-              <span>2024: <b>${v24} d</b> vs 2023: <b>${v23} d</b></span>
-            </div>
-            <div style="display:flex; height:12px; gap:4px;">
-              <div style="width:${(v24 / 31) * 100}%; background:${P[k].c}; border-radius:4px;" title="2024: ${v24} días"></div>
-              <div style="width:${(v23 / 31) * 100}%; background:${P[k].c}; border-radius:4px; opacity:0.5; border:1px dashed #FFF;" title="2023: ${v23} días"></div>
-            </div>
-          </div>
-        `;
-          }).join("") +
-          `
-        <div style="display:flex; gap:18px; font-size:12px; margin-top:10px; color:var(--mut);">
-          <span>Sólido: 2024</span>
-          <span>Punteado transparente: 2023</span>
-        </div>
-      `;
-
-        // 3. Tabla comparativa día por día
-        $("#comp-table-body").innerHTML = Array.from({ length: 31 }, (_, i) => {
-          const r24 = d24.d[i],
-            r23 = d23.d[i];
-          const diffCat = r24.c - r23.c;
-          const diffBadge =
-            diffCat < 0
-              ? '<span class="diff-badge diff-good">Mejoró en 2024</span>'
-              : diffCat > 0
-                ? '<span class="diff-badge diff-bad">Empeoró en 2024</span>'
-                : '<span class="diff-badge diff-neutral">Sin cambio</span>';
-
-          return `
-          <tr>
-            <td><b>${i + 1} mar</b></td>
-            <td>${chip(r24.c)}</td>
-            <td>${r24.r.map((p) => (P[p] ? P[p].n : p)).join("+")}</td>
-            <td>${r24.v[0] != null ? r24.v[0].toFixed(0) : "—"}</td>
-            <td>${r24.v[2] != null ? r24.v[2].toFixed(3) : "—"}</td>
-            <td style="border-left: 2px solid var(--line);">${chip(r23.c)}</td>
-            <td>${r23.r.map((p) => (P[p] ? P[p].n : p)).join("+")}</td>
-            <td>${r23.v[0] != null ? r23.v[0].toFixed(0) : "—"}</td>
-            <td>${r23.v[2] != null ? r23.v[2].toFixed(3) : "—"}</td>
-            <td>${diffBadge}</td>
-          </tr>
-        `;
-        }).join("");
-
-        // 4. Inicializar gráfica diaria superpuesta
-        $("#comp-var-sel").onchange = drawCompDailySvg;
-        drawCompDailySvg();
-      }
-
-      function drawCompDailySvg() {
-        const field = $("#comp-var-sel").value;
-        const d23 = RAW_DATA[2023].d;
-        const d24 = RAW_DATA[2024].d;
-
-        const getVal = (row, f) => {
-          if (!row || !row.v) return null;
-          let v = null;
-          if (f === "O3_max") v = row.v[2];
-          else if (f === "PM10_d24h") v = row.v[0];
-          else if (f === "PM25_d24h") v = row.v[1];
-          else if (f === "CO_max8h") v = row.v[3];
-          else if (f === "temp_media") v = row.temp;
-          return v != null && !isNaN(v) ? Number(v) : null;
+          } else if (granularity === "semanas") {
+            for (let w = 0; w < 52; w++) {
+              const wData = dataArr.slice(w*7, w*7+7);
+              if (!wData.length) continue;
+              const v = getModeCat(wData.map(x => x.c));
+              html += `
+                <div class="cal-item c${v}" onclick="setSimDay(${w*7}, true)" onmouseenter="showTip(event, 'Semana ${w+1} ${yearLabel}<br>Cat. predominante: ${CAT[v]}')" onmouseleave="hideTip()">
+                  <b style="font-size:15px; margin-top:6px">Sem ${w+1}</b>
+                </div>`;
+            }
+          }
+          html += `</div></div>`;
+          return html;
         };
 
-        const v24 = d24.map((r) => getVal(r, field));
-        const v23 = d23.map((r) => getVal(r, field));
-        const valid = [...v24, ...v23].filter((v) => v != null && !isNaN(v));
+        master.innerHTML = renderBlock(d4, "2024", "#4CC9F0") + renderBlock(d3, "2023", "#FFC83D");
+      }
+    }
 
-        const maxVal = valid.length ? Math.max(...valid) * 1.15 : 10;
-        const minVal = valid.length ? Math.min(0, Math.min(...valid)) : 0;
-
-        const W = 900,
-          H = 220,
-          X0 = 50,
-          Y0 = 20;
-        const xf = (i) => X0 + (i / 30) * W;
-        const yf = (val) => Y0 + H - ((val - minVal) / (maxVal - minVal)) * H;
-
-        let s = "";
-        // Líneas de cuadrícula
-        for (let i = 0; i <= 4; i++) {
-          const val = minVal + (maxVal - minVal) * (i / 4);
-          const y = yf(val);
-          s += `<line x1="${X0}" x2="${X0 + W}" y1="${y}" y2="${y}" stroke="#25506F" stroke-width="0.5"/>`;
-          s += `<text x="${X0 - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${field.includes("O3") ? val.toFixed(3) : val.toFixed(1)}</text>`;
+    // LÓGICA GRÁFICA TENDENCIAS CONTINUAS ACTUALIZADA
+    function renderTrend(isComp) {
+      const isTemp = activeTrendVar === "TEMP";
+      const vIdx = isTemp ? 7 : P[activeTrendVar].i;
+      const tName = isTemp ? "Temperatura Media (°C)" : P[activeTrendVar].n + " Máximo Diario (" + P[activeTrendVar].u + ")";
+      const tColor = isTemp ? "#FF7A2F" : P[activeTrendVar].c;
+      
+      const getAgg = (yearArray) => {
+        let res = [];
+        const days = Math.floor(yearArray.length / 24);
+        for(let i=0; i<days; i++) {
+          let chunk = yearArray.slice(i*24, (i+1)*24).map(h => h[vIdx]).filter(v => v != null && !isNaN(v));
+          if(chunk.length === 0) { res.push(null); continue; }
+          // Promedio para Temp, Máximo para Contaminantes
+          res.push(isTemp ? chunk.reduce((a,b)=>a+b,0)/chunk.length : Math.max(...chunk)); 
         }
+        return res;
+      };
 
-        // Eje X días
-        for (let d = 1; d <= 31; d += 3) {
-          s += `<text x="${xf(d - 1)}" y="${Y0 + H + 20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${d} mar</text>`;
+      const h1 = getH(isComp ? 2024 : activeYear);
+      const arr1 = getAgg(h1);
+      const arr2 = isComp ? getAgg(getH(2023)) : null;
+
+      // NUEVOS LÍMITES: X0 de 45px aleja la curva del eje Y, dejando espacio para los números
+      const W = 800, H = 160, X0 = 45, Y0 = 10;
+      const W_chart = W - X0 - 15; // 15px de respiro a la derecha
+      
+      const allVals = [...arr1.filter(v=>v!=null), ...(arr2 ? arr2.filter(v=>v!=null) : [])];
+      const maxVal = allVals.length ? Math.max(...allVals) * 1.15 : 100;
+      const yf = val => Y0 + H - (val / maxVal) * H;
+
+      let svgStr = "";
+      
+      // Grid Horizontal y Textos del Eje Y
+      for(let i = 0; i <= 4; i++) {
+        const v = (maxVal * i) / 4;
+        svgStr += `<line x1="${X0}" x2="${X0 + W_chart}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
+                   <text x="${X0 - 8}" y="${yf(v)+4}" text-anchor="end" font-size="11" fill="#9DB6CB">${isTemp ? v.toFixed(1) : (P[activeTrendVar].dg ? v.toFixed(P[activeTrendVar].dg) : Math.round(v))}</text>`;
+      }
+      
+      // Eje X y Líneas Verticales Divisorias (NUEVO)
+      const isAnnual = activeMonth === 0;
+      if (isAnnual) {
+        // Marcadores por mes en vista anual
+        const daysPerMonth = [31, (activeYear===2024?29:28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        let currentDay = 0;
+        for(let m = 0; m < 12; m++) {
+          let midDay = currentDay + daysPerMonth[m]/2;
+          let xPos = X0 + (midDay / Math.max(1, arr1.length)) * W_chart;
+          let xLine = X0 + (currentDay / Math.max(1, arr1.length)) * W_chart;
+          
+          if (m > 0) { // Guía divisoria de inicio de mes
+            svgStr += `<line x1="${xLine}" x2="${xLine}" y1="${Y0}" y2="${Y0+H}" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+          }
+          svgStr += `<text x="${xPos}" y="${Y0+H+22}" text-anchor="middle" font-size="11" font-weight="600" fill="#9DB6CB">${mN[m+1]}</text>`;
+          currentDay += daysPerMonth[m];
         }
-
-        // Trayectoria 2023 (punteada amarilla)
-        s += `<path d="${genPath(v23, xf, yf)}" fill="none" stroke="#FFC83D" stroke-width="2.4" stroke-dasharray="6 4" opacity="0.95"/>`;
-
-        // Trayectoria 2024 (continua azul)
-        s += `<path d="${genPath(v24, xf, yf)}" fill="none" stroke="#4CC9F0" stroke-width="3.2"/>`;
-
-        // Puntos 2023 (amarillos)
-        v23.forEach((val, i) => {
-          if (val != null && !isNaN(val)) {
-            s += `<circle cx="${xf(i)}" cy="${yf(val)}" r="3.5" fill="#FFC83D" stroke="#071626" stroke-width="1.2"
-                  style="cursor:pointer;"
-                  onmouseenter="showTip(event, '<b>2023 · Día ${i + 1} de marzo</b><br>${$("#comp-var-sel option:checked").text}: <b>${field.includes("O3") ? val.toFixed(3) : val.toFixed(1)}</b>')"
-                  onmouseleave="hideTip()"/>`;
-          }
-        });
-
-        // Puntos 2024 (azules)
-        v24.forEach((val, i) => {
-          if (val != null && !isNaN(val)) {
-            s += `<circle cx="${xf(i)}" cy="${yf(val)}" r="4" fill="#4CC9F0" stroke="#071626" stroke-width="1.2"
-                  style="cursor:pointer;"
-                  onmouseenter="showTip(event, '<b>2024 · Día ${i + 1} de marzo</b><br>${$("#comp-var-sel option:checked").text}: <b>${field.includes("O3") ? val.toFixed(3) : val.toFixed(1)}</b>')"
-                  onmouseleave="hideTip()"/>`;
-          }
-        });
-
-        $("#comp-daily-svg").innerHTML = s;
-
-        // Nota explicativa técnica cuando hay datos faltantes (ej. PM2.5 en 2023)
-        const noteEl = $("#comp-daily-note");
-        if (noteEl) {
-          if (field === "PM25_d24h") {
-            noteEl.innerHTML = `
-            <div style="background:rgba(255,200,61,0.1); border:1px solid rgba(255,200,61,0.3); border-radius:8px; padding:10px 14px; font-size:12.5px; margin-top:12px; color:#E8F1F8;">
-              <b>ℹ Explicación técnica sobre los tramos discontinuos en PM₂.₅ (2023):</b><br>
-              En marzo de 2023, el sensor de PM₂.₅ en la estación Centro estuvo fuera de servicio o con datos insuficientes (&lt;75% de las 24 horas requeridas por la NOM-172) durante los días 1 al 7 y 18 al 27, acumulando 291 horas sin registro (60.9% de disponibilidad). Por criterio normativo estricto, no se imputan valores y la línea solo se dibuja en días con registros válidos. En 2024 el sensor operó de forma continua (97.2% de disponibilidad).
-            </div>
-          `;
-          } else if (field === "O3_max") {
-            noteEl.innerHTML = `
-            <div style="background:rgba(76,201,240,0.1); border:1px solid rgba(76,201,240,0.3); border-radius:8px; padding:10px 14px; font-size:12.5px; margin-top:12px; color:#E8F1F8;">
-              <b>ℹ Ozono (O₃):</b> Serie 100% continua en ambos años (31 días evaluados). Observa cómo en 2023 los picos de O₃ superaron frecuentemente a 2024, alcanzando el máximo de 0.136 ppm el 28 de marzo.
-            </div>
-          `;
-          } else {
-            noteEl.innerHTML = "";
+      } else {
+        // Marcadores por día en vista mensual (cada 5 días)
+        const totalDays = arr1.length;
+        for (let d = 0; d < totalDays; d++) {
+          if (d === 0 || (d + 1) % 5 === 0 || d === totalDays - 1) {
+            let xPos = X0 + (d / Math.max(1, totalDays - 1)) * W_chart;
+            // Guía divisoria sutil para días seleccionados
+            svgStr += `<line x1="${xPos}" x2="${xPos}" y1="${Y0}" y2="${Y0+H}" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+            svgStr += `<text x="${xPos}" y="${Y0+H+22}" text-anchor="middle" font-size="11" font-weight="600" fill="#9DB6CB">${d + 1}</text>`;
           }
         }
       }
+      
+      const step = W_chart / Math.max(1, arr1.length - 1);
+      const genPath = (arr) => { 
+        let path = "", pen = false; 
+        arr.forEach((v, idx) => { 
+          if(v == null) { pen = false; return; } 
+          path += (pen ? "L" : "M") + (X0 + idx * step).toFixed(1) + " " + yf(v).toFixed(1); 
+          pen = true; 
+        }); 
+        return path; 
+      };
 
-      function genPath(arr, xf, yf) {
-        let p = "",
-          pen = false;
-        arr.forEach((v, i) => {
-          if (v == null || isNaN(v)) {
-            pen = false;
-            return;
-          }
-          p += (pen ? "L" : "M") + xf(i).toFixed(1) + " " + yf(v).toFixed(1);
-          pen = true;
-        });
-        return p;
+      if (arr2) {
+        svgStr += `<path d="${genPath(arr2)}" fill="none" stroke="#FFC83D" stroke-dasharray="4 4" stroke-width="2" opacity="0.8"/>`;
       }
-
-      /* ==========================================================================
-       7. SIMULADOR HORARIO HORA POR HORA
-       ========================================================================== */
-      let day = 2,
-        t = 0,
-        isPlaying = false,
-        simSpeed = 1,
-        activePol = "PM10",
-        lastHour = -1;
-
-      function initSimulador() {
-        $("#dsel").innerHTML = D.map(
-          (x, i) => `
-        <option value="${i + 1}">${dow(i + 1)} ${String(i + 1).padStart(2, "0")} mar · ${CAT[x.c]}</option>
-      `,
-        ).join("");
-
-        $("#spd").innerHTML = [1, 2, 4]
-          .map(
-            (s) => `
-        <button class="btn ${s === 1 ? "on" : ""}" data-s="${s}">${s}×</button>
-      `,
-          )
-          .join(" ");
-
-        $("#polb").innerHTML = KS.map(
-          (k) => `
-        <button class="btn ${k === activePol ? "on" : ""}" data-k="${k}" style="padding:4px 10px">${P[k].n}</button>
-      `,
-        ).join(" ");
-
-        $("#gauges").innerHTML = KS.map((k) => {
-          const b = P[k].br,
-            tot = b[3];
-          return `
-          <div class="gc" style="--c:${P[k].c}">
-            <small>${P[k].n} (${P[k].u})</small>
-            <b id="g_${k}">—</b>
-            <span id="gc_${k}"></span>
-            <div class="gb">
-              <span style="width:${(b[0] / tot) * 100}%; background:var(--cat-buena)"></span>
-              <span style="width:${((b[1] - b[0]) / tot) * 100}%; background:var(--cat-aceptable)"></span>
-              <span style="width:${((b[2] - b[1]) / tot) * 100}%; background:var(--cat-mala)"></span>
-              <span style="width:${((b[3] - b[2]) / tot) * 100}%; background:var(--cat-muymala)"></span>
-              <i id="gm_${k}" style="left:0"></i>
-            </div>
-          </div>
-        `;
-        }).join("");
-
-        // Dibujar cielo base
-        $("#sky").innerHTML = `
-        <rect id="sbg" width="600" height="260"/>
-        <g id="stars" fill="#fff">${Array.from({ length: 30 }, () => `<circle cx="${Math.random() * 600}" cy="${Math.random() * 120}" r="${0.5 + Math.random()}"/>`).join("")}</g>
-        <circle id="glow" r="44" fill="#FFC83D" opacity=".18"/>
-        <circle id="orb" r="22" fill="#FFC83D"/>
-        <rect id="haze" width="600" height="260" fill="#B08D57" opacity="0"/>
-        <!-- Silueta urbana Guadalajara -->
-        <path d="M0 260V220h40v-30h30v30h30v-55h35v55h40v-20h30v20h50v-65h30v65h40v-25h30v25h50v-45h30v45h40v-30h30v30h55v45z" fill="#06121E"/>
-        <g id="wind" transform="translate(540 60)">
-          <circle r="26" fill="#08162A" opacity=".7"/>
-          <g id="wa"><path d="M0 -18L7 2H2V16H-2V2H-7Z" fill="#E8F1F8"/></g>
-        </g>
-        <text id="tt" x="20" y="38" font-size="24" font-weight="700" fill="#fff"></text>
-        <text id="tl" x="20" y="58" font-size="12" fill="#C7D9E8">temperatura · dirección de viento</text>
-        <text id="hz" x="580" y="250" text-anchor="end" font-size="12" fill="#C7D9E8"></text>
-      `;
-
-        bindSimuladorEvents();
-        setDay(2);
-        t = 6;
-        requestAnimationFrame(simFrame);
+      svgStr += `<path d="${genPath(arr1)}" fill="none" stroke="${isComp ? '#4CC9F0' : tColor}" stroke-width="2.5" stroke-linejoin="round"/>`;
+      
+      $("#trend-chart").innerHTML = svgStr;
+      
+      // Leyenda
+      if(isComp) {
+        $("#trend-legend").innerHTML = `<span style="color:#4CC9F0;">■ 2024: ${tName}</span><span style="color:#FFC83D;">■ 2023: ${tName}</span>`;
+      } else {
+        $("#trend-legend").innerHTML = `<span style="color:${tColor};">■ ${activeYear}: ${tName}</span>`;
       }
+    }
 
-      function bindSimuladorEvents() {
-        $("#play").onclick = () => {
-          if (t >= 23.99) t = 0;
+    let simDay = 0, simPol = "PM10", simTime = 8;
+    let isPlaying = false, animReq, lastRenderedHour = -1;
+    let lastFrameTime = performance.now();
+
+    function initSim(isComp) {
+      $("#sim-pols").innerHTML = KS.map(k => `
+        <button class="btn" style="background:${simPol === k ? 'var(--sun)' : 'var(--bg-card)'}; color:${simPol === k ? '#000' : 'var(--tx)'}; border-color:${simPol === k ? 'var(--sun)' : 'var(--line)'}" 
+                onclick="simPol='${k}'; updateSimPolButtons(); drawSimChart(${isComp}); renderSimFrame(${isComp});">
+          ${P[k].n}
+        </button>`).join("");
+      
+      const refD = getD(isComp ? 2024 : activeYear);
+      $("#sel-sim-day").innerHTML = refD.map((x, i) => `<option value="${i}">${x.d} ${mN[x.m]}</option>`).join("");
+      
+      // Corrección de Bug: Evitar el scroll indeseado y forzar refresco
+      $("#sel-sim-day").onchange = e => setSimDay(+e.target.value, false);
+      
+      $("#sim-legend").style.display = isComp ? "block" : "none";
+      $("#sim-gauges").style.display = isComp ? "none" : "grid";
+      
+      if (!$("#btn-play").hasListener) {
+        $("#btn-play").addEventListener("click", () => {
           isPlaying = !isPlaying;
-          $("#play").textContent = isPlaying ? "⏸ Pausa" : "▶ Continuar";
-        };
-
-        $("#dsel").onchange = (e) => {
-          setDay(+e.target.value);
-          t = 0;
-        };
-        $("#prev").onclick = () => {
-          setDay(day - 1);
-          t = 0;
-        };
-        $("#next").onclick = () => {
-          setDay(day + 1);
-          t = 0;
-        };
-        $("#hsl").oninput = (e) => {
-          t = +e.target.value;
-          isPlaying = false;
-          $("#play").textContent = "▶ Continuar";
-        };
-
-        $$("#spd button").forEach(
-          (b) =>
-            (b.onclick = () => {
-              simSpeed = +b.dataset.s;
-              $$("#spd button").forEach((x) =>
-                x.classList.toggle("on", x === b),
-              );
-            }),
-        );
-
-        $$("#polb button").forEach(
-          (b) =>
-            (b.onclick = () => {
-              activePol = b.dataset.k;
-              $$("#polb button").forEach((x) =>
-                x.classList.toggle("on", x === b),
-              );
-              drawSimChart();
-            }),
-        );
-
-        $("#tmp").onchange = drawSimChart;
-        $("#chart").onclick = (e) => {
-          const r = $("#chart").getBoundingClientRect();
-          const xx = ((e.clientX - r.left) / r.width) * 760;
-          const targetH = Math.max(
-            0,
-            Math.min(23, Math.round(((xx - 54) / 652) * 23)),
-          );
-          seek(targetH);
-        };
+          $("#btn-play").textContent = isPlaying ? "⏸ Pausa" : "▶ Iniciar";
+          if (isPlaying) {
+            lastFrameTime = performance.now();
+            requestAnimationFrame(loopSim);
+          }
+        });
+        $("#btn-play").hasListener = true;
       }
-
-      function setDay(d) {
-        day = Math.max(1, Math.min(31, d));
-        $("#dsel").value = day;
-        lastHour = -1;
-        drawSimChart();
-        renderHourlyTable();
-      }
-
-      function goDay(d, h = 0) {
-        setDay(d);
-        t = h;
+      
+      $("#sim-range").oninput = e => {
+        simTime = +e.target.value;
         isPlaying = false;
-        $("#play").textContent = "▶ Iniciar";
-        $("#simulador").scrollIntoView({ behavior: "smooth" });
+        $("#btn-play").textContent = "▶ Iniciar";
+        renderSimFrame(activeYear === 'comp');
+      };
+      
+      setSimDay(0, false);
+    }
+    
+    function updateSimPolButtons() {
+      $$("#sim-pols button").forEach(b => {
+        const isActive = b.textContent.includes(P[simPol].n);
+        b.style.background = isActive ? 'var(--sun)' : 'var(--bg-card)';
+        b.style.color = isActive ? '#000' : 'var(--tx)';
+        b.style.borderColor = isActive ? 'var(--sun)' : 'var(--line)';
+      });
+    }
+
+    function setSimDay(index, autoScroll = true) {
+      simDay = index;
+      lastRenderedHour = -1; // REINICIO FORZADO PARA GARANTIZAR ACTUALIZACIÓN DEL PANEL
+      $("#sel-sim-day").value = index;
+      
+      const isComp = activeYear === 'comp';
+      drawSimChart(isComp);
+      renderSimFrame(isComp);
+      
+      if (autoScroll) {
+        $("#simulador").scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    }
 
-      function seek(h) {
-        t = h;
-        isPlaying = false;
-        $("#play").textContent = "▶ Continuar";
+    function drawSimChart(isComp) {
+      const p = P[simPol];
+      const offset = simDay * 24;
+      const X0 = 50, W = 670, Y0 = 20, H_box = 200;
+      
+      const h1 = getH(isComp ? 2024 : activeYear);
+      const h2 = isComp ? getH(2023) : null;
+      
+      const arr1 = [], arr2 = [];
+      for(let h = 0; h < 24; h++) { 
+        arr1.push((h1[offset + h] || [])[p.i]); 
+        if (h2) arr2.push((h2[offset + h] || [])[p.i]); 
       }
-
-      function renderHourlyTable() {
-        const o = (day - 1) * 24;
-        $("#htb").innerHTML = Array.from({ length: 24 }, (_, h) => {
-          const x = H[o + h];
-          if (!x) return "";
-          return `
-          <tr class="cl2r" data-h="${h}" onclick="seek(${h})">
-            <td><b>${String(h).padStart(2, "0")}:00</b></td>
-            <td>${x[4] ?? "—"}</td>
-            <td>${x[2] ?? "—"}</td>
-            <td>${x[3] ?? "—"}</td>
-            <td>${x[0] != null ? x[0].toFixed(3) : "—"}</td>
-            <td>${x[1] != null ? x[1].toFixed(2) : "—"}</td>
-            <td>${x[7] != null ? x[7].toFixed(1) + " °C" : "—"}</td>
-            <td>${chip(GL[o + h].c)}</td>
-          </tr>
-        `;
-        }).join("");
-      }
-
-      function drawSimChart() {
-        const k = activePol,
-          p = P[k],
-          b = p.br;
-        const o = (day - 1) * 24;
-        const ix = [],
-          rw = [],
-          tp = [];
-
-        for (let h = 0; h < 24; h++) {
-          const row = H[o + h] || [];
-          ix.push(row[p.i]);
-          rw.push(row[p.r]);
-          tp.push(row[7]);
+      
+      const allVals = [...arr1.filter(v=>v!=null), ...(arr2 ? arr2.filter(v=>v!=null) : [])];
+      const maxVal = Math.max(...allVals, p.b[0]*1.15) * 1.15;
+      const yf = val => Y0 + H_box - (val / maxVal) * H_box;
+      
+      let svgStr = "";
+      
+      [...p.b.slice(0, 3), maxVal].forEach((th, i, arr) => { 
+        const prevTh = i === 0 ? 0 : arr[i-1]; 
+        if (prevTh < maxVal) {
+          const tCapped = Math.min(th, maxVal);
+          svgStr += `<rect x="${X0}" y="${yf(tCapped)}" width="${W}" height="${yf(prevTh) - yf(tCapped)}" fill="${COL[i]}" opacity="0.12"/>`; 
         }
+      });
+      
+      for(let i = 0; i <= 4; i++) {
+        const v = (maxVal * i) / 4;
+        svgStr += `<line x1="${X0}" x2="${X0+W}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
+                   <text x="${X0-8}" y="${yf(v)+4}" text-anchor="end" font-size="11" fill="#9DB6CB">${p.dg ? v.toFixed(p.dg) : Math.round(v)}</text>`;
+      }
+      for(let h = 0; h <= 24; h += 3) {
+        svgStr += `<text x="${X0 + (h/24)*W}" y="${Y0 + H_box + 20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${String(h).padStart(2,"0")}:00</text>`;
+      }
+      
+      const genPath = (arr) => { 
+        let path = "", pen = false; 
+        arr.forEach((v, h) => { 
+          if(v == null || isNaN(v)) { pen = false; return; } 
+          path += (pen ? "L" : "M") + (X0 + (h/24)*W).toFixed(1) + " " + yf(v).toFixed(1); 
+          pen = true; 
+        }); 
+        return path; 
+      };
+      
+      if (h2) {
+        svgStr += `<path d="${genPath(arr2)}" fill="none" stroke="#FFC83D" stroke-dasharray="6 4" stroke-width="2.5" opacity="0.9"/>`;
+      }
+      svgStr += `<path d="${genPath(arr1)}" fill="none" stroke="${isComp ? '#4CC9F0' : p.c}" stroke-width="3.5" stroke-linejoin="round"/>`;
+      
+      svgStr += `<line id="sim-timeline" y1="${Y0}" y2="${Y0 + H_box}" stroke="#FFF" stroke-width="2"/>`;
+      
+      $("#sim-chart").innerHTML = svgStr;
+    }
 
-        const X0 = 54,
-          XW = 652,
-          YT = 20,
-          YH = 240;
-        const valMax =
-          Math.max(
-            ...ix.filter((v) => v != null),
-            ...rw.filter((v) => v != null),
-            b[0] * 1.2,
-          ) * 1.15;
-        const yf = (v) => YT + YH - (v / valMax) * YH;
+    function renderSimFrame(isComp) {
+      const h = Math.floor(simTime);
+      const offset = simDay * 24;
+      const X0 = 50, W = 670;
+      
+      if (h !== lastRenderedHour) {
+        lastRenderedHour = h;
+        
+        const h1 = getH(isComp ? 2024 : activeYear)[offset + h] || [];
+        const h2 = (isComp ? getH(2023) : [])[offset + h] || [];
+        
+        if (!isComp) {
+          $("#sim-ban").innerHTML = `
+            <b style="font-size:18px; color:var(--sun)">${String(h).padStart(2,"0")}:00 hrs</b><br>
+            <p style="margin-top:8px; color: #C7D9E8;">
+              <b>Meteorología local:</b><br>
+              Temperatura: <span style="color:#FFF; font-weight:600;">${h1[7] != null ? h1[7].toFixed(1) : '—'} °C</span> &nbsp;|&nbsp; 
+              Humedad: <span style="color:#FFF; font-weight:600;">${h1[9] != null ? h1[9].toFixed(1) : '—'} %</span> &nbsp;|&nbsp; 
+              Viento: <span style="color:#FFF; font-weight:600;">${h1[10] != null ? h1[10].toFixed(1) : '—'} m/s</span>
+            </p>`;
+            
+          $("#sim-gauges").innerHTML = KS.map(k => { 
+            const val = h1[P[k].i]; 
+            const cIdx = cat(k, val);
+            return `
+              <div class="gc" style="--c:${P[k].c}">
+                <small>${P[k].n} (${P[k].u})</small>
+                <b>${val != null ? (P[k].dg ? val.toFixed(P[k].dg) : Math.round(val)) : '—'}</b>
+                <div style="font-size:11.5px; font-weight:600; color:${cIdx >= 0 ? COL[cIdx] : '#fff'}; margin-bottom: 6px;">
+                  ${cIdx >= 0 ? CAT[cIdx] : 'Sin datos'}
+                </div>
+                <div class="gb">
+                  <span style="width:${P[k].b[0]/P[k].b[3]*100}%; background:var(--cat-buena)"></span>
+                  <span style="width:${(P[k].b[1]-P[k].b[0])/P[k].b[3]*100}%; background:var(--cat-aceptable)"></span>
+                  <span style="width:${(P[k].b[2]-P[k].b[1])/P[k].b[3]*100}%; background:var(--cat-mala)"></span>
+                  <span style="width:${(P[k].b[3]-P[k].b[2])/P[k].b[3]*100}%; background:var(--cat-muymala)"></span>
+                  <i style="left:${val != null ? Math.min(val/P[k].b[3], 1)*100 : 0}%"></i>
+                </div>
+              </div>`; 
+          }).join("");
+          
+        } else {
+          // ETIQUETAS DINÁMICAS NOM-172 EN COMPARATIVA
+          const val1 = h1[P[simPol].i];
+          const val2 = h2[P[simPol].i];
+          const cIdx1 = cat(simPol, val1);
+          const cIdx2 = cat(simPol, val2);
+          
+          const tag1 = cIdx1 >= 0 ? `<span style="background:${COL[cIdx1]}; color:${cIdx1 >= 2 ? '#fff' : '#111'}; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">${CAT[cIdx1]}</span>` : `<span style="background:var(--cat-nodata); color:#fff; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">Sin datos</span>`;
+          
+          const tag2 = cIdx2 >= 0 ? `<span style="background:${COL[cIdx2]}; color:${cIdx2 >= 2 ? '#fff' : '#111'}; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">${CAT[cIdx2]}</span>` : `<span style="background:var(--cat-nodata); color:#fff; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">Sin datos</span>`;
 
-        let s = "";
-        // Franjas de categoría de fondo
-        let lo = 0;
-        [...b.slice(0, 3), valMax].forEach((threshold, i) => {
-          const t1 = Math.min(threshold, valMax);
-          if (lo < valMax) {
-            s += `<rect x="${X0}" y="${yf(t1)}" width="${XW}" height="${yf(lo) - yf(t1)}" fill="${COL[i]}" opacity="0.12"/>`;
-          }
-          lo = threshold;
-        });
-
-        // Ejes y cuadrícula
-        for (let i = 0; i <= 4; i++) {
-          const v = (valMax * i) / 4;
-          s += `<line x1="${X0}" x2="${X0 + XW}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>`;
-          s += `<text x="${X0 - 6}" y="${yf(v) + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${p.dg ? v.toFixed(p.dg) : Math.round(v)}</text>`;
+          $("#sim-ban").innerHTML = `
+            <b style="font-size:18px; color:var(--sun)">${String(h).padStart(2,"0")}:00 hrs (Cruce Meteorológico)</b>
+            <div style="margin-top: 12px; display: grid; gap: 12px;">
+              <div style="background: rgba(76, 201, 240, 0.08); padding: 12px; border-radius: 8px; border-left: 4px solid #4CC9F0;">
+                <b style="color:#4CC9F0; font-size: 15px;">Año 2024:</b><br>
+                <div style="margin: 6px 0;">${P[simPol].n}: <b style="font-size: 15.5px;">${val1 != null ? val1.toFixed(P[simPol].dg) : '—'} ${P[simPol].u}</b> ${tag1}</div>
+                <span style="color: var(--mut)">Temp: ${h1[7] != null ? h1[7].toFixed(1) : '—'}°C | Viento: ${h1[10] != null ? h1[10].toFixed(1) : '—'} m/s</span>
+              </div>
+              <div style="background: rgba(255, 200, 61, 0.08); padding: 12px; border-radius: 8px; border-left: 4px solid #FFC83D;">
+                <b style="color:#FFC83D; font-size: 15px;">Año 2023:</b><br>
+                <div style="margin: 6px 0;">${P[simPol].n}: <b style="font-size: 15.5px;">${val2 != null ? val2.toFixed(P[simPol].dg) : '—'} ${P[simPol].u}</b> ${tag2}</div>
+                <span style="color: var(--mut)">Temp: ${h2[7] != null ? h2[7].toFixed(1) : '—'}°C | Viento: ${h2[10] != null ? h2[10].toFixed(1) : '—'} m/s</span>
+              </div>
+            </div>`;
         }
-        for (let h = 0; h < 24; h += 3) {
-          const x = X0 + (h / 23) * XW;
-          s += `<text x="${x}" y="${YT + YH + 20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${String(h).padStart(2, "0")}:00</text>`;
-        }
-
-        // Trazos
-        if (p.r !== p.i) {
-          s += `<path d="${genPath(rw, (h) => X0 + (h / 23) * XW, yf)}" stroke="${p.c}" stroke-width="2" stroke-dasharray="5 4" fill="none" opacity="0.8"/>`;
-        }
-        s += `<path d="${genPath(ix, (h) => X0 + (h / 23) * XW, yf)}" stroke="${p.c}" stroke-width="3.5" fill="none" stroke-linejoin="round"/>`;
-
-        ix.forEach((v, h) => {
-          if (v != null) {
-            s += `<circle cx="${X0 + (h / 23) * XW}" cy="${yf(v)}" r="4" fill="${COL[cat(k, v)]}" stroke="#071626" stroke-width="1.5"/>`;
-          }
-        });
-
-        s += `<line id="ph" x1="0" x2="0" y1="${YT}" y2="${YT + YH}" stroke="#FFC83D" stroke-width="2"/>`;
-        s += `<circle id="pd" r="7" fill="none" stroke="#FFC83D" stroke-width="3"/>`;
-
-        $("#chart").innerHTML = s;
-        $("#chart")._yf = yf;
-        $("#chart")._ix = ix;
       }
+      
+      const tl = $("#sim-timeline");
+      if (tl) tl.setAttribute("transform", `translate(${X0 + (simTime / 24) * W}, 0)`);
+      
+      $("#sim-range").value = simTime; 
+      $("#sim-clock").textContent = String(h).padStart(2,"0") + ":" + String(Math.floor((simTime-h)*60)).padStart(2,"0");
+    }
 
-      const HEALTH_MSGS = [
-        "Calidad BUENA: Las condiciones son óptimas para actividades al aire libre.",
-        "Calidad ACEPTABLE: Grupos sensibles (niños, adultos mayores, asma) deben considerar reducir esfuerzos en exteriores.",
-        "Calidad MALA: Grupos sensibles deben evitar actividades físicas al aire libre; población general reducir esfuerzos prolongados.",
-        "Calidad MUY MALA: Riesgo grave. Se recomienda permanecer en interiores y suspender actividades escolares en exteriores.",
-        "Calidad EXTREMADAMENTE MALA: Contingencia ambiental. Permanecer en interiores con ventanas cerradas.",
-      ];
-
-      function updateSimulationStep(h) {
-        lastHour = h;
-        const i = (day - 1) * 24 + h;
-        const x = H[i] || [];
-        const g = GL[i] || { c: -1, dom: [] };
-
-        // Actualizar tacómetros
-        KS.forEach((k) => {
-          const v = x[P[k].i];
-          const cIdx = cat(k, v);
-          const gVal = $("#g_" + k),
-            gChip = $("#gc_" + k),
-            gMark = $("#gm_" + k);
-          if (gVal)
-            gVal.textContent =
-              v != null
-                ? (P[k].dg ? v.toFixed(P[k].dg) : Math.round(v)) + " " + P[k].u
-                : "—";
-          if (gChip) gChip.innerHTML = chip(cIdx);
-          if (gMark)
-            gMark.style.left =
-              (v == null ? 0 : Math.min(v / P[k].br[3], 1) * 100) + "%";
-        });
-
-        // Actualizar Banner
-        const b = $("#ban");
-        b.className = "ban c" + g.c;
-        b.innerHTML = `
-        <h3>${String(h).padStart(2, "0")}:00 · ${g.c < 0 ? "Sin datos" : CAT[g.c]}</h3>
-        <p>${g.c < 0 ? "Sensor fuera de línea temporalmente." : HEALTH_MSGS[g.c]}</p>
-        <p style="font-size:13px; margin-top:4px;"><b>Contaminante determinante:</b> ${g.dom.map((k) => P[k].n).join(" + ") || "Ninguno"}</p>
-      `;
-
-        // Resaltar fila activa en la tabla
-        $$("#htb tr").forEach((r) => {
-          const n = +r.dataset.h;
-          r.classList.toggle("now", n === h);
-          r.classList.toggle("fut", n > h);
-        });
-      }
-
-      let prevTimestamp = 0;
-      function simFrame(ts) {
-        const dt = Math.min((ts - prevTimestamp) / 1000, 0.1);
-        prevTimestamp = ts;
-
-        if (isPlaying) {
-          t += dt * 1.5 * simSpeed;
-          if (t >= 23.999) {
-            if ($("#auto").checked && day < 31) {
-              setDay(day + 1);
-              t = 0;
-            } else {
-              t = 23.999;
-              isPlaying = false;
-              $("#play").textContent = "↻ Reiniciar";
-            }
-          }
-        }
-
-        const h = Math.floor(t);
-        if (h !== lastHour) updateSimulationStep(h);
-
-        const f = t - h;
-        const i = (day - 1) * 24 + h;
-        const x = H[i] || [];
-
-        // Marcador de línea en gráfica
-        const X0 = 54,
-          XW = 652;
-        const curX = X0 + (t / 23) * XW;
-        const ph = $("#ph");
-        if (ph) {
-          ph.setAttribute("x1", curX);
-          ph.setAttribute("x2", curX);
-        }
-
-        const cw = $("#chart");
-        if (cw && cw._ix && $("#pd")) {
-          const curVal = cw._ix[h];
-          if (curVal != null) {
-            $("#pd").style.opacity = 1;
-            $("#pd").setAttribute("cx", X0 + (h / 23) * XW);
-            $("#pd").setAttribute("cy", cw._yf(curVal));
-          } else {
-            $("#pd").style.opacity = 0;
-          }
-        }
-
-        $("#hsl").value = t;
-        $("#clock").textContent =
-          String(h).padStart(2, "0") +
-          ":" +
-          String(Math.floor(f * 60)).padStart(2, "0");
-
-        // Cielo dinámico
-        const sbg = $("#sbg");
-        if (sbg) sbg.setAttribute("fill", getSkyColor(t));
-        if ($("#stars")) $("#stars").style.opacity = t < 6 || t > 19 ? 0.9 : 0;
-
-        // Sol / Luna
-        const isNight = t < 6 || t >= 18;
-        const orbProgress = (t >= 18 ? t - 18 : t >= 6 ? t - 6 : t + 6) / 12;
-        const orbX = 60 + orbProgress * 480;
-        const orbY = 200 - Math.sin(Math.PI * orbProgress) * 140;
-        ["orb", "glow"].forEach((id) => {
-          const el = $("#" + id);
-          if (el) {
-            el.setAttribute("cx", orbX);
-            el.setAttribute("cy", orbY);
-            el.setAttribute("fill", isNight ? "#E8F1F8" : "#FFC83D");
-          }
-        });
-
-        // Turbidez visual (PM10)
-        const pmVal = x[2] ?? x[4] ?? 20;
-        if ($("#haze"))
-          $("#haze").setAttribute(
-            "opacity",
-            Math.min(pmVal / 140, 0.65).toFixed(2),
-          );
-
-        // Temperatura y Viento
-        const tm = x[7];
-        if ($("#tt"))
-          $("#tt").textContent = tm != null ? tm.toFixed(1) + " °C" : "— °C";
-        if ($("#wa"))
-          $("#wa").setAttribute(
-            "transform",
-            `rotate(${((x[8] ?? 0) + 180) % 360})`,
-          );
-        if ($("#hz"))
-          $("#hz").textContent =
-            `PM₁₀ NowCast: ${x[2] ?? "—"} µg/m³ · O₃: ${x[0] != null ? x[0].toFixed(3) : "—"} ppm`;
-
-        requestAnimationFrame(simFrame);
-      }
-
-      function getSkyColor(h) {
-        if (h < 5.5 || h > 20.5) return "#06101D"; // Noche profunda
-        if (h < 7.5) return "#3D2B4D"; // Amanecer violeta/rojizo
-        if (h < 17.5) return "#1A5276"; // Día soleado
-        return "#6C3443"; // Atardecer
-      }
-
-      /* ==========================================================================
-       8. MES COMPLETO HORA POR HORA (744 HORAS)
-       ========================================================================== */
-      function drawFullMonthChart() {
-        const vars = [
-          ...KS.map((k) => [
-            k,
-            `${P[k].n} (${P[k].u})`,
-            P[k].i,
-            P[k].c,
-            P[k].br,
-          ]),
-          ["T", "Temperatura Exterior (°C)", 7, "#FFC83D", null],
-        ];
-
-        $("#msel").innerHTML = vars
-          .map((m, i) => `<option value="${i}">${m[1]}</option>`)
-          .join("");
-        $("#msel").onchange = renderMonthSvg;
-
-        function renderMonthSvg() {
-          const m = vars[+$("#msel").value];
-          const dataArr = H.map((x) => x[m[2]]);
-          const valid = dataArr.filter((v) => v != null && !isNaN(v));
-
-          const maxVal = valid.length
-            ? Math.max(...valid, m[4] ? m[4][0] * 1.2 : 0) * 1.1
-            : 10;
-          const minVal = m[4] ? 0 : valid.length ? Math.min(...valid) - 1 : 0;
-
-          const W = 940,
-            H_box = 240,
-            X0 = 50,
-            Y0 = 20;
-          const xf = (i) => X0 + (i / 743) * W;
-          const yf = (val) =>
-            Y0 + H_box - ((val - minVal) / (maxVal - minVal)) * H_box;
-
-          let s = "";
-          for (let i = 0; i <= 4; i++) {
-            const val = minVal + ((maxVal - minVal) * i) / 4;
-            const y = yf(val);
-            s += `<line x1="${X0}" x2="${X0 + W}" y1="${y}" y2="${y}" stroke="#25506F" stroke-width="0.5"/>`;
-            s += `<text x="${X0 - 6}" y="${y + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${val < 1 ? val.toFixed(3) : val.toFixed(1)}</text>`;
-          }
-
-          // Marcas de días
-          for (let d = 1; d <= 31; d += 3) {
-            s += `<text x="${xf((d - 1) * 24)}" y="${Y0 + H_box + 20}" font-size="11" fill="#9DB6CB">${d} mar</text>`;
-          }
-
-          // Límites de norma
-          if (m[4]) {
-            m[4].slice(0, 3).forEach((thresh, idx) => {
-              if (thresh < maxVal) {
-                s += `<line x1="${X0}" x2="${X0 + W}" y1="${yf(thresh)}" y2="${yf(thresh)}" stroke="${COL[idx + 1]}" stroke-dasharray="6 4" opacity="0.6"/>`;
-              }
-            });
-          }
-
-          // Trayectoria mensual
-          s += `<path d="${genPath(dataArr, xf, yf)}" stroke="${m[3]}" stroke-width="1.8" fill="none"/>`;
-
-          // Marcas rojas de datos faltantes en la base
-          dataArr.forEach((v, idx) => {
-            if (v == null || isNaN(v)) {
-              s += `<rect x="${xf(idx) - 1}" y="${Y0 + H_box - 8}" width="2" height="8" fill="#E5484D" opacity="0.8"/>`;
-            }
-          });
-
-          s += `<line id="mx" y1="${Y0}" y2="${Y0 + H_box}" stroke="#FFC83D" stroke-width="1.5" style="display:none;"/>`;
-
-          $("#mchart").innerHTML = s;
-          $("#mchart")._meta = { dataArr, m, xf, yf, X0, W };
-        }
-
-        renderMonthSvg();
-
-        // Eventos interactivos en gráfica mensual
-        $("#mchart").onmousemove = (e) => {
-          const mc = $("#mchart");
-          if (!mc._meta) return;
-          const { dataArr, m, xf, X0, W } = mc._meta;
-          const rect = mc.getBoundingClientRect();
-          const mouseX = ((e.clientX - rect.left) / rect.width) * 1000;
-          const hourIdx = Math.max(
-            0,
-            Math.min(743, Math.round(((mouseX - X0) / W) * 743)),
-          );
-
-          const l = $("#mx");
-          if (l) {
-            l.style.display = "";
-            l.setAttribute("x1", xf(hourIdx));
-            l.setAttribute("x2", xf(hourIdx));
-          }
-
-          const val = dataArr[hourIdx];
-          const dayNum = Math.floor(hourIdx / 24) + 1;
-          const hourNum = hourIdx % 24;
-          const cc = m[0] === "T" ? -1 : cat(m[0], val);
-
-          showTip(
-            e,
-            `
-          <b>${dayNum} de marzo ${currentYear}, ${String(hourNum).padStart(2, "0")}:00</b><br>
-          ${m[1]}: <b>${val != null ? (m[0] === "O3" ? val.toFixed(3) : val.toFixed(1)) : "Sin dato"}</b>
-          ${cc >= 0 ? "<br>Categoría: " + chip(cc) : ""}
-        `,
-          );
-        };
-
-        $("#mchart").onmouseleave = () => {
-          hideTip();
-          if ($("#mx")) $("#mx").style.display = "none";
-        };
-
-        $("#mchart").onclick = (e) => {
-          const mc = $("#mchart");
-          if (!mc._meta) return;
-          const { X0, W } = mc._meta;
-          const rect = mc.getBoundingClientRect();
-          const mouseX = ((e.clientX - rect.left) / rect.width) * 1000;
-          const hourIdx = Math.max(
-            0,
-            Math.min(743, Math.round(((mouseX - X0) / W) * 743)),
-          );
-          goDay(Math.floor(hourIdx / 24) + 1, hourIdx % 24);
-        };
-      }
-
-      /* ==========================================================================
-       9. CALCULADORA INTERACTIVA NOM-172
-       ========================================================================== */
-      function initCalculadora() {
-        $("#ck").innerHTML = KS.map(
-          (k) => `
-        <option value="${k}">${P[k].n} (${P[k].u})</option>
-      `,
-        ).join("");
-
-        function runCalc() {
-          const k = $("#ck").value,
-            r = $("#cr"),
-            b = P[k].br;
-          r.max = b[3] * 1.35;
-          r.step = b[3] / 300;
-          if (!r._k || r._k !== k) {
-            r.value = b[0];
-            r._k = k;
-          }
-          const v = +r.value;
-          $("#cv").textContent = P[k].dg ? v.toFixed(P[k].dg) : Math.round(v);
-          $("#cc").innerHTML = chip(cat(k, v));
-        }
-
-        $("#ck").onchange = () => {
-          $("#cr")._k = 0;
-          runCalc();
-        };
-        $("#cr").oninput = runCalc;
-        runCalc();
-      }
-      initCalculadora();
-
-      /* ==========================================================================
-       10. DISPONIBILIDAD DE DATOS
-       ========================================================================== */
-      function renderDisponibilidad() {
-        $("#av").innerHTML =
-          AV.map(
-            ([name, pct, nulls]) => `
-        <div class="bar" style="grid-template-columns:120px 1fr 50px; cursor:default;" title="${nulls} horas sin dato">
-          <span>${name}</span>
-          <div><i style="width:${pct}%; background:${pct >= 95 ? "#2ECC71" : pct > 0 ? "#FFC83D" : "#E5484D"}"></i></div>
-          <b>${pct}%</b>
-        </div>
-      `,
-          ).join("") +
-          `
-        <div style="font-size:12px; color:var(--mut); margin-top:8px;">
-          * En rojo: Sensores sin captación de datos durante el mes (mantenimiento o falla técnica estructural).
-        </div>
-      `;
-      }
-
-      /* ==========================================================================
-       11. CATÁLOGO DE ALERTAS Y PROTOCOLOS
-       ========================================================================== */
-      const PROTOCOLOS = [
-        [
-          "a",
-          "Alerta Preventiva Nocturna",
-          "Pronóstico de madrugada con inversión térmica y viento calmo (&lt;1 m/s)",
-          "Alerta a escuelas y ciudadanía para suspender actividad física matutina de 06:00 a 09:00 h.",
-          "Grupos vulnerables, Secretaría de Educación",
-        ],
-        [
-          "a",
-          "Alerta por Ozono Vespertino",
-          "O₃ horario &ge; 0.091 ppm (Categoría Mala / Muy Mala)",
-          "Recomendar diferir entrenamientos deportivos y recreo escolar al aire libre a antes de las 12:00 h.",
-          "Público en general, deportes, escuelas",
-        ],
-        [
-          "a",
-          "Alerta por Partículas en Nivel Mala",
-          "NowCast PM₁₀ &gt; 60 o PM₂.₅ &gt; 33 µg/m³",
-          "Uso preventivo de cubrebocas en exteriores y restricción a personas con asma o EPOC.",
-          "Sector salud, población vulnerable",
-        ],
-        [
-          "a",
-          "Levantamiento de Restricciones",
-          "El indicador desciende y se consolida en Buena o Aceptable por 3 h",
-          "Aviso formal del cese de medidas preventivas con sello horario de validación.",
-          "Ciudadanía y medios",
-        ],
-        [
-          "c",
-          "Calibración de Sensores de PM",
-          "Disponibilidad menor a 75% o derivas constantes",
-          "Revisión técnica de colectores ópticos para evitar vacíos como los observados en PM₂.₅ en 2023.",
-          "Ingeniería SIMAJ",
-        ],
-        [
-          "c",
-          "Auditoría de Temperatura Baja",
-          "Registros anómalos de temperatura exterior en CEN",
-          "Cotejar sensores locales contra estaciones automáticas de CONAGUA antes de validar datos.",
-          "Operación y Validación SIMAJ",
-        ],
-      ];
-
-      let currentFilterAlert = "t";
-      function initAlertsTable() {
-        const filters = [
-          ["t", "Todos"],
-          ["a", "Alertas y Salud"],
-          ["c", "Técnicos y Corrección"],
-        ];
-        $("#af").innerHTML = filters
-          .map(
-            (f) => `
-        <button class="btn ${f[0] === currentFilterAlert ? "on" : ""}" data-f="${f[0]}">${f[1]}</button>
-      `,
-          )
-          .join(" ");
-
-        $$("#af button").forEach(
-          (b) =>
-            (b.onclick = () => {
-              currentFilterAlert = b.dataset.f;
-              initAlertsTable();
-            }),
-        );
-
-        $("#atb").innerHTML = PROTOCOLOS.filter(
-          (r) => currentFilterAlert === "t" || r[0] === currentFilterAlert,
-        )
-          .map(
-            (r) => `
-        <tr>
-          <td><b>${r[1]}</b></td>
-          <td>${r[2]}</td>
-          <td>${r[3]}</td>
-          <td>${r[4]}</td>
-        </tr>
-      `,
-          )
-          .join("");
-      }
-
-      /* ==========================================================================
-       12. TOOLTIP HELPER GLOBAL
-       ========================================================================== */
-      const tipEl = $("#tip");
-      function showTip(e, html) {
-        tipEl.innerHTML = html;
-        tipEl.style.display = "block";
-        const x = Math.min(e.clientX + 14, window.innerWidth - 260);
-        const y = Math.min(e.clientY + 14, window.innerHeight - 120);
-        tipEl.style.left = x + "px";
-        tipEl.style.top = y + "px";
-      }
-      function hideTip() {
-        tipEl.style.display = "none";
-      }
-
-      // Inicializar carga de datos al arrancar
-      window.addEventListener("DOMContentLoaded", initDataLoader);
-    </script>
-  </body>
+    function loopSim(timestamp) { 
+      if (!isPlaying) return; 
+      
+      if (!timestamp) timestamp = performance.now();
+      const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.1); 
+      lastFrameTime = timestamp; 
+      simTime += dt * 2.5; 
+      
+      if (simTime >= 23.99) { 
+        simTime = 0; 
+        const refD = getD(activeYear === 'comp' ? 2024 : activeYear);
+        if (simDay < refD.length - 1) {
+          setSimDay(simDay + 1, false); 
+        } else { 
+          isPlaying = false; 
+          $("#btn-play").textContent = "▶ Iniciar"; 
+        } 
+      } 
+      
+      renderSimFrame(activeYear === 'comp'); 
+      animReq = requestAnimationFrame(loopSim); 
+    }
+    
+    function showTip(e, txt) { 
+      const t = $("#tip"); 
+      t.innerHTML = txt; 
+      t.style.display = "block"; 
+      t.style.left = Math.min(e.clientX + 14, window.innerWidth - 200) + "px"; 
+      t.style.top = e.clientY + 14 + "px"; 
+    }
+    function hideTip() { $("#tip").style.display = "none"; }
+    
+    window.onload = () => { setTimeout(renderAll, 150); };
+  </script>
+</body>
 </html>
