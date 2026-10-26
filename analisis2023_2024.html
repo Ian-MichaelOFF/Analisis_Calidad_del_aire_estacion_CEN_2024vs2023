@@ -1,727 +1,290 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AIMAJ · Calidad del Aire CEN · Comparativa anual 2023 vs 2024</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard de Calidad del Aire 2023-2024</title>
+    <script src="Datos/datos_dashboard.js"></script>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f7f6;
+        color: #333;
+      }
+      h1,
+      h2 {
+        color: #2c3e50;
+        text-align: center;
+      }
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .full-width {
+        grid-column: 1 / -1;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background-color: #34495e;
+        color: white;
+      }
+      select {
+        padding: 10px;
+        font-size: 16px;
+        margin-bottom: 15px;
+        width: 100%;
+      }
+      @media (max-width: 768px) {
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tablero de Análisis de Calidad del Aire</h1>
 
-    /* ==========================================================================
-       VARIABLES Y SISTEMA DE DISEÑO (TEMA DARK GLASSMORPHIC AIMAJ)
-       ========================================================================== */
-    :root {
-      --bg: #071626;
-      --bg2: #0B1F33;
-      --bg-card: #112B44;
-      --card-border: #1C4468;
-      --line: #25506F;
-      --tx: #E8F1F8;
-      --mut: #9DB6CB;
-      --mut-dark: #62829D;
-      
-      /* Acentos de diseño */
-      --sun: #FFC83D;
-      --sky: #4CC9F0;
-      --accent-purple: #9B5DE5;
-      
-      /* Colores oficiales NOM-172-SEMARNAT-2023 */
-      --cat-buena: #2ECC71;
-      --cat-aceptable: #FFC83D;
-      --cat-mala: #FF7A2F;
-      --cat-muymala: #E5484D;
-      --cat-extrema: #9B5DE5;
-      --cat-nodata: #4A5B6C;
+    <div class="dashboard-grid">
+      <!-- Gráfica Mensual Contaminantes -->
+      <div class="card full-width">
+        <h2>Comparación Mensual: PM10 y PM2.5 (Promedio)</h2>
+        <canvas id="monthlyChart"></canvas>
+      </div>
 
-      /* Colores por contaminante */
-      --c-pm10: #D4A373;
-      --c-pm25: #F28482;
-      --c-o3: #4CC9F0;
-      --c-co: #B5A6E0;
-      --c-temp: #FFC83D;
-      --c-rh: #48CAE4;
-      --c-ws: #80ED99;
-      
-      /* Transiciones y sombras */
-      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-      --glass: rgba(17, 43, 68, 0.75);
-    }
+      <!-- Gráfica O3 y Temperatura -->
+      <div class="card">
+        <h2>Relación O3 (Máx) y Temperatura Mensual</h2>
+        <canvas id="o3TempChart"></canvas>
+      </div>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; scroll-padding-top: 68px; }
-    body {
-      background: var(--bg);
-      color: var(--tx);
-      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 15px;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+      <!-- Análisis de Días Críticos (Interactivo) -->
+      <div class="card">
+        <h2>Análisis Horario: Días Críticos</h2>
+        <select id="criticalDaySelect">
+          <option value="">Selecciona un día crítico...</option>
+        </select>
+        <canvas id="criticalChart"></canvas>
+      </div>
 
-    h1, h2, h3, h4 {
-      font-family: 'Outfit', sans-serif;
-      font-weight: 700;
-      line-height: 1.2;
-      color: #FFFFFF;
-    }
+      <!-- Tabla Mensual -->
+      <div class="card full-width">
+        <h2>Desglose Mensual Consolidado</h2>
+        <table id="monthlyTable">
+          <thead>
+            <tr>
+              <th>Año</th>
+              <th>Mes</th>
+              <th>O3 Máx (ppm)</th>
+              <th>CO Máx (ppm)</th>
+              <th>PM10 Promedio (µg/m³)</th>
+              <th>PM2.5 Promedio (µg/m³)</th>
+              <th>Temp Promedio (°C)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Los datos se insertarán dinámicamente aquí -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-    button, select, input { font-family: inherit; color: inherit; }
-    :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+    <!-- Cargar los datos -->
+    <script src="/Datos/datos_dashboard.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!window.DATA_DASHBOARD) {
+          alert("No se encontró DATA_DASHBOARD. Verifica datos_dashboard.js");
+          return;
+        }
 
-    /* ==========================================================================
-       BARRA DE NAVEGACIÓN Y SELECTOR DE AÑO
-       ========================================================================== */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(7, 22, 38, 0.92);
-      backdrop-filter: blur(12px);
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding: 10px 18px;
-      align-items: center;
-      border-bottom: 1px solid var(--line);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
+        const data = window.DATA_DASHBOARD;
+        const years = Object.keys(data);
+        const monthsLabel = [
+          "Ene",
+          "Feb",
+          "Mar",
+          "Abr",
+          "May",
+          "Jun",
+          "Jul",
+          "Ago",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dic",
+        ];
 
-    nav .brand {
-      font: 800 19px 'Outfit';
-      color: var(--sun);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-right: 14px;
-      text-decoration: none;
-      white-space: nowrap;
-    }
+        // 1. Preparar datos para gráficos mensuales
+        const datasetsPM10 = [];
+        const datasetsPM25 = [];
+        let allDays = [];
 
-    nav a {
-      color: var(--tx);
-      text-decoration: none;
-      font-size: 13.5px;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 8px;
-      white-space: nowrap;
-      transition: var(--transition);
-    }
-    nav a:hover { background: var(--bg-card); color: var(--sun); }
+        years.forEach((year, index) => {
+          const meses = data[year].meses;
+          const color =
+            index === 0 ? "rgba(52, 152, 219, 0.7)" : "rgba(231, 76, 60, 0.7)";
 
-    .nav-year-controls {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg2);
-      padding: 3px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-    }
+          // Llenar tabla mensual
+          const tbody = document.querySelector("#monthlyTable tbody");
+          meses.forEach((m) => {
+            const row = `<tr>
+                        <td>${year}</td>
+                        <td>${monthsLabel[m.mes - 1]}</td>
+                        <td>${m.O3_max ? m.O3_max.toFixed(3) : "-"}</td>
+                        <td>${m.CO_max ? m.CO_max.toFixed(3) : "-"}</td>
+                        <td>${m.PM10_mean ? m.PM10_mean.toFixed(1) : "-"}</td>
+                        <td>${m.PM25_mean ? m.PM25_mean.toFixed(1) : "-"}</td>
+                        <td>${m.Temp_mean ? m.Temp_mean.toFixed(1) : "-"}</td>
+                    </tr>`;
+            tbody.innerHTML += row;
+          });
 
-    .year-btn {
-      background: transparent;
-      border: 0;
-      padding: 5px 12px;
-      border-radius: 7px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--mut);
-      transition: var(--transition);
-    }
-    .year-btn.active {
-      background: var(--sun);
-      color: #071626;
-      box-shadow: 0 2px 8px rgba(255, 200, 61, 0.3);
-    }
-    .year-btn:hover:not(.active) { color: #FFF; background: var(--card-border); }
+          // Preparar series para PM10 y PM2.5
+          datasetsPM10.push({
+            label: `PM10 Promedio ${year}`,
+            data: meses.map((m) => m.PM10_mean),
+            backgroundColor: color,
+            borderColor: color.replace("0.7", "1"),
+            borderWidth: 1,
+          });
 
-    .year-toggle-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      background: #081B2E;
-      padding: 3px;
-      border-radius: 9px;
-      border: 1px solid var(--line);
-    }
-    .year-toggle-pill .year-btn {
-      padding: 4px 11px;
-      font-size: 12.5px;
-    }
+          // Recopilar días críticos para el selector
+          if (data[year].dias_criticos) {
+            allDays = allDays.concat(data[year].dias_criticos);
+          }
+        });
 
-    /* ==========================================================================
-       LAYOUT Y CONTENEDORES
-       ========================================================================== */
-    .wrap { max-width: 1200px; margin: auto; padding: 0 16px; }
-    section { padding: 54px 0; border-bottom: 1px solid rgba(37, 80, 111, 0.4); }
-    section:nth-of-type(even) { background: var(--bg2); }
+        // 2. Gráfica de Comparación Mensual (PM10)
+        new Chart(document.getElementById("monthlyChart"), {
+          type: "bar",
+          data: { labels: monthsLabel, datasets: datasetsPM10 },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Concentración (µg/m³)" },
+              },
+            },
+          },
+        });
 
-    .band {
-      margin-bottom: 26px;
-      padding-left: 16px;
-      border-left: 6px solid var(--c, var(--sun));
-    }
-    .band h2 { font-size: clamp(24px, 3.5vw, 36px); letter-spacing: -0.5px; }
-    .band p { margin: 6px 0 0; color: var(--mut); max-width: 54em; font-size: 15px; }
+        // 3. Gráfica de O3 vs Temperatura (Solo el primer año disponible para mantener legibilidad)
+        const yearBase = years[0];
+        const o3Data = data[yearBase].meses.map((m) => m.O3_max);
+        const tempData = data[yearBase].meses.map((m) => m.Temp_mean);
 
-    .grid { display: grid; gap: 18px; }
-    .k4 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-    .k3 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
-    .k2 { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); }
-    @media (max-width: 768px) { .k2, .k3 { grid-template-columns: 1fr; } }
+        new Chart(document.getElementById("o3TempChart"), {
+          type: "line",
+          data: {
+            labels: monthsLabel,
+            datasets: [
+              {
+                label: `O3 Máx ${yearBase}`,
+                data: o3Data,
+                borderColor: "rgba(155, 89, 182, 1)",
+                yAxisID: "y",
+              },
+              {
+                label: `Temp Promedio ${yearBase}`,
+                data: tempData,
+                borderColor: "rgba(241, 196, 15, 1)",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                type: "linear",
+                position: "left",
+                title: { display: true, text: "O3 (ppm)" },
+              },
+              y1: {
+                type: "linear",
+                position: "right",
+                title: { display: true, text: "Temperatura (°C)" },
+                grid: { drawOnChartArea: false },
+              },
+            },
+          },
+        });
 
-    .card {
-      background: var(--glass);
-      backdrop-filter: blur(8px);
-      border-radius: 14px;
-      padding: 22px;
-      border: 1px solid var(--card-border);
-      border-top: 4px solid var(--c, var(--sky));
-      box-shadow: var(--shadow);
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .card:hover { border-color: rgba(76, 201, 240, 0.4); }
+        // 4. Lógica de Días Críticos (Selector y Gráfica Horaria)
+        const select = document.getElementById("criticalDaySelect");
+        allDays.forEach((day, index) => {
+          const option = document.createElement("option");
+          option.value = index;
+          option.text = `${day.fecha} (O3 Max: ${day.O3_max}, PM10 Max: ${day.PM10_max})`;
+          select.appendChild(option);
+        });
 
-    .kpi { display: flex; flex-direction: column; justify-content: space-between; }
-    .kpi b { display: block; font: 800 36px 'Outfit'; color: var(--c, var(--sun)); line-height: 1.1; margin: 4px 0 6px; }
-    .kpi span { font-size: 13.5px; color: var(--mut); }
+        let criticalChartInfo = null;
 
-    /* ==========================================================================
-       HERO BANNER
-       ========================================================================== */
-    .hero {
-      position: relative;
-      overflow: hidden;
-      padding: 72px 18px 84px;
-      background: radial-gradient(circle at 80% 20%, #153A5B 0%, #081B2E 70%);
-      border-bottom: 1px solid var(--line);
-    }
-    .hero h1 { font-size: clamp(30px, 5vw, 56px); font-weight: 800; max-width: 14em; letter-spacing: -1px; }
-    .hero p { max-width: 48em; font-size: 17px; color: #C7D9E8; margin-top: 14px; }
-    .hero .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--sun);
-      color: #071626;
-      font-weight: 700;
-      padding: 4px 14px;
-      border-radius: 99px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .hero-badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-    .data-source-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(76, 201, 240, 0.12);
-      border: 1px solid rgba(76, 201, 240, 0.35);
-      color: var(--sky);
-      font-size: 13px;
-      padding: 5px 12px;
-      border-radius: 8px;
-    }
-    .data-source-badge i { width: 8px; height: 8px; border-radius: 50%; background: #2ECC71; display: inline-block; box-shadow: 0 0 8px #2ECC71; }
+        select.addEventListener("change", (e) => {
+          if (criticalChartInfo) criticalChartInfo.destroy();
+          const val = e.target.value;
+          if (val === "") return;
 
-    /* ==========================================================================
-       CHIPS, BOTONES Y CONTROLES
-       ========================================================================== */
-    .chip {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 99px;
-      font-weight: 600;
-      font-size: 12px;
-      color: #111;
-      white-space: nowrap;
-    }
-    .c0 { background: var(--cat-buena); }
-    .c1 { background: var(--cat-aceptable); }
-    .c2 { background: var(--cat-mala); color: #fff; }
-    .c3 { background: var(--cat-muymala); color: #fff; }
-    .c4 { background: var(--cat-extrema); color: #fff; }
-    .cn { background: var(--cat-nodata); color: #fff; }
+          const dayData = allDays[val].horas;
+          const hours = dayData.map((h) => `${h.HOUR}:00`);
+          const pm10H = dayData.map((h) => h.PM10);
+          const pm25H = dayData.map((h) => h["PM2.5"]);
+          const o3H = dayData.map((h) => h.O3 * 1000); // Escalado para visualización
 
-    .btn {
-      background: var(--bg-card);
-      border: 1px solid var(--line);
-      color: var(--tx);
-      border-radius: 9px;
-      padding: 7px 14px;
-      cursor: pointer;
-      font-size: 13.5px;
-      font-weight: 600;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn:hover, .btn.on {
-      background: var(--sun);
-      color: #071626;
-      border-color: var(--sun);
-      box-shadow: 0 2px 10px rgba(255, 200, 61, 0.25);
-    }
-    .tools {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    select, input[type=number] {
-      background: #091D30;
-      border: 1px solid var(--line);
-      color: var(--tx);
-      border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 13.5px;
-    }
-    input[type=range] { accent-color: var(--sun); }
-
-    /* ==========================================================================
-       GRÁFICAS: DONAS, BARRAS Y CALENDARIOS
-       ========================================================================== */
-    .donutw { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
-    .leg { list-style: none; padding: 0; margin: 0; }
-    .leg li {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin: 6px 0;
-      cursor: pointer;
-      padding: 4px 10px;
-      border-radius: 8px;
-      transition: background 0.15s;
-    }
-    .leg li:hover { background: rgba(255, 255, 255, 0.08); }
-    .leg i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
-
-    .bar {
-      display: grid;
-      grid-template-columns: 80px 1fr 40px;
-      gap: 12px;
-      align-items: center;
-      margin: 8px 0;
-      font-size: 13.5px;
-      cursor: pointer;
-      border-radius: 8px;
-      padding: 4px 8px;
-      transition: background 0.15s;
-    }
-    .bar:hover, .bar.on { background: rgba(76, 201, 240, 0.12); }
-    .bar div {
-      height: 18px;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .bar div i {
-      display: block;
-      height: 100%;
-      border-radius: 6px;
-      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; font-size: 12px; }
-    .cal .h { font-weight: 700; text-align: center; color: var(--mut); padding-bottom: 4px; text-transform: uppercase; font-size: 11px; }
-    .day {
-      border: 0;
-      border-radius: 10px;
-      padding: 8px 4px;
-      text-align: center;
-      min-height: 70px;
-      cursor: pointer;
-      color: #111;
-      transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
-      position: relative;
-    }
-    .day:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 6px 14px rgba(0,0,0,0.4); z-index: 2; }
-    .day.dim { opacity: 0.18; transform: none; }
-    .day b { display: block; font: 700 16px 'Outfit'; margin-bottom: 2px; }
-    .day small { display: block; font-size: 10.5px; line-height: 1.2; word-break: break-word; font-weight: 500; }
-    .day.c2, .day.c3, .day.c4 { color: #fff; }
-
-    /* ==========================================================================
-       TABLAS ESTILIZADAS
-       ========================================================================== */
-    .tw { overflow-x: auto; border-radius: 10px; }
-    table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-    th {
-      background: #081B2E;
-      text-align: left;
-      padding: 10px 12px;
-      font: 700 13px 'Outfit';
-      color: #FFF;
-      white-space: nowrap;
-      border-bottom: 2px solid var(--line);
-    }
-    th.s { cursor: pointer; user-select: none; }
-    th.s:hover { color: var(--sun); }
-    td {
-      padding: 9px 12px;
-      border-bottom: 1px solid rgba(37, 80, 111, 0.4);
-      vertical-align: middle;
-    }
-    tbody tr:hover { background: rgba(76, 201, 240, 0.08); }
-    tr.cl2r { cursor: pointer; }
-    tr.now { background: rgba(76, 201, 240, 0.2) !important; font-weight: 600; }
-    tr.fut { opacity: 0.45; }
-
-    /* ==========================================================================
-       SIMULADOR HORARIO
-       ========================================================================== */
-    .sim { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; }
-    @media (max-width: 900px) { .sim { grid-template-columns: 1fr; } }
-    #sky { width: 100%; display: block; border-radius: 14px; background: #0A1428; box-shadow: var(--shadow); }
-    .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .gc {
-      background: var(--bg-card);
-      border-radius: 12px;
-      padding: 12px;
-      border-left: 5px solid var(--c);
-      border: 1px solid var(--card-border);
-      border-left-width: 5px;
-    }
-    .gc small { color: var(--mut); font-size: 11.5px; font-weight: 500; }
-    .gc b { display: block; font: 700 22px 'Outfit'; margin: 2px 0 4px; }
-    .gb {
-      position: relative;
-      display: flex;
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 6px;
-      background: #000;
-    }
-    .gb span { height: 100%; }
-    .gb i { position: absolute; top: -3px; width: 3px; height: 14px; background: #fff; border-radius: 2px; transition: left 0.4s; box-shadow: 0 0 6px #fff; }
-
-    .ban {
-      border-radius: 14px;
-      padding: 16px 20px;
-      margin-top: 14px;
-      color: #111;
-      transition: background 0.4s;
-    }
-    .ban h3 { font-size: 22px; }
-    .ban p { margin: 4px 0 0; font-size: 14px; }
-    .ban.c2, .ban.c3, .ban.c4 { color: #fff; }
-
-    .log {
-      list-style: none;
-      padding: 0;
-      margin: 8px 0 0;
-      font-size: 13px;
-      max-height: 160px;
-      overflow-y: auto;
-    }
-    .log li { padding: 5px 0; border-bottom: 1px solid rgba(37, 80, 111, 0.4); display: flex; gap: 8px; align-items: center; }
-
-    /* ==========================================================================
-       SECCIÓN COMPARATIVA (2024 vs 2023)
-       ========================================================================== */
-    .comp-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .diff-badge {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .diff-good { background: rgba(46, 204, 113, 0.2); color: #2ECC71; border: 1px solid rgba(46, 204, 113, 0.4); }
-    .diff-bad { background: rgba(229, 72, 77, 0.2); color: #E5484D; border: 1px solid rgba(229, 72, 77, 0.4); }
-    .diff-neutral { background: rgba(76, 201, 240, 0.2); color: #4CC9F0; border: 1px solid rgba(76, 201, 240, 0.4); }
-
-    /* Tooltip Flotante */
-    #tip {
-      position: fixed;
-      pointer-events: none;
-      background: rgba(8, 27, 46, 0.95);
-      border: 1px solid var(--sun);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 12.5px;
-      z-index: 9999;
-      display: none;
-      max-width: 250px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-    }
-
-    /* Footer */
-    footer {
-      background: #05101C;
-      color: var(--mut);
-      padding: 44px 18px;
-      font-size: 13.5px;
-      border-top: 1px solid var(--line);
-    }
-    footer b { color: var(--tx); }
-  
-.q{font-size:13px;color:var(--sun);font-weight:600;margin-bottom:4px}
-.note{background:rgba(255,200,61,.08);border:1px solid rgba(255,200,61,.3);border-radius:8px;padding:9px 13px;font-size:12.5px;margin-top:12px}
-.lg{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);margin-top:8px}
-.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-svg text{font-family:'IBM Plex Sans',sans-serif}
-.ev td,.ev th{font-size:13px}
-td.a{white-space:nowrap}
-ul.t{padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:6px;margin-top:6px}
-</style>
-</head>
-<body>
-<div id="tip"></div>
-<nav aria-label="Navegación">
-<a href="#" class="brand">☀ AIMAJ · SIMAJ</a>
-<a href="#resumen">Resumen</a><a href="#meses">Meses</a><a href="#categorias">Categorías</a><a href="#atipicos">Atípicos</a><a href="#horas">Horas</a><a href="#meteo">Meteorología</a><a href="#simulador">Días clave</a><a href="#agencia">Interpretación</a><a href="#metodo">Método y datos</a>
-</nav>
-
-<header class="hero"><div class="wrap" style="position:relative;z-index:2">
-<span class="tag">AIMAJ → SIMAJ · Sprint 2</span>
-<h1>Calidad del aire en CEN: 2023 vs 2024</h1>
-<p>Comparación anual de los 12 meses de 2023 y 2024 en la estación Centro (Guadalajara) con los criterios de la NOM-172-SEMARNAT-2023: concentraciones, categorías Aire y Salud, meses, horas y días relevantes, y variables meteorológicas disponibles.</p>
-<div class="hero-badges"><div class="data-source-badge"><i></i> Pipeline: NowCast PM · promedio 8 h CO · O₃ horario</div><div class="data-source-badge" style="color:var(--sun);border-color:rgba(255,200,61,.4)">⚠ Horas y categorías: solo días con registro horario (<span id="cobTxt"></span>)</div></div>
-</div></header>
-
-<section id="resumen" style="--c:var(--sun)"><div class="wrap">
-<div class="band"><h2>Indicadores clave</h2><p>Resumen anual 2024 frente a 2023. Los promedios comparan únicamente los meses con dato en ambos años.</p></div>
-<div class="grid k3" id="kpis"></div>
-<div class="note" id="kpiNote"></div>
-</div></section>
-
-<section id="meses" style="--c:var(--sky)"><div class="wrap">
-<div class="band"><h2>Comportamiento mensual</h2><p class="q">¿Qué meses tuvieron las mejores y peores condiciones, y cuánto cambiaron de un año a otro?</p></div>
-<div class="card"><div class="tools"><select id="vsel" aria-label="Variable"></select><span style="color:var(--mut);font-size:13px" id="vnote"></span></div>
-<svg id="cMes" viewBox="0 0 900 262" style="width:100%"></svg><div class="lg"><span><i style="background:#FFC83D"></i>2023</span><span><i style="background:#4CC9F0"></i>2024</span><span>s/d = sin dato en el archivo</span></div></div>
-<div class="card tw" style="margin-top:18px;--c:var(--line)"><h3>Tabla mensual: 2023 → 2024</h3>
-<p style="font-size:13px;color:var(--mut);margin-bottom:10px">Sustituye a la tabla diaria. Verde = mejora, rojo = empeora. «% horas ≥ Mala» solo usa los días con registro; meses con menos de 10 días (*) son poco representativos.</p>
-<table class="ev"><thead><tr><th>Mes</th><th>Días con registro</th><th>% horas ≥ Mala</th><th>PM₂.₅ µg/m³</th><th>PM₁₀ µg/m³</th><th>O₃ máx ppm</th><th>CO máx ppm</th><th>Temp °C</th></tr></thead><tbody id="tMes"></tbody></table></div>
-</div></section>
-
-<section id="categorias" style="--c:var(--cat-buena)"><div class="wrap">
-<div class="band"><h2>Categorías Aire y Salud</h2><p class="q">¿Cómo se distribuyeron las categorías y qué contaminante las determinó?</p></div>
-<div class="grid k2">
-<div class="card"><h3>Distribución anual de horas por categoría</h3><div id="catAn"></div><div class="lg" id="catLg"></div></div>
-<div class="card"><h3>Contaminante determinante (días Aceptable o peor)</h3><div id="domB"></div><p style="font-size:12.5px;color:var(--mut);margin-top:8px">Los empates suman a ambos contaminantes. CO nunca fue determinante.</p></div>
-</div>
-<div class="card" style="margin-top:18px"><h3>Categoría horaria por mes (% de horas)</h3><svg id="cCat" viewBox="0 0 900 262" style="width:100%"></svg><div class="lg" id="catLg2"></div><div style="font-size:12px;color:var(--mut)">Cada mes: barra izquierda 2023, derecha 2024. Barras tenues = menos de 10 días con registro.</div></div>
-</div></section>
-
-<section id="atipicos" style="--c:var(--cat-mala)"><div class="wrap">
-<div class="band"><h2>Periodos y eventos atípicos</h2><p class="q">¿Cuándo ocurrieron los episodios más severos?</p></div>
-<div class="card"><h3>Calendario anual por categoría diaria (máximo riesgo del día)</h3>
-<p style="font-size:13px;color:var(--mut);margin-bottom:8px">Gris oscuro = día sin registro horario en el archivo. Borde blanco = día clave; haz clic para abrirlo en el simulador.</p>
-<div style="overflow-x:auto"><b style="color:#FFC83D">2023</b><svg id="hm2023" viewBox="0 0 880 262" style="min-width:700px;width:100%"></svg><b style="color:#4CC9F0">2024</b><svg id="hm2024" viewBox="0 0 880 262" style="min-width:700px;width:100%"></svg></div><div class="lg" id="catLg3"></div></div>
-<div class="card tw" style="margin-top:18px;--c:var(--line)"><h3>Días clave (Extrema o O₃ ≥ 0.136 ppm)</h3><table class="ev"><thead><tr><th>Fecha</th><th>Categoría</th><th>Determinante</th><th>PM₁₀ NowCast</th><th>PM₂.₅ NowCast</th><th>O₃ máx</th><th>CO 8 h máx</th></tr></thead><tbody id="tEv"></tbody></table></div>
-</div></section>
-
-<section id="horas" style="--c:var(--c-pm25)"><div class="wrap">
-<div class="band"><h2>Horas relevantes</h2><p class="q">¿En qué horas del día se concentran los problemas?</p></div>
-<div class="card"><div class="tools"><select id="hsel"><option value="PM25">PM₂.₅ (µg/m³)</option><option value="PM10">PM₁₀ (µg/m³)</option><option value="O3">O₃ (ppm)</option><option value="CO">CO (ppm)</option><option value="ET">Temperatura exterior (°C)</option></select></div>
-<div class="grid k2"><div><h3 style="font-size:16px">Perfil horario promedio</h3><svg id="cPerf" viewBox="0 0 520 250" style="width:100%"></svg></div>
-<div><h3 style="font-size:16px">Hora del máximo diario (nº de días)</h3><svg id="cPico" viewBox="0 0 520 250" style="width:100%"></svg></div></div>
-<div class="lg"><span><i style="background:#FFC83D"></i>2023</span><span><i style="background:#4CC9F0"></i>2024</span></div>
-<div class="note">Perfiles calculados con lecturas crudas de los días con registro (muestra sesgada hacia días con episodios). «Hora del máximo» cuenta, por día Aceptable o peor, la hora en que el contaminante determinante alcanzó su máximo.</div></div>
-</div></section>
-
-<section id="meteo" style="--c:var(--c-rh)"><div class="wrap">
-<div class="band"><h2>Relación con temperatura, humedad y viento</h2><p class="q">¿Los meses más cálidos, húmedos o ventosos coinciden con más contaminación?</p></div>
-<div class="card"><div class="tools"><label>Eje X <select id="xsel"><option value="Temp_mean">Temperatura (°C)</option><option value="RH_mean">Humedad relativa (%)</option><option value="WS_mean">Viento (m/s)</option></select></label>
-<label>Eje Y <select id="ysel"><option value="PM25_mean">PM₂.₅ medio</option><option value="PM10_mean">PM₁₀ medio</option><option value="O3_max">O₃ máximo</option><option value="CO_max">CO máximo</option></select></label></div>
-<svg id="cMet" viewBox="0 0 900 300" style="width:100%"></svg><div class="lg"><span><i style="background:#FFC83D"></i>2023</span><span><i style="background:#4CC9F0"></i>2024</span></div>
-<div class="note" id="metTxt"></div></div>
-</div></section>
-
-<section id="simulador" style="--c:var(--sky)"><div class="wrap">
-<div class="band"><h2>Días clave: paso del día</h2><p>Simulador horario reducido a los días relevantes de ambos años. Cada hora muestra el índice NOM-172 (NowCast PM, 8 h CO, O₃ horario).</p></div>
-<div class="tools"><select id="dsel" aria-label="Día clave"></select><button class="btn" id="pv">◀</button><button class="btn" id="nx">▶</button><button class="btn on" id="play" style="min-width:110px">▶ Iniciar</button><input type="range" id="hsl" min="0" max="23" step="1" value="0" style="flex:1;min-width:160px"><b id="clk" style="font:800 22px Outfit;color:var(--sun)">00:00</b></div>
-<div class="sim"><div class="card"><div class="tools" id="polb"></div><svg id="cSim" viewBox="0 0 760 290" style="width:100%"></svg><div style="font-size:12px;color:var(--mut)">Línea gruesa: índice oficial. Punteada: lectura horaria cruda.</div></div>
-<div><div class="gauges" id="gauges"></div><div class="ban" id="ban"></div></div></div>
-</div></section>
-
-<section id="agencia" style="--c:var(--sun)"><div class="wrap">
-<div class="band"><h2>Interpretación desde la agencia (AIMAJ → SIMAJ)</h2><p>Cada afirmación indica si está respaldada por los datos o es una interpretación que requiere confirmación.</p></div>
-<div class="grid k2">
-<div class="card" style="--c:var(--sun)"><h3>1. ¿Qué cambió entre 2023 y 2024?</h3><ul class="t">
-<li><b>PM₂.₅ bajó 36 %</b> en promedio anual (26.0 → 16.7 µg/m³); 11 de 12 meses mejoraron, de −10 % (dic) a −68 % (sep). Solo enero empeoró (+19 %).</li>
-<li><b>PM₁₀ bajó solo 7 %</b> (49.1 → 45.8 µg/m³, 9 meses comparables); enero +24 % y mayo +12 %.</li>
-<li>Horas en <b>Buena</b>: 14 % → 37 %. Horas ≥ Mala: 35 % → 27 %.</li>
-<li><b>Sin cambio en la cola severa:</b> horas Muy mala o peor 2.6 % en ambos años; días Muy mala o Extrema 37 → 38. Las Extrema bajaron de 10 a 5.</li>
-<li><b>O₃ no mejoró:</b> máximo 0.151 → 0.156 ppm; horas ≥ Mala 150 → 139; días con ≥ 0.136 ppm: 5 → 4.</li></ul></div>
-<div class="card" style="--c:var(--sky)"><h3>2. ¿Cuáles fueron los periodos más relevantes?</h3><ul class="t">
-<li><b>15–23 dic 2023:</b> nueve días seguidos en Muy mala o Extrema (PM₁₀ NowCast 150–301 µg/m³; 7 Extrema). En dic 2024 solo el 25 dic fue Extrema.</li>
-<li><b>18–20 ene 2024:</b> tres días Extrema (PM₁₀ 215–256 µg/m³, CO 8 h hasta 6.4 ppm). Enero 2024 sumó 14 días Muy mala o peor frente a 7 en enero 2023.</li>
-<li><b>1 ene:</b> PM₁₀ NowCast 235 (2023) → 636 µg/m³ (2024); PM₂.₅ 196 → 359. <b>25 dic</b> Extrema en ambos años.</li>
-<li><b>O₃:</b> 24 feb en ambos años (0.151 y 0.156 ppm); jun 2023 (0.140–0.141) y 31 may–1 jun 2024 (0.142–0.146).</li>
-<li><b>Mejor periodo:</b> jul–sep, con PM₂.₅ de 7–9 µg/m³ en 2024.</li></ul></div>
-<div class="card" style="--c:var(--cat-mala)"><h3>3. ¿Qué patrones se identifican?</h3><ul class="t">
-<li><b>Estacional:</b> partículas más altas nov–feb; O₃ máximo feb–jun; mínimo de partículas jul–oct.</li>
-<li><b>Horario:</b> partículas con dos máximos, 08–10 h y 21–00 h; O₃ entre 11 y 17 h; CO sobre las 07 h.</li>
-<li><b>Contaminantes:</b> PM₁₀ y PM₂.₅ determinan casi todas las categorías; O₃ en 56–63 días por año; CO nunca superó «Aceptable».</li>
-<li><b>Meteorología (mensual):</b> O₃ máx con viento medio r = +0.68 (n = 21, mismo signo en ambos años); PM₂.₅ con humedad r = −0.56 (n = 18). Temperatura con O₃ es inconsistente (−0.30 en 2023, +0.84 en 2024).</li>
-<li><b>Composición:</b> PM₂.₅/PM₁₀ pasó de ≈0.65–0.70 a ≈0.30–0.36 en mar, abr y jun; en ene y dic no cambió.</li></ul></div>
-<div class="card" style="--c:var(--cat-buena)"><h3>4. Información útil para decidir</h3><ul class="t">
-<li>Priorizar <b>partículas</b> en dic–ene y en fechas puntuales (31 dic–1 ene, 24–25 dic): aviso preventivo y seguimiento horario.</li>
-<li>Emitir avisos <b>por ventana horaria</b>: 08–10 h y 21–00 h (PM); 12–16 h (O₃, feb–jun). Un boletín diario oculta estos picos.</li>
-<li>Reportar % de horas ≥ Mala y días Muy mala o peor por mes, además del promedio, porque el promedio no refleja la cola severa.</li>
-<li>Cerrar vacíos de datos: PM₁₀ ago–oct 2023, humedad y viento en 2024, y validar el PM₂.₅ antes de dar la mejora como firme.</li></ul></div>
-</div>
-<div class="card" style="margin-top:18px;--c:var(--accent-purple);background:rgba(155,93,229,.08)"><h3 style="color:var(--accent-purple)">Respaldado por datos vs. no demostrable</h3>
-<div class="grid k2" style="margin-top:10px"><div><b>✔ Respaldado por los datos</b><ul class="t"><li>Reducción de PM₂.₅ mensual en 11 de 12 meses y reducción marginal de PM₁₀.</li><li>Sin mejora en O₃ ni en la frecuencia de días Muy mala o peor.</li><li>Concentración de episodios en dic–ene y en 1 ene / 25 dic.</li><li>Máximos de partículas en 08–10 h y 21–00 h; de O₃ en 11–17 h.</li></ul></div>
-<div><b>⚠ Requiere confirmación</b><ul class="t"><li>Atribuir la mejora de 2024 a políticas, lluvias o parque vehicular (no hay inventario de emisiones ni precipitación).</li><li>Que la caída de PM₂.₅ sea real y no un cambio de equipo o calibración: PM₁₀ casi no cambió.</li><li>Pirotecnia como causa de los picos del 1 ene y 25 dic (solo coincide la fecha).</li><li>Causalidad meteorológica: n ≤ 24 meses y la estacionalidad confunde las relaciones.</li><li>Que los días ausentes del archivo fueran «Buena»: el criterio de selección debe confirmarse con el pipeline del Sprint 1.</li></ul></div></div></div>
-</div></section>
-
-<section id="metodo" style="--c:var(--cat-buena)"><div class="wrap">
-<div class="band"><h2>Método y calidad de datos</h2></div>
-<div class="grid k2">
-<div class="card tw"><h3>Límites NOM-172-SEMARNAT-2023</h3><table><thead><tr><th>Contaminante</th><th>Buena</th><th>Aceptable</th><th>Mala</th><th>Muy mala</th></tr></thead><tbody>
-<tr><td><b>O₃</b> ppm, 1 h</td><td>&lt; 0.058</td><td>0.058–0.090</td><td>0.091–0.135</td><td>0.136–0.175</td></tr>
-<tr><td><b>CO</b> ppm, 8 h</td><td>&lt; 5.0</td><td>5.1–9.0</td><td>9.1–12.0</td><td>12.1–16.0</td></tr>
-<tr><td><b>PM₁₀</b> NowCast</td><td>&lt; 45</td><td>45–60</td><td>61–132</td><td>133–213</td></tr>
-<tr><td><b>PM₂.₅</b> NowCast</td><td>&lt; 15</td><td>15–33</td><td>34–79</td><td>80–130</td></tr></tbody></table>
-<p style="font-size:13px;color:var(--mut);margin-top:10px">Extremadamente mala: por encima del último límite. Categoría horaria y diaria = contaminante de mayor riesgo; el día se clasifica con ≥ 18 h válidas. En el borde de días aislados el NowCast y el promedio de 8 h usan el historial disponible. Los promedios mensuales son referencia, no índice oficial.</p></div>
-<div class="card tw"><h3>Cobertura de datos</h3><table id="tCob"></table>
-<ul class="t"><li>El archivo trae 228 días (2023) y 242 días (2024) con registro horario, y ningún día incluido es 100 % Buena.</li><li>PM₁₀ sin dato mensual ago–oct 2023; humedad sin dato ene–may 2024 y jun 2023; viento sin dato ene–mar 2024.</li><li>Pipeline reproducible: <code>procesar_datos.py</code>.</li></ul></div>
-</div></div></section>
-
-<footer><div class="wrap"><b>AIMAJ · Universidad de Guadalajara, CUCEI</b><br>Análisis y Visualización de la Información 2026B · MC. Nayeli Areli Pérez Padilla<br>Equipo: Manzo Mejía Susana Rubí, Castellanos Zuñiga Ian Michael, Montero González José Antonio, Melendez González Ángel Leonel, Anaya Valladolid Luis Rafael, Magaña Mojica Jesús Ismael.<br>Fuente: SIMAJ · NOM-172-SEMARNAT-2023 (DOF 25/01/2024). Estación Centro (CEN), 2023 y 2024.</div></footer>
-
-<script>
-window.DATOS={"2023":{"meses":[{"mes":1,"O3_max":0.105,"CO_max":6.531,"PM10_mean":58.23411371237458,"PM25_mean":30.724242424242423,"Temp_mean":19.17606019151847,"RH_mean":41.78428961748634,"WS_mean":2.769836956521739,"n":24,"cnt":[0,0,17,6,1],"dom":{"PM10":24,"PM25":18,"O3":2,"CO":0},"hc":[113,220,235,18,7],"hp":{"PM10":228,"PM25":177,"O3":3,"CO":0},"et_h":19.3},{"mes":2,"O3_max":0.151,"CO_max":4.383,"PM10_mean":55.14542728635682,"PM25_mean":27.5,"Temp_mean":20.80752688172043,"RH_mean":37.91947852760736,"WS_mean":3.5852760736196316,"n":27,"cnt":[0,0,23,4,0],"dom":{"PM10":27,"PM25":18,"O3":3,"CO":0},"hc":[67,336,234,11,0],"hp":{"PM10":221,"PM25":122,"O3":15,"CO":0},"et_h":20.8},{"mes":3,"O3_max":0.136,"CO_max":4.113,"PM10_mean":42.14002828854314,"PM25_mean":28.132450331125828,"Temp_mean":23.350097847358125,"RH_mean":28.38825831702544,"WS_mean":4.49784735812133,"n":25,"cnt":[0,1,22,2,0],"dom":{"PM10":19,"PM25":18,"O3":10,"CO":0},"hc":[99,329,166,3,0],"hp":{"PM10":96,"PM25":107,"O3":19,"CO":0},"et_h":23.7},{"mes":4,"O3_max":0.113,"CO_max":3.197,"PM10_mean":40.52982954545455,"PM25_mean":26.680701754385964,"Temp_mean":24.58611898016997,"RH_mean":24.549008498583568,"WS_mean":5.002549575070821,"n":27,"cnt":[0,1,25,1,0],"dom":{"PM10":18,"PM25":23,"O3":8,"CO":0},"hc":[82,385,170,2,0],"hp":{"PM10":65,"PM25":131,"O3":21,"CO":0},"et_h":24.7},{"mes":5,"O3_max":0.14,"CO_max":2.491,"PM10_mean":43.68119891008175,"PM25_mean":30.44557823129252,"Temp_mean":25.674931880108993,"RH_mean":26.332743362831856,"WS_mean":5.178610354223433,"n":26,"cnt":[0,1,24,1,0],"dom":{"PM10":21,"PM25":25,"O3":6,"CO":0},"hc":[49,361,228,2,0],"hp":{"PM10":103,"PM25":196,"O3":18,"CO":0},"et_h":25.7},{"mes":6,"O3_max":0.141,"CO_max":1.75,"PM10_mean":47.84582743988685,"PM25_mean":31.472131147540985,"Temp_mean":27.766666666666666,"RH_mean":null,"WS_mean":5.287735849056604,"n":29,"cnt":[0,1,26,2,0],"dom":{"PM10":24,"PM25":25,"O3":12,"CO":0},"hc":[39,353,302,2,0],"hp":{"PM10":121,"PM25":262,"O3":44,"CO":0},"et_h":27.6},{"mes":7,"O3_max":0.103,"CO_max":2.605,"PM10_mean":32.65235457063712,"PM25_mean":23.296352583586625,"Temp_mean":21.451858851674636,"RH_mean":46.164856459330146,"WS_mean":3.9708940886699513,"n":21,"cnt":[0,2,17,1,1],"dom":{"PM10":18,"PM25":18,"O3":5,"CO":0},"hc":[112,269,118,4,1],"hp":{"PM10":50,"PM25":114,"O3":6,"CO":0},"et_h":21.7},{"mes":8,"O3_max":0.097,"CO_max":3.599,"PM10_mean":null,"PM25_mean":18.420624151967434,"Temp_mean":28.616227150537632,"RH_mean":55.097352150537624,"WS_mean":2.398497311827957,"n":1,"cnt":[0,0,1,0,0],"dom":{"PM10":0,"PM25":1,"O3":1,"CO":0},"hc":[0,22,2,0,0],"hp":{"PM10":0,"PM25":1,"O3":2,"CO":0},"et_h":28.5},{"mes":9,"O3_max":0.1,"CO_max":2.311,"PM10_mean":null,"PM25_mean":20.613986013986015,"Temp_mean":31.09179027777778,"RH_mean":49.47809722222222,"WS_mean":2.120326388888889,"n":4,"cnt":[0,0,4,0,0],"dom":{"PM10":0,"PM25":1,"O3":4,"CO":0},"hc":[6,79,11,0,0],"hp":{"PM10":0,"PM25":4,"O3":7,"CO":0},"et_h":30.6},{"mes":10,"O3_max":0.099,"CO_max":3.13,"PM10_mean":null,"PM25_mean":19.58682634730539,"Temp_mean":28.647741403026135,"RH_mean":49.79496561210454,"WS_mean":2.1672737276478684,"n":3,"cnt":[0,0,3,0,0],"dom":{"PM10":0,"PM25":1,"O3":3,"CO":0},"hc":[16,48,8,0,0],"hp":{"PM10":0,"PM25":4,"O3":4,"CO":0},"et_h":28.4},{"mes":11,"O3_max":0.121,"CO_max":6.955,"PM10_mean":56.37377049180328,"PM25_mean":25.807692307692307,"Temp_mean":26.330503816793897,"RH_mean":46.81229007633588,"WS_mean":3.196756097560976,"n":12,"cnt":[0,2,7,3,0],"dom":{"PM10":11,"PM25":4,"O3":2,"CO":0},"hc":[87,97,95,9,0],"hp":{"PM10":97,"PM25":20,"O3":6,"CO":0},"et_h":25.3},{"mes":12,"O3_max":0.128,"CO_max":9.784,"PM10_mean":65.42758620689655,"PM25_mean":28.902995720399428,"Temp_mean":22.875057873485865,"RH_mean":48.84919246298788,"WS_mean":4.88204280155642,"n":27,"cnt":[0,1,11,7,8],"dom":{"PM10":26,"PM25":9,"O3":0,"CO":0},"hc":[69,287,210,61,21],"hp":{"PM10":277,"PM25":174,"O3":5,"CO":0},"et_h":22.9}],"dias":[{"f":"2023-01-01","c":4},{"f":"2023-01-03","c":2},{"f":"2023-01-04","c":2},{"f":"2023-01-05","c":3},{"f":"2023-01-06","c":3},{"f":"2023-01-07","c":2},{"f":"2023-01-08","c":2},{"f":"2023-01-09","c":2},{"f":"2023-01-10","c":2},{"f":"2023-01-11","c":3},{"f":"2023-01-17","c":-1},{"f":"2023-01-18","c":3},{"f":"2023-01-19","c":2},{"f":"2023-01-20","c":3},{"f":"2023-01-21","c":2},{"f":"2023-01-22","c":2},{"f":"2023-01-23","c":3},{"f":"2023-01-24","c":2},{"f":"2023-01-25","c":2},{"f":"2023-01-26","c":2},{"f":"2023-01-27","c":2},{"f":"2023-01-28","c":2},{"f":"2023-01-29","c":2},{"f":"2023-01-30","c":2},{"f":"2023-01-31","c":2},{"f":"2023-02-01","c":2},{"f":"2023-02-02","c":2},{"f":"2023-02-03","c":2},{"f":"2023-02-04","c":2},{"f":"2023-02-05","c":2},{"f":"2023-02-06","c":2},{"f":"2023-02-07","c":2},{"f":"2023-02-08","c":2},{"f":"2023-02-09","c":2},{"f":"2023-02-10","c":2},{"f":"2023-02-11","c":3},{"f":"2023-02-12","c":2},{"f":"2023-02-13","c":2},{"f":"2023-02-14","c":2},{"f":"2023-02-15","c":2},{"f":"2023-02-16","c":2},{"f":"2023-02-17","c":2},{"f":"2023-02-18","c":3},{"f":"2023-02-19","c":2},{"f":"2023-02-20","c":2},{"f":"2023-02-21","c":2},{"f":"2023-02-23","c":3},{"f":"2023-02-24","c":3},{"f":"2023-02-25","c":2},{"f":"2023-02-26","c":2},{"f":"2023-02-27","c":2},{"f":"2023-02-28","c":2},{"f":"2023-03-01","c":2},{"f":"2023-03-04","c":2},{"f":"2023-03-05","c":2},{"f":"2023-03-06","c":2},{"f":"2023-03-07","c":2},{"f":"2023-03-08","c":2},{"f":"2023-03-09","c":2},{"f":"2023-03-10","c":2},{"f":"2023-03-11","c":2},{"f":"2023-03-12","c":1},{"f":"2023-03-13","c":2},{"f":"2023-03-15","c":2},{"f":"2023-03-16","c":2},{"f":"2023-03-17","c":2},{"f":"2023-03-18","c":2},{"f":"2023-03-22","c":2},{"f":"2023-03-23","c":2},{"f":"2023-03-24","c":2},{"f":"2023-03-25","c":2},{"f":"2023-03-26","c":2},{"f":"2023-03-27","c":3},{"f":"2023-03-28","c":3},{"f":"2023-03-29","c":2},{"f":"2023-03-30","c":2},{"f":"2023-03-31","c":2},{"f":"2023-04-01","c":2},{"f":"2023-04-02","c":2},{"f":"2023-04-03","c":2},{"f":"2023-04-04","c":2},{"f":"2023-04-05","c":2},{"f":"2023-04-06","c":2},{"f":"2023-04-07","c":2},{"f":"2023-04-09","c":2},{"f":"2023-04-10","c":2},{"f":"2023-04-11","c":2},{"f":"2023-04-12","c":2},{"f":"2023-04-13","c":2},{"f":"2023-04-14","c":2},{"f":"2023-04-16","c":2},{"f":"2023-04-17","c":2},{"f":"2023-04-19","c":2},{"f":"2023-04-20","c":2},{"f":"2023-04-21","c":2},{"f":"2023-04-22","c":2},{"f":"2023-04-23","c":1},{"f":"2023-04-24","c":2},{"f":"2023-04-25","c":3},{"f":"2023-04-26","c":2},{"f":"2023-04-27","c":2},{"f":"2023-04-28","c":2},{"f":"2023-04-29","c":2},{"f":"2023-04-30","c":2},{"f":"2023-05-01","c":2},{"f":"2023-05-02","c":2},{"f":"2023-05-03","c":2},{"f":"2023-05-04","c":3},{"f":"2023-05-05","c":2},{"f":"2023-05-06","c":-1},{"f":"2023-05-07","c":2},{"f":"2023-05-08","c":2},{"f":"2023-05-09","c":2},{"f":"2023-05-10","c":2},{"f":"2023-05-11","c":1},{"f":"2023-05-12","c":2},{"f":"2023-05-13","c":2},{"f":"2023-05-14","c":2},{"f":"2023-05-15","c":2},{"f":"2023-05-16","c":2},{"f":"2023-05-17","c":2},{"f":"2023-05-18","c":2},{"f":"2023-05-19","c":2},{"f":"2023-05-20","c":2},{"f":"2023-05-22","c":2},{"f":"2023-05-23","c":2},{"f":"2023-05-26","c":2},{"f":"2023-05-27","c":2},{"f":"2023-05-28","c":2},{"f":"2023-05-30","c":2},{"f":"2023-05-31","c":2},{"f":"2023-06-01","c":2},{"f":"2023-06-02","c":2},{"f":"2023-06-03","c":2},{"f":"2023-06-05","c":1},{"f":"2023-06-06","c":2},{"f":"2023-06-07","c":2},{"f":"2023-06-08","c":2},{"f":"2023-06-09","c":2},{"f":"2023-06-10","c":2},{"f":"2023-06-11","c":2},{"f":"2023-06-12","c":2},{"f":"2023-06-13","c":2},{"f":"2023-06-14","c":3},{"f":"2023-06-15","c":2},{"f":"2023-06-16","c":2},{"f":"2023-06-17","c":2},{"f":"2023-06-18","c":2},{"f":"2023-06-19","c":2},{"f":"2023-06-20","c":3},{"f":"2023-06-21","c":2},{"f":"2023-06-22","c":2},{"f":"2023-06-23","c":2},{"f":"2023-06-24","c":2},{"f":"2023-06-25","c":2},{"f":"2023-06-26","c":2},{"f":"2023-06-27","c":2},{"f":"2023-06-28","c":2},{"f":"2023-06-29","c":2},{"f":"2023-06-30","c":2},{"f":"2023-07-04","c":2},{"f":"2023-07-05","c":2},{"f":"2023-07-06","c":2},{"f":"2023-07-07","c":2},{"f":"2023-07-08","c":2},{"f":"2023-07-11","c":2},{"f":"2023-07-12","c":2},{"f":"2023-07-13","c":2},{"f":"2023-07-14","c":2},{"f":"2023-07-15","c":2},{"f":"2023-07-16","c":2},{"f":"2023-07-17","c":4},{"f":"2023-07-18","c":3},{"f":"2023-07-19","c":2},{"f":"2023-07-20","c":2},{"f":"2023-07-21","c":2},{"f":"2023-07-22","c":2},{"f":"2023-07-23","c":1},{"f":"2023-07-27","c":1},{"f":"2023-07-28","c":2},{"f":"2023-07-29","c":2},{"f":"2023-08-30","c":2},{"f":"2023-09-16","c":2},{"f":"2023-09-20","c":2},{"f":"2023-09-28","c":2},{"f":"2023-09-29","c":2},{"f":"2023-10-24","c":2},{"f":"2023-10-25","c":2},{"f":"2023-10-29","c":2},{"f":"2023-11-08","c":2},{"f":"2023-11-18","c":3},{"f":"2023-11-19","c":3},{"f":"2023-11-20","c":1},{"f":"2023-11-23","c":1},{"f":"2023-11-24","c":2},{"f":"2023-11-25","c":3},{"f":"2023-11-26","c":2},{"f":"2023-11-27","c":2},{"f":"2023-11-28","c":2},{"f":"2023-11-29","c":2},{"f":"2023-11-30","c":2},{"f":"2023-12-01","c":2},{"f":"2023-12-02","c":2},{"f":"2023-12-03","c":1},{"f":"2023-12-07","c":2},{"f":"2023-12-08","c":2},{"f":"2023-12-09","c":3},{"f":"2023-12-10","c":3},{"f":"2023-12-11","c":2},{"f":"2023-12-12","c":2},{"f":"2023-12-13","c":3},{"f":"2023-12-14","c":2},{"f":"2023-12-15","c":4},{"f":"2023-12-16","c":4},{"f":"2023-12-17","c":3},{"f":"2023-12-18","c":3},{"f":"2023-12-19","c":4},{"f":"2023-12-20","c":4},{"f":"2023-12-21","c":4},{"f":"2023-12-22","c":4},{"f":"2023-12-23","c":4},{"f":"2023-12-25","c":4},{"f":"2023-12-26","c":2},{"f":"2023-12-27","c":2},{"f":"2023-12-28","c":2},{"f":"2023-12-29","c":2},{"f":"2023-12-30","c":3},{"f":"2023-12-31","c":3}],"perfil":{"O3":[0.024,0.023,0.022,0.02,0.018,0.014,0.009,0.01,0.017,0.03,0.044,0.056,0.063,0.066,0.067,0.066,0.062,0.056,0.044,0.032,0.029,0.028,0.026,0.026],"PM10":[54.271,55.624,53.458,49.009,47.724,49.255,56.16,64.31,66.557,58.302,48.065,41.079,36.158,34.009,32.94,34.786,37.528,42.519,48.671,57.62,67.716,70.573,64.005,58.321],"PM25":[28.289,29.082,27.674,27.378,28.032,28.126,30.234,35.264,39.094,41.02,35.68,32.566,29.034,25.639,23.358,24.329,23.565,24.194,24.878,26.459,30.338,31.114,30.171,29.135],"CO":[1.248,1.187,1.146,1.13,1.159,1.246,1.541,1.882,1.732,1.305,1.042,0.904,0.814,0.757,0.736,0.718,0.737,0.79,0.944,1.196,1.248,1.227,1.248,1.247],"ET":[20.99,20.221,19.545,18.951,18.405,17.994,17.617,17.676,18.886,20.901,22.969,24.918,26.667,27.899,28.844,29.491,29.574,29.069,27.95,26.36,24.724,23.445,22.478,21.798]},"pico":{"PM10":[16,4,8,3,1,2,3,6,22,19,8,2,1,1,0,1,1,2,3,8,11,26,24,16],"PM25":[6,3,8,1,3,1,1,5,12,27,18,12,9,2,2,1,5,3,1,6,8,13,4,10],"O3":[0,0,0,0,0,0,0,0,0,0,1,5,8,9,11,13,8,1,0,0,0,0,0,0],"CO":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},"cob":{"PM10":94.0,"PM25":79.0,"O3":96.0,"CO":99.0,"ET":76.8}},"2024":{"meses":[{"mes":1,"O3_max":0.109,"CO_max":7.656,"PM10_mean":71.97567567567567,"PM25_mean":36.50215208034433,"Temp_mean":24.378317204301077,"RH_mean":null,"WS_mean":null,"n":31,"cnt":[0,2,15,10,4],"dom":{"PM10":31,"PM25":19,"O3":2,"CO":0},"hc":[63,336,269,56,20],"hp":{"PM10":322,"PM25":279,"O3":5,"CO":0},"et_h":24.4},{"mes":2,"O3_max":0.156,"CO_max":6.586,"PM10_mean":44.99818511796733,"PM25_mean":19.479568106312293,"Temp_mean":25.1318352601156,"RH_mean":null,"WS_mean":null,"n":24,"cnt":[0,2,18,4,0],"dom":{"PM10":20,"PM25":16,"O3":9,"CO":0},"hc":[178,209,176,13,0],"hp":{"PM10":135,"PM25":90,"O3":28,"CO":0},"et_h":25.9},{"mes":3,"O3_max":0.098,"CO_max":3.972,"PM10_mean":40.18493150684932,"PM25_mean":13.164591977869986,"Temp_mean":22.7274278002699,"RH_mean":null,"WS_mean":null,"n":30,"cnt":[0,3,27,0,0],"dom":{"PM10":30,"PM25":12,"O3":4,"CO":0},"hc":[433,159,128,0,0],"hp":{"PM10":126,"PM25":19,"O3":3,"CO":0},"et_h":22.8},{"mes":4,"O3_max":0.126,"CO_max":2.998,"PM10_mean":40.692424242424245,"PM25_mean":14.54820143884892,"Temp_mean":25.198215297450428,"RH_mean":null,"WS_mean":5.261468521229869,"n":24,"cnt":[0,4,20,0,0],"dom":{"PM10":22,"PM25":9,"O3":9,"CO":0},"hc":[247,267,79,0,0],"hp":{"PM10":70,"PM25":15,"O3":13,"CO":0},"et_h":25.2},{"mes":5,"O3_max":0.142,"CO_max":2.617,"PM10_mean":48.92147806004619,"PM25_mean":23.266423357664234,"Temp_mean":28.116525606469,"RH_mean":null,"WS_mean":5.103719101123596,"n":24,"cnt":[0,3,20,1,0],"dom":{"PM10":19,"PM25":14,"O3":17,"CO":0},"hc":[140,284,151,1,0],"hp":{"PM10":97,"PM25":63,"O3":41,"CO":0},"et_h":28.3},{"mes":6,"O3_max":0.146,"CO_max":1.827,"PM10_mean":38.565916398713824,"PM25_mean":11.463414634146341,"Temp_mean":26.286684722222223,"RH_mean":39.781625,"WS_mean":4.674298398835517,"n":17,"cnt":[0,2,14,1,0],"dom":{"PM10":10,"PM25":0,"O3":13,"CO":0},"hc":[108,198,100,2,0],"hp":{"PM10":77,"PM25":0,"O3":41,"CO":0},"et_h":27.8},{"mes":7,"O3_max":0.091,"CO_max":2.731,"PM10_mean":17.823179791976226,"PM25_mean":8.807920792079209,"Temp_mean":22.702812939521802,"RH_mean":56.19613220815752,"WS_mean":3.6754049844236762,"n":2,"cnt":[0,0,2,0,0],"dom":{"PM10":1,"PM25":0,"O3":1,"CO":0},"hc":[30,16,2,0,0],"hp":{"PM10":1,"PM25":0,"O3":1,"CO":0},"et_h":23.4},{"mes":8,"O3_max":0.095,"CO_max":2.64,"PM10_mean":19.049226441631504,"PM25_mean":8.920520231213873,"Temp_mean":23.022080645161292,"RH_mean":53.95985337243402,"WS_mean":3.807840310077519,"n":7,"cnt":[0,4,3,0,0],"dom":{"PM10":5,"PM25":4,"O3":2,"CO":0},"hc":[128,34,6,0,0],"hp":{"PM10":3,"PM25":0,"O3":3,"CO":0},"et_h":22.7},{"mes":9,"O3_max":0.118,"CO_max":1.573,"PM10_mean":16.60276073619632,"PM25_mean":6.6711309523809526,"Temp_mean":23.809746031746034,"RH_mean":49.92423280423281,"WS_mean":4.673398576512456,"n":4,"cnt":[0,2,2,0,0],"dom":{"PM10":3,"PM25":2,"O3":3,"CO":0},"hc":[76,15,5,0,0],"hp":{"PM10":2,"PM25":0,"O3":4,"CO":0},"et_h":24.0},{"mes":10,"O3_max":0.079,"CO_max":4.507,"PM10_mean":33.14733969986357,"PM25_mean":12.66016713091922,"Temp_mean":22.536012278308323,"RH_mean":38.736630286493856,"WS_mean":3.628117870722434,"n":23,"cnt":[0,3,19,1,0],"dom":{"PM10":23,"PM25":8,"O3":1,"CO":0},"hc":[338,130,79,3,0],"hp":{"PM10":82,"PM25":20,"O3":0,"CO":0},"et_h":22.4},{"mes":11,"O3_max":0.087,"CO_max":4.898,"PM10_mean":48.4,"PM25_mean":19.044444444444444,"Temp_mean":22.236269444444442,"RH_mean":39.81522222222222,"WS_mean":2.8087080291970805,"n":26,"cnt":[0,3,18,5,0],"dom":{"PM10":26,"PM25":14,"O3":2,"CO":0},"hc":[252,203,149,20,0],"hp":{"PM10":169,"PM25":69,"O3":0,"CO":0},"et_h":22.3},{"mes":12,"O3_max":0.085,"CO_max":7.595,"PM10_mean":60.678474114441414,"PM25_mean":26.118046132971507,"Temp_mean":19.74184811827957,"RH_mean":33.0744623655914,"WS_mean":1.5113899018232821,"n":29,"cnt":[0,0,17,11,1],"dom":{"PM10":29,"PM25":18,"O3":0,"CO":0},"hc":[162,250,249,31,4],"hp":{"PM10":280,"PM25":183,"O3":0,"CO":0},"et_h":19.7}],"dias":[{"f":"2024-01-01","c":4},{"f":"2024-01-02","c":3},{"f":"2024-01-03","c":3},{"f":"2024-01-04","c":2},{"f":"2024-01-05","c":2},{"f":"2024-01-06","c":2},{"f":"2024-01-07","c":2},{"f":"2024-01-08","c":1},{"f":"2024-01-09","c":2},{"f":"2024-01-10","c":2},{"f":"2024-01-11","c":2},{"f":"2024-01-12","c":2},{"f":"2024-01-13","c":3},{"f":"2024-01-14","c":2},{"f":"2024-01-15","c":3},{"f":"2024-01-16","c":3},{"f":"2024-01-17","c":3},{"f":"2024-01-18","c":4},{"f":"2024-01-19","c":4},{"f":"2024-01-20","c":4},{"f":"2024-01-21","c":1},{"f":"2024-01-22","c":2},{"f":"2024-01-23","c":2},{"f":"2024-01-24","c":2},{"f":"2024-01-25","c":2},{"f":"2024-01-26","c":3},{"f":"2024-01-27","c":3},{"f":"2024-01-28","c":2},{"f":"2024-01-29","c":2},{"f":"2024-01-30","c":3},{"f":"2024-01-31","c":3},{"f":"2024-02-01","c":2},{"f":"2024-02-02","c":2},{"f":"2024-02-04","c":2},{"f":"2024-02-05","c":2},{"f":"2024-02-06","c":3},{"f":"2024-02-07","c":2},{"f":"2024-02-08","c":2},{"f":"2024-02-09","c":2},{"f":"2024-02-10","c":2},{"f":"2024-02-12","c":2},{"f":"2024-02-13","c":2},{"f":"2024-02-17","c":1},{"f":"2024-02-18","c":1},{"f":"2024-02-19","c":2},{"f":"2024-02-20","c":3},{"f":"2024-02-21","c":3},{"f":"2024-02-22","c":2},{"f":"2024-02-23","c":2},{"f":"2024-02-24","c":3},{"f":"2024-02-25","c":2},{"f":"2024-02-26","c":2},{"f":"2024-02-27","c":2},{"f":"2024-02-28","c":2},{"f":"2024-02-29","c":2},{"f":"2024-03-01","c":2},{"f":"2024-03-02","c":2},{"f":"2024-03-03","c":2},{"f":"2024-03-05","c":2},{"f":"2024-03-06","c":2},{"f":"2024-03-07","c":2},{"f":"2024-03-08","c":2},{"f":"2024-03-09","c":2},{"f":"2024-03-10","c":2},{"f":"2024-03-11","c":2},{"f":"2024-03-12","c":2},{"f":"2024-03-13","c":1},{"f":"2024-03-14","c":2},{"f":"2024-03-15","c":2},{"f":"2024-03-16","c":2},{"f":"2024-03-17","c":2},{"f":"2024-03-18","c":2},{"f":"2024-03-19","c":2},{"f":"2024-03-20","c":2},{"f":"2024-03-21","c":2},{"f":"2024-03-22","c":2},{"f":"2024-03-23","c":2},{"f":"2024-03-24","c":1},{"f":"2024-03-25","c":1},{"f":"2024-03-26","c":2},{"f":"2024-03-27","c":2},{"f":"2024-03-28","c":2},{"f":"2024-03-29","c":2},{"f":"2024-03-30","c":2},{"f":"2024-03-31","c":2},{"f":"2024-04-01","c":2},{"f":"2024-04-04","c":1},{"f":"2024-04-05","c":2},{"f":"2024-04-06","c":2},{"f":"2024-04-07","c":2},{"f":"2024-04-08","c":2},{"f":"2024-04-09","c":-1},{"f":"2024-04-11","c":2},{"f":"2024-04-12","c":2},{"f":"2024-04-13","c":2},{"f":"2024-04-15","c":2},{"f":"2024-04-16","c":2},{"f":"2024-04-17","c":2},{"f":"2024-04-18","c":2},{"f":"2024-04-19","c":2},{"f":"2024-04-20","c":1},{"f":"2024-04-22","c":2},{"f":"2024-04-23","c":2},{"f":"2024-04-24","c":2},{"f":"2024-04-25","c":2},{"f":"2024-04-26","c":2},{"f":"2024-04-27","c":1},{"f":"2024-04-28","c":2},{"f":"2024-04-29","c":1},{"f":"2024-04-30","c":2},{"f":"2024-05-02","c":2},{"f":"2024-05-03","c":2},{"f":"2024-05-04","c":2},{"f":"2024-05-05","c":2},{"f":"2024-05-06","c":2},{"f":"2024-05-08","c":2},{"f":"2024-05-11","c":2},{"f":"2024-05-15","c":1},{"f":"2024-05-16","c":1},{"f":"2024-05-17","c":2},{"f":"2024-05-18","c":1},{"f":"2024-05-19","c":2},{"f":"2024-05-20","c":2},{"f":"2024-05-21","c":2},{"f":"2024-05-22","c":2},{"f":"2024-05-23","c":2},{"f":"2024-05-24","c":2},{"f":"2024-05-25","c":2},{"f":"2024-05-26","c":2},{"f":"2024-05-27","c":2},{"f":"2024-05-28","c":2},{"f":"2024-05-29","c":2},{"f":"2024-05-30","c":2},{"f":"2024-05-31","c":3},{"f":"2024-06-01","c":3},{"f":"2024-06-02","c":2},{"f":"2024-06-03","c":2},{"f":"2024-06-04","c":1},{"f":"2024-06-05","c":2},{"f":"2024-06-06","c":2},{"f":"2024-06-07","c":2},{"f":"2024-06-08","c":2},{"f":"2024-06-10","c":2},{"f":"2024-06-11","c":1},{"f":"2024-06-13","c":2},{"f":"2024-06-14","c":2},{"f":"2024-06-15","c":2},{"f":"2024-06-17","c":2},{"f":"2024-06-19","c":2},{"f":"2024-06-27","c":2},{"f":"2024-06-28","c":2},{"f":"2024-07-07","c":2},{"f":"2024-07-22","c":2},{"f":"2024-08-01","c":1},{"f":"2024-08-02","c":1},{"f":"2024-08-07","c":2},{"f":"2024-08-08","c":2},{"f":"2024-08-19","c":1},{"f":"2024-08-20","c":1},{"f":"2024-08-29","c":2},{"f":"2024-09-14","c":2},{"f":"2024-09-17","c":2},{"f":"2024-09-19","c":1},{"f":"2024-09-23","c":1},{"f":"2024-10-02","c":2},{"f":"2024-10-03","c":2},{"f":"2024-10-04","c":2},{"f":"2024-10-05","c":2},{"f":"2024-10-09","c":1},{"f":"2024-10-10","c":2},{"f":"2024-10-11","c":2},{"f":"2024-10-12","c":2},{"f":"2024-10-13","c":2},{"f":"2024-10-14","c":2},{"f":"2024-10-15","c":1},{"f":"2024-10-17","c":2},{"f":"2024-10-18","c":2},{"f":"2024-10-22","c":1},{"f":"2024-10-23","c":2},{"f":"2024-10-24","c":2},{"f":"2024-10-25","c":3},{"f":"2024-10-26","c":2},{"f":"2024-10-27","c":2},{"f":"2024-10-28","c":2},{"f":"2024-10-29","c":2},{"f":"2024-10-30","c":2},{"f":"2024-10-31","c":2},{"f":"2024-11-01","c":2},{"f":"2024-11-02","c":2},{"f":"2024-11-04","c":2},{"f":"2024-11-05","c":1},{"f":"2024-11-06","c":2},{"f":"2024-11-07","c":1},{"f":"2024-11-08","c":2},{"f":"2024-11-09","c":2},{"f":"2024-11-10","c":1},{"f":"2024-11-11","c":2},{"f":"2024-11-12","c":2},{"f":"2024-11-13","c":2},{"f":"2024-11-14","c":2},{"f":"2024-11-15","c":2},{"f":"2024-11-16","c":2},{"f":"2024-11-20","c":2},{"f":"2024-11-21","c":3},{"f":"2024-11-22","c":3},{"f":"2024-11-23","c":3},{"f":"2024-11-24","c":2},{"f":"2024-11-25","c":2},{"f":"2024-11-26","c":3},{"f":"2024-11-27","c":3},{"f":"2024-11-28","c":2},{"f":"2024-11-29","c":2},{"f":"2024-11-30","c":2},{"f":"2024-12-01","c":2},{"f":"2024-12-02","c":3},{"f":"2024-12-03","c":3},{"f":"2024-12-04","c":3},{"f":"2024-12-05","c":3},{"f":"2024-12-06","c":2},{"f":"2024-12-07","c":3},{"f":"2024-12-10","c":2},{"f":"2024-12-11","c":2},{"f":"2024-12-12","c":2},{"f":"2024-12-13","c":2},{"f":"2024-12-14","c":2},{"f":"2024-12-15","c":3},{"f":"2024-12-16","c":2},{"f":"2024-12-17","c":3},{"f":"2024-12-18","c":3},{"f":"2024-12-19","c":2},{"f":"2024-12-20","c":2},{"f":"2024-12-21","c":3},{"f":"2024-12-22","c":2},{"f":"2024-12-23","c":2},{"f":"2024-12-24","c":2},{"f":"2024-12-25","c":4},{"f":"2024-12-26","c":2},{"f":"2024-12-27","c":2},{"f":"2024-12-28","c":2},{"f":"2024-12-29","c":3},{"f":"2024-12-30","c":2},{"f":"2024-12-31","c":3}],"perfil":{"O3":[0.017,0.016,0.016,0.013,0.011,0.009,0.006,0.007,0.014,0.026,0.039,0.051,0.058,0.061,0.061,0.06,0.056,0.049,0.037,0.026,0.023,0.021,0.02,0.018],"PM10":[55.204,52.907,47.093,45.177,46.181,48.722,51.471,60.821,73.919,69.671,55.859,48.776,42.398,39.836,37.265,34.456,34.297,33.957,37.1,46.122,57.283,60.391,60.237,59.04],"PM25":[23.435,24.009,22.47,22.308,23.758,23.491,26.322,28.72,32.407,29.387,24.07,21.406,18.171,15.809,14.015,12.936,12.613,12.481,12.603,15.078,18.225,20.374,22.692,23.808],"CO":[1.438,1.3,1.231,1.192,1.207,1.29,1.626,1.985,1.79,1.265,0.999,0.844,0.754,0.704,0.677,0.655,0.651,0.71,0.96,1.29,1.369,1.446,1.543,1.531],"ET":[20.645,19.842,18.971,18.257,17.618,17.099,16.65,17.132,19.625,22.562,25.008,27.178,29.132,30.682,31.67,32.073,31.946,31.051,29.234,26.942,25.158,23.743,22.641,21.646]},"pico":{"PM10":[19,10,2,1,5,2,3,1,31,43,16,6,3,2,1,3,1,2,3,2,7,5,14,37],"PM25":[8,5,3,3,2,3,6,7,20,20,3,4,4,3,0,0,0,0,0,0,1,1,7,16],"O3":[0,0,0,0,0,0,0,0,0,0,0,6,15,15,8,10,7,2,0,0,0,0,0,0],"CO":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},"cob":{"PM10":93.3,"PM25":87.7,"O3":96.5,"CO":98.5,"ET":99.3}},"imp":[{"f":"2023-01-01","c":4,"dom":["PM10","PM25"],"mx":{"PM10":235.2,"PM25":196.2,"O3":0.07,"CO":4.83},"h":[[0.001,null,147.0,29.0,147.0,29.0,15.2],[null,null,151.6,91.0,156.0,122.0,14.8],[null,null,155.1,116.1,161.0,135.0,14.4],[null,4.1,175.4,135.3,206.0,152.0,14.0],[null,4.26,193.5,164.5,220.0,192.0,13.6],[null,4.3,194.0,164.5,195.0,null,13.3],[null,4.47,209.2,172.3,232.0,176.0,12.8],[null,4.73,235.2,196.2,263.0,214.0,12.7],[null,4.83,207.6,196.2,173.0,null,13.4],[0.007,4.79,188.3,171.0,164.0,160.0,15.3],[0.028,4.41,128.5,null,72.0,null,17.2],[0.038,3.83,83.2,null,38.0,null,18.9],[0.056,3.3,60.1,null,37.0,26.0,20.5],[0.07,2.83,49.0,36.1,38.0,29.0,21.6],[0.05,2.2,35.0,36.0,21.0,null,22.3],[0.032,1.44,25.0,null,15.0,null,23.1],[0.03,0.98,20.0,null,15.0,9.0,23.7],[0.029,0.61,16.0,10.7,12.0,9.0,23.6],[0.021,0.52,13.5,8.6,11.0,7.0,22.6],[0.01,0.55,18.7,8.8,24.0,9.0,21.5],[0.005,0.57,24.3,10.9,30.0,13.0,20.3],[0.013,0.55,20.1,13.0,16.0,15.0,19.4],[0.011,0.56,18.1,12.5,16.0,12.0,18.3],[0.008,0.6,17.5,11.7,17.0,11.0,17.6]]},{"f":"2023-02-24","c":3,"dom":["PM10","PM25","O3"],"mx":{"PM10":146.0,"PM25":100.6,"O3":0.151,"CO":1.95},"h":[[null,1.36,48.1,24.4,52.0,26.0,19.0],[null,1.45,90.0,43.3,132.0,62.0,18.1],[null,1.6,126.0,76.2,162.0,109.0,17.5],[null,1.8,146.0,95.1,166.0,114.0,17.0],[null,1.89,140.5,100.6,135.0,106.0,16.5],[null,1.95,104.7,73.8,69.0,47.0,16.3],[null,1.91,80.4,55.9,56.0,38.0,15.9],[null,1.91,55.7,38.9,31.0,22.0,15.7],[0.003,1.95,56.3,33.0,57.0,27.0,16.4],[0.009,1.91,73.7,37.5,91.0,42.0,17.8],[0.026,1.84,80.8,44.2,88.0,51.0,19.9],[0.055,1.71,83.4,51.6,86.0,59.0,22.3],[0.089,1.68,99.7,72.3,116.0,93.0,24.2],[0.115,1.63,118.9,91.7,138.0,111.0,26.0],[0.129,1.61,97.4,91.7,76.0,null,27.3],[0.149,1.56,83.2,73.2,69.0,64.0,28.2],[0.151,1.4,96.6,73.7,110.0,74.0,28.5],[0.117,1.32,101.3,69.6,106.0,66.0,28.9],[0.071,1.27,90.2,59.0,79.0,49.0,28.4],[0.035,1.26,88.6,48.8,87.0,39.0,27.0],[0.03,1.16,86.3,44.9,84.0,41.0,24.6],[0.026,1.08,80.6,30.9,75.0,17.0,23.4],[0.025,1.05,72.8,26.4,65.0,22.0,22.3],[0.028,1.0,57.4,21.7,42.0,17.0,21.7]]},{"f":"2023-03-28","c":3,"dom":["O3"],"mx":{"PM10":97.6,"PM25":70.0,"O3":0.136,"CO":2.04},"h":[[0.029,0.89,37.9,27.0,34.0,32.0,22.2],[0.015,0.92,43.4,31.8,49.0,36.0,21.6],[0.015,0.94,45.2,32.4,47.0,33.0,21.0],[0.004,1.0,47.4,27.7,51.0,23.0,20.3],[0.003,1.11,57.4,29.9,67.0,32.0,19.4],[0.002,1.23,71.3,35.4,85.0,41.0,18.7],[0.003,1.45,88.2,44.2,105.0,53.0,18.3],[0.003,1.72,97.6,57.1,107.0,70.0,18.8],[0.013,1.94,95.3,64.1,93.0,71.0,20.1],[0.046,2.01,91.2,70.0,87.0,76.0,22.5],[0.068,2.04,77.6,67.0,64.0,64.0,25.0],[0.083,2.01,58.8,67.0,40.0,null,27.3],[0.104,1.93,42.9,null,27.0,null,29.1],[0.133,1.84,37.4,null,32.0,27.0,30.4],[0.136,1.63,40.2,31.9,43.0,30.0,31.7],[0.132,1.36,44.6,32.5,49.0,33.0,32.3],[0.099,1.14,44.3,31.2,44.0,30.0,32.6],[0.081,1.05,48.6,37.2,53.0,43.0,32.5],[0.062,1.0,52.8,38.6,57.0,40.0,30.8],[0.054,0.97,58.9,32.8,65.0,27.0,28.4],[0.048,0.95,64.9,28.9,71.0,25.0,26.2],[0.047,0.94,71.0,28.4,77.0,28.0,24.5],[0.046,0.93,66.5,34.9,62.0,43.0,23.9],[0.031,0.94,60.2,29.6,54.0,23.0,22.9]]},{"f":"2023-05-04","c":3,"dom":["O3"],"mx":{"PM10":118.4,"PM25":75.2,"O3":0.14,"CO":1.7},"h":[[0.039,0.89,74.3,42.9,70.0,46.0,23.1],[0.046,0.88,72.6,45.0,71.0,48.0,22.4],[0.038,0.86,68.3,45.0,64.0,45.0,21.9],[0.009,0.93,75.2,45.4,82.0,46.0,21.2],[0.004,1.01,89.1,60.3,103.0,75.0,20.7],[0.002,1.11,96.5,63.7,104.0,67.0,20.3],[0.003,1.29,112.8,67.3,129.0,71.0,19.5],[0.004,1.48,118.4,75.2,124.0,83.0,20.1],[0.02,1.58,102.7,75.1,87.0,75.0,22.1],[0.048,1.64,77.3,75.0,52.0,null,24.2],[0.076,1.7,68.7,null,60.0,null,26.0],[0.106,1.66,65.3,null,62.0,null,27.6],[0.139,1.63,60.2,null,55.0,null,29.3],[0.14,1.57,56.1,null,52.0,null,30.9],[0.106,1.41,50.5,null,45.0,null,31.6],[0.082,1.21,54.3,null,58.0,53.0,31.9],[0.072,1.12,54.6,45.2,55.0,41.0,32.1],[0.056,1.1,55.8,43.4,57.0,42.0,31.8],[0.046,1.07,52.9,36.8,50.0,31.0,31.6],[0.051,1.05,64.6,32.8,77.0,29.0,29.8],[0.057,1.02,92.0,39.7,119.0,47.0,27.4],[0.054,1.01,101.5,47.1,111.0,55.0,26.2],[0.05,1.03,99.3,58.3,97.0,69.0,25.5],[0.048,1.04,93.1,62.7,87.0,67.0,24.7]]},{"f":"2023-06-14","c":3,"dom":["O3"],"mx":{"PM10":87.0,"PM25":46.8,"O3":0.14,"CO":1.05},"h":[[0.034,0.8,65.1,40.0,39.0,37.0,null],[0.039,0.8,52.0,38.5,39.0,37.0,null],[0.027,0.8,54.0,37.8,56.0,36.0,null],[0.026,0.76,60.0,38.8,66.0,40.0,null],[0.025,0.76,56.0,39.0,52.0,39.0,null],[0.014,0.78,52.0,37.4,48.0,34.0,null],[0.011,0.81,51.5,37.9,51.0,39.0,null],[0.021,0.86,57.3,37.3,63.0,36.0,null],[0.037,0.91,61.1,39.1,65.0,43.0,null],[0.059,0.95,56.0,43.6,51.0,52.0,null],[0.08,0.98,54.9,45.5,53.0,49.0,null],[0.113,1.01,52.9,46.7,50.0,49.0,null],[0.133,1.05,53.4,46.8,54.0,null,null],[0.14,1.03,54.8,null,57.0,null,null],[0.131,1.02,56.2,null,60.0,41.0,null],[0.095,0.97,56.3,34.2,57.0,28.0,null],[0.092,0.92,53.4,34.2,46.0,null,null],[0.104,0.9,58.9,null,70.0,null,null],[0.092,0.87,62.4,null,69.0,63.0,null],[0.058,0.88,64.7,44.3,69.0,36.0,null],[0.048,0.83,75.0,36.9,85.0,31.0,null],[0.043,0.82,86.0,34.8,96.0,33.0,null],[0.04,0.8,87.0,36.5,88.0,38.0,null],[0.038,0.79,78.0,31.7,69.0,27.0,null]]},{"f":"2023-06-20","c":3,"dom":["O3"],"mx":{"PM10":75.1,"PM25":45.2,"O3":0.141,"CO":1.03},"h":[[0.033,0.83,65.3,35.6,63.0,36.0,null],[0.035,0.82,63.7,35.0,62.0,34.0,null],[0.037,0.82,60.3,35.0,57.0,35.0,null],[0.035,0.78,52.8,33.2,43.0,30.0,null],[0.034,0.75,44.3,31.0,37.0,27.0,null],[0.029,0.73,41.2,29.2,38.0,26.0,null],[0.02,0.73,40.6,28.8,40.0,28.0,null],[0.021,0.76,42.8,30.0,45.0,32.0,null],[0.035,0.79,41.4,30.7,40.0,32.0,null],[0.05,0.81,43.7,30.8,46.0,31.0,null],[0.07,0.85,45.8,33.5,49.0,39.0,null],[0.097,0.89,48.7,37.0,53.0,42.0,null],[0.12,0.94,54.0,42.0,62.0,47.0,null],[0.141,0.98,61.0,43.8,68.0,46.0,null],[0.119,0.99,62.3,45.2,64.0,47.0,null],[0.108,0.98,50.1,42.9,36.0,40.0,null],[0.101,0.98,52.9,38.9,56.0,34.0,null],[0.071,1.01,68.4,38.0,84.0,36.0,null],[0.065,1.0,70.2,37.6,72.0,36.0,null],[0.045,1.03,67.1,35.4,64.0,31.0,null],[0.043,1.01,69.6,34.2,72.0,32.0,null],[0.053,0.98,69.3,31.3,69.0,28.0,null],[0.051,0.97,75.1,34.8,81.0,40.0,null],[0.046,0.96,70.6,35.7,66.0,37.0,null]]},{"f":"2023-07-17","c":4,"dom":["PM10"],"mx":{"PM10":217.3,"PM25":124.0,"O3":0.062,"CO":0.86},"h":[[0.037,0.84,65.6,35.5,52.0,23.0,21.577],[0.036,0.85,54.8,45.8,44.0,56.0,20.243],[0.035,0.86,37.4,23.4,20.0,1.0,17.264],[0.039,0.85,22.2,15.2,7.0,7.0,17.086],[0.041,0.78,18.1,15.2,14.0,null,15.695],[0.031,0.66,15.0,13.1,12.0,12.0,15.046],[0.023,0.62,18.0,10.7,21.0,9.0,15.489],[0.021,0.61,23.5,10.7,29.0,null,17.561],[0.028,0.6,30.7,27.6,38.0,35.0,19.946],[0.036,0.6,30.9,24.3,31.0,22.0,21.63],[0.045,0.59,30.9,23.1,31.0,22.0,23.414],[0.052,0.59,27.0,19.4,23.0,16.0,25.339],[0.052,0.58,26.5,21.7,26.0,24.0,26.93],[0.056,0.57,25.7,23.9,25.0,26.0,28.898],[0.058,0.55,27.9,23.4,30.0,23.0,29.577],[0.06,0.53,27.4,23.7,27.0,24.0,30.251],[0.06,0.52,30.2,24.9,33.0,26.0,29.318],[0.062,0.52,32.2,20.9,35.0,17.0,29.887],[0.061,0.52,29.5,24.0,26.0,27.0,29.031],[0.045,0.57,42.2,24.0,55.0,null,26.205],[0.011,0.68,104.1,113.4,166.0,158.0,23.963],[0.021,0.73,198.6,124.0,293.0,132.0,22.249],[0.042,0.75,217.3,107.5,236.0,93.0,20.849],[0.037,0.78,204.2,85.6,191.0,65.0,20.392]]},{"f":"2023-12-15","c":4,"dom":["PM10"],"mx":{"PM10":285.6,"PM25":81.6,"O3":0.063,"CO":5.31},"h":[[0.003,2.33,112.3,40.6,117.0,42.0,21.201],[0.002,2.52,117.2,39.3,122.0,38.0,21.134],[0.002,2.53,103.6,35.1,90.0,31.0,21.108],[0.003,2.4,88.8,33.6,74.0,32.0,19.932],[0.006,2.29,68.4,29.3,48.0,25.0,19.678],[0.003,2.18,58.2,26.4,48.0,23.0,18.926],[0.002,1.97,51.1,24.8,44.0,23.0,18.784],[0.002,1.72,51.0,24.9,51.0,25.0,18.814],[0.003,1.52,53.5,23.4,56.0,22.0,19.488],[0.011,1.33,49.8,26.7,46.0,30.0,22.439],[0.02,1.25,32.9,27.3,16.0,28.0,25.55],[0.027,1.21,23.4,23.2,14.0,19.0,27.621],[0.034,1.2,15.2,18.6,7.0,14.0,29.079],[0.043,1.17,15.1,17.3,15.0,16.0,31.004],[0.051,1.1,15.0,17.1,15.0,17.0,32.901],[0.06,0.99,19.5,15.6,24.0,14.0,33.736],[0.063,0.87,21.8,14.8,24.0,14.0,33.661],[0.06,0.84,30.4,17.9,39.0,21.0,32.28],[0.02,0.99,56.7,26.4,83.0,35.0,29.343],[0.003,1.51,89.4,32.7,122.0,39.0,26.575],[0.002,2.29,145.2,42.4,201.0,52.0,25.339],[0.003,3.22,205.1,58.2,265.0,74.0,24.043],[0.002,4.17,260.1,69.1,315.0,80.0,23.234],[0.002,5.31,285.6,81.6,311.0,94.0,21.952]]},{"f":"2023-12-16","c":4,"dom":["PM10"],"mx":{"PM10":300.8,"PM25":84.3,"O3":0.048,"CO":6.93},"h":[[0.002,6.37,300.8,84.3,316.0,87.0,20.516],[0.001,6.8,260.9,64.6,221.0,45.0,20.002],[null,6.93,182.5,50.8,104.0,37.0,19.564],[null,6.59,139.2,41.4,96.0,32.0,19.241],[null,5.89,106.6,32.7,74.0,24.0,18.602],[null,5.02,80.3,26.4,54.0,20.0,17.94],[null,4.13,65.2,23.7,50.0,21.0,17.842],[null,3.08,62.1,23.8,59.0,24.0,17.662],[0.006,2.06,59.5,21.4,57.0,19.0,19.768],[0.016,1.6,46.7,20.7,34.0,20.0,23.993],[0.023,1.27,33.8,20.3,21.0,20.0,25.925],[0.032,1.05,25.4,20.3,17.0,null,27.095],[0.039,0.93,19.2,null,13.0,null,30.069],[0.044,0.82,17.1,null,15.0,11.0,31.82],[0.045,0.7,15.5,9.9,14.0,8.0,32.894],[0.046,0.59,14.2,10.5,13.0,11.0,33.975],[0.048,0.49,14.1,9.7,14.0,9.0,34.195],[0.044,0.47,17.6,10.9,21.0,12.0,33.656],[0.035,0.48,32.3,10.9,47.0,11.0,30.53],[0.022,0.55,38.6,15.0,45.0,19.0,28.928],[0.011,0.64,48.8,22.0,59.0,29.0,26.402],[0.002,0.87,69.4,26.5,90.0,31.0,23.727],[0.003,1.09,84.2,30.3,99.0,34.0,23.962],[0.013,1.19,76.6,25.1,69.0,20.0,22.971]]},{"f":"2023-12-19","c":4,"dom":["PM10"],"mx":{"PM10":226.6,"PM25":70.3,"O3":0.069,"CO":5.0},"h":[[0.003,4.24,224.2,70.3,255.0,81.0,19.923],[0.002,4.74,226.6,69.2,229.0,68.0,18.483],[0.002,5.0,214.8,66.1,203.0,63.0,17.718],[0.003,4.64,174.4,48.0,134.0,30.0,16.622],[0.004,4.36,133.7,37.5,93.0,27.0,16.372],[0.01,3.92,105.4,36.8,77.0,36.0,15.924],[0.003,3.29,92.2,34.9,79.0,33.0,15.075],[0.003,2.6,86.6,28.9,81.0,23.0,14.846],[0.009,2.1,82.3,24.5,78.0,20.0,18.185],[0.019,1.63,76.6,24.7,71.0,25.0,21.581],[0.03,1.25,66.8,26.9,57.0,29.0,24.575],[0.039,1.14,55.9,25.4,45.0,24.0,26.141],[0.051,1.06,47.9,24.7,40.0,24.0,28.658],[0.064,1.05,46.9,23.8,46.0,23.0,31.15],[0.069,0.99,44.4,25.3,42.0,27.0,32.787],[0.069,0.91,47.7,26.5,51.0,28.0,33.392],[0.065,0.87,54.9,27.2,62.0,28.0,33.463],[0.062,0.85,60.9,25.8,67.0,24.0,32.212],[0.04,0.98,71.5,26.8,82.0,29.0,29.056],[0.003,1.42,94.7,34.7,118.0,42.0,26.832],[0.002,1.78,142.9,45.3,191.0,56.0,25.489],[0.002,2.11,190.0,52.2,237.0,59.0,25.003],[0.003,2.52,203.0,56.6,216.0,61.0,22.978],[0.003,3.01,214.5,58.3,226.0,60.0,21.352]]},{"f":"2023-12-20","c":4,"dom":["PM10"],"mx":{"PM10":229.8,"PM25":67.7,"O3":0.128,"CO":4.21},"h":[[null,3.59,229.8,67.7,245.0,77.0,20.743],[null,4.08,222.9,61.8,216.0,56.0,19.975],[null,4.21,187.0,49.9,151.0,38.0,19.471],[null,4.19,155.0,50.0,123.0,50.0,18.815],[null,4.2,145.5,49.5,136.0,49.0,18.135],[null,4.21,136.3,54.7,127.0,60.0,17.835],[null,4.11,149.6,58.9,163.0,63.0,17.277],[0.001,3.81,157.3,57.4,165.0,56.0,16.543],[0.005,3.38,152.2,51.2,147.0,45.0,18.956],[0.015,3.04,142.1,51.1,132.0,51.0,22.932],[0.035,2.9,126.0,51.1,110.0,51.0,26.546],[0.06,2.58,103.0,48.0,80.0,45.0,29.162],[0.074,2.23,82.5,38.5,62.0,29.0,31.32],[0.092,1.93,60.7,32.2,39.0,26.0,32.412],[0.108,1.67,53.3,33.1,46.0,34.0,33.155],[0.121,1.52,63.7,37.6,74.0,42.0,33.886],[0.128,1.4,72.8,38.8,82.0,40.0,32.967],[0.094,1.27,78.4,35.4,84.0,32.0,31.93],[0.045,1.2,79.2,28.2,80.0,21.0,30.322],[0.026,1.19,77.1,24.1,75.0,20.0,27.797],[0.03,1.19,76.5,21.5,76.0,19.0,26.863],[0.019,1.21,72.8,21.3,69.0,21.0,24.354],[0.008,1.24,70.4,21.6,68.0,22.0,22.311],[0.016,1.25,67.2,20.8,64.0,20.0,21.988]]},{"f":"2023-12-21","c":4,"dom":["PM10"],"mx":{"PM10":218.2,"PM25":67.5,"O3":0.085,"CO":3.84},"h":[[0.004,1.35,67.6,25.4,68.0,30.0,21.172],[0.002,1.48,82.8,30.2,98.0,35.0,20.309],[0.001,1.62,86.2,33.1,99.0,36.0,19.641],[0.002,1.73,98.1,38.1,111.0,43.0,19.403],[0.003,1.86,103.1,42.5,110.0,47.0,20.536],[0.002,1.9,105.2,43.3,108.0,44.0,18.018],[0.002,1.97,115.6,43.6,125.0,44.0,18.067],[0.002,2.12,124.4,45.3,133.0,47.0,17.765],[0.005,2.12,119.2,43.2,114.0,41.0,19.461],[0.019,2.03,111.6,43.6,104.0,44.0,22.252],[0.035,1.9,93.8,42.8,76.0,42.0,25.834],[0.05,1.73,74.9,40.4,56.0,36.0,27.814],[0.062,1.58,56.9,37.3,39.0,31.0,29.79],[0.07,1.49,51.0,35.5,45.0,32.0,31.734],[0.076,1.34,44.0,29.7,37.0,25.0,32.259],[0.083,1.14,43.0,30.3,42.0,31.0,33.857],[0.085,1.0,45.5,28.3,48.0,26.0,33.614],[0.077,0.94,50.2,26.7,55.0,25.0,31.803],[0.029,1.05,63.6,31.1,77.0,36.0,29.112],[0.003,1.34,93.3,32.7,123.0,35.0,27.752],[0.001,1.67,123.2,37.1,153.0,43.0,25.874],[0.003,2.11,147.6,44.0,172.0,50.0,24.185],[0.003,2.86,176.3,59.0,205.0,74.0,23.301],[0.003,3.84,218.2,67.5,260.0,76.0,22.431]]},{"f":"2023-12-22","c":4,"dom":["PM10"],"mx":{"PM10":254.1,"PM25":70.3,"O3":0.042,"CO":5.26},"h":[[0.002,4.57,254.1,70.3,290.0,73.0,21.789],[0.001,4.97,222.1,61.6,190.0,53.0,21.174],[0.001,5.13,183.6,51.3,145.0,41.0,20.591],[0.002,5.26,171.3,55.7,159.0,60.0,19.854],[0.006,5.08,151.7,43.8,132.0,32.0,20.264],[0.011,4.64,119.8,38.9,88.0,34.0,20.775],[0.011,3.9,95.9,34.0,72.0,29.0,20.416],[0.005,2.97,84.0,31.0,72.0,28.0,19.757],[0.003,2.36,86.0,32.5,88.0,34.0,20.172],[0.008,2.05,89.5,32.2,93.0,32.0,22.033],[0.019,1.79,90.7,31.6,92.0,31.0,23.855],[0.023,1.37,82.8,31.8,75.0,32.0,24.634],[0.033,1.21,74.9,30.9,67.0,30.0,25.806],[0.035,1.2,72.9,28.9,71.0,27.0,27.393],[0.036,1.19,67.0,23.5,61.0,18.0,27.455],[0.042,1.13,53.5,21.1,40.0,18.0,29.061],[0.042,0.97,47.2,19.6,41.0,18.0,28.196],[0.032,0.87,49.6,22.2,52.0,25.0,27.202],[0.008,0.95,69.8,30.6,90.0,39.0,26.122],[null,1.14,98.9,33.3,128.0,36.0,25.108],[null,1.41,120.5,42.2,142.0,51.0,23.143],[null,1.88,136.7,49.1,153.0,56.0,22.382],[null,2.56,167.4,57.0,198.0,65.0,22.025],[0.002,3.32,208.7,69.5,250.0,82.0,21.761]]},{"f":"2023-12-23","c":4,"dom":["PM10"],"mx":{"PM10":268.9,"PM25":81.6,"O3":0.066,"CO":5.29},"h":[[0.003,4.09,252.4,76.3,296.0,83.0,21.145],[null,4.79,267.7,81.6,283.0,87.0,20.453],[null,5.29,268.9,78.8,270.0,76.0,19.778],[null,5.21,216.5,53.9,164.0,29.0,19.196],[null,5.02,147.2,40.5,78.0,27.0,18.493],[null,4.7,107.1,36.7,67.0,33.0,17.457],[null,4.28,98.1,38.9,89.0,41.0,17.142],[null,3.91,105.0,44.4,112.0,50.0,16.909],[0.003,3.35,120.0,46.7,135.0,49.0,17.755],[0.013,2.75,115.5,46.4,111.0,46.0,22.135],[0.029,2.16,98.7,41.2,82.0,36.0,25.932],[0.045,2.03,66.8,31.6,35.0,22.0,29.137],[0.055,1.95,51.9,28.8,37.0,26.0,29.072],[0.066,1.8,55.4,27.9,59.0,27.0,29.767],[0.066,1.54,65.7,29.9,76.0,32.0,29.854],[0.055,1.14,68.8,27.5,72.0,25.0,28.62],[0.047,0.94,64.9,24.7,61.0,22.0,27.574],[0.04,0.86,62.0,24.4,59.0,24.0,25.639],[0.032,0.84,61.5,24.7,61.0,25.0,24.633],[0.026,0.89,64.2,27.8,67.0,31.0,22.39],[0.02,0.94,66.6,29.9,69.0,32.0,22.7],[0.008,0.99,68.3,29.8,70.0,31.0,22.894],[0.011,1.03,67.1,29.8,66.0,31.0,22.478],[0.022,1.05,59.1,27.4,51.0,22.0,22.015]]},{"f":"2023-12-25","c":4,"dom":["PM10","PM25"],"mx":{"PM10":280.5,"PM25":141.5,"O3":0.04,"CO":2.33},"h":[[0.018,null,26.0,31.0,26.0,31.0,20.529],[0.015,null,50.0,33.1,62.0,35.0,19.23],[0.01,null,62.6,36.1,72.0,40.0,18.532],[0.003,1.14,74.0,38.9,84.0,43.0,18.006],[0.002,1.35,83.8,43.9,93.0,50.0,17.968],[0.003,1.65,127.1,84.3,169.0,122.0,17.835],[0.004,1.81,194.1,115.9,260.0,147.0,16.981],[0.003,1.9,236.7,123.0,279.0,130.0,16.947],[0.004,2.12,258.9,138.0,281.0,153.0,17.585],[0.011,2.29,280.5,141.5,302.0,145.0,19.203],[0.031,2.33,253.2,114.2,226.0,87.0,21.968],[0.04,2.25,175.6,76.6,98.0,39.0,26.293],[0.039,2.06,104.8,46.3,34.0,16.0,27.309],[0.034,1.74,56.9,28.1,9.0,10.0,27.15],[0.03,1.46,35.4,22.6,14.0,17.0,26.388],[0.032,1.21,25.7,17.8,16.0,13.0,25.44],[0.03,0.94,18.8,17.4,12.0,17.0,25.397],[0.029,0.72,16.4,15.2,14.0,13.0,24.461],[0.023,0.61,22.2,14.1,28.0,13.0,23.672],[0.019,0.59,19.1,14.0,16.0,14.0,23.086],[0.016,0.61,23.0,15.0,27.0,16.0,22.554],[0.01,0.66,29.5,18.5,36.0,22.0,22.137],[0.003,0.73,38.2,23.7,47.0,29.0,21.673],[0.015,0.76,42.1,22.9,46.0,22.0,22.026]]},{"f":"2024-01-01","c":4,"dom":["PM10","PM25"],"mx":{"PM10":635.6,"PM25":358.6,"O3":0.076,"CO":null},"h":[[0.002,null,217.0,193.0,217.0,193.0,17.659],[0.002,null,302.6,213.1,355.0,230.0,16.817],[0.003,null,352.8,237.3,393.0,266.0,16.145],[0.003,null,440.2,247.8,513.0,265.0,15.545],[0.005,null,557.8,358.6,668.0,455.0,15.249],[0.003,null,635.6,293.3,711.0,230.0,14.797],[0.003,null,576.8,256.4,519.0,220.0,14.437],[0.002,null,476.5,182.4,377.0,109.0,14.306],[0.004,null,390.1,207.7,304.0,233.0,14.729],[0.015,null,384.0,193.9,378.0,180.0,19.191],[0.049,null,330.5,170.9,277.0,148.0,22.956],[0.07,null,252.2,125.4,174.0,80.0,25.945],[0.076,null,174.6,92.7,97.0,60.0,28.356],[0.056,null,113.3,62.3,52.0,32.0,30.237],[0.051,null,67.1,41.6,21.0,21.0,31.757],[0.053,null,41.5,41.6,16.0,null,31.677],[0.057,null,35.2,28.5,29.0,22.0,31.389],[0.051,null,37.0,25.3,39.0,23.0,30.205],[0.041,null,38.4,24.6,40.0,24.0,28.271],[0.036,null,42.7,24.8,47.0,25.0,26.246],[0.031,null,47.3,26.9,52.0,29.0,24.643],[0.023,null,40.6,26.9,34.0,27.0,23.662],[0.009,null,35.3,23.4,30.0,20.0,22.785],[0.002,null,38.6,25.2,42.0,27.0,21.612]]},{"f":"2024-01-18","c":4,"dom":["PM10"],"mx":{"PM10":225.4,"PM25":74.2,"O3":0.026,"CO":5.01},"h":[[0.009,1.43,49.5,21.4,33.0,19.0,23.717],[0.016,1.42,40.2,19.7,31.0,18.0,23.359],[0.022,1.34,32.6,20.3,25.0,21.0,23.442],[0.026,1.22,23.3,20.3,14.0,null,24.107],[0.025,1.04,21.6,19.4,20.0,19.0,23.715],[0.021,0.89,21.8,19.2,22.0,19.0,23.052],[0.007,0.93,24.4,22.3,27.0,25.0,23.045],[0.002,1.1,48.7,34.5,73.0,46.0,21.655],[0.002,1.33,81.4,43.9,114.0,53.0,21.74],[0.002,1.63,102.7,46.0,124.0,48.0,22.302],[0.004,1.89,113.8,47.0,125.0,48.0,23.855],[0.005,2.13,115.4,53.5,117.0,60.0,25.151],[0.008,2.36,124.2,54.3,133.0,55.0,25.903],[0.011,2.62,138.6,60.6,153.0,67.0,26.529],[0.012,2.76,148.3,64.3,158.0,68.0,26.49],[0.018,2.68,139.2,57.7,130.0,51.0,27.513],[0.023,2.53,124.6,50.8,110.0,44.0,28.9],[0.024,2.36,118.8,47.9,113.0,45.0,30.101],[0.005,2.53,130.9,48.7,143.0,46.0,27.512],[0.002,2.96,169.9,57.5,212.0,72.0,25.074],[0.002,3.42,207.8,66.9,244.0,78.0,24.433],[0.002,3.94,225.4,69.1,243.0,72.0,22.728],[0.002,4.38,222.2,67.3,219.0,65.0,21.55],[0.002,5.01,209.6,74.2,197.0,82.0,21.015]]},{"f":"2024-01-19","c":4,"dom":["PM10"],"mx":{"PM10":214.7,"PM25":86.7,"O3":0.07,"CO":6.44},"h":[[0.002,5.64,210.3,76.5,211.0,79.0,20.394],[0.001,6.3,214.7,83.5,219.0,90.0,20.273],[0.001,6.44,212.3,86.7,210.0,90.0,19.966],[0.001,6.07,181.2,74.4,150.0,62.0,19.294],[0.001,5.53,162.6,63.2,144.0,52.0,18.848],[0.001,4.9,152.4,58.4,135.0,53.0,18.823],[0.002,4.57,145.1,58.5,136.0,56.0,18.202],[0.002,4.28,146.8,58.3,149.0,58.0,17.692],[0.001,4.01,159.8,55.6,176.0,52.0,18.02],[0.006,3.54,171.0,59.1,190.0,64.0,20.511],[0.027,3.15,149.3,59.5,120.0,60.0,26.144],[0.044,2.93,116.8,53.6,86.0,47.0,28.29],[0.057,2.79,77.4,42.7,38.0,32.0,32.053],[0.06,2.63,58.2,37.8,39.0,33.0,32.979],[0.061,2.29,44.6,32.4,31.0,27.0,33.799],[0.068,1.8,31.8,26.2,19.0,20.0,34.213],[0.07,1.3,27.9,22.1,24.0,18.0,35.279],[0.058,0.96,33.4,21.5,39.0,21.0,32.545],[0.014,1.21,40.2,26.8,47.0,32.0,30.245],[0.003,2.03,78.6,37.9,117.0,49.0,28.997],[0.002,2.66,133.3,52.4,188.0,67.0,27.922],[0.002,3.25,163.7,57.2,194.0,62.0,25.607],[0.002,3.83,193.3,66.1,223.0,75.0,24.861],[0.003,4.45,208.7,75.6,224.0,85.0,23.66]]},{"f":"2024-01-20","c":4,"dom":["PM10"],"mx":{"PM10":255.5,"PM25":96.4,"O3":0.07,"CO":5.91},"h":[[0.002,5.26,242.9,90.8,277.0,106.0,23.314],[0.002,5.91,255.5,94.4,268.0,98.0,23.44],[0.001,5.75,229.8,85.7,204.0,77.0,22.718],[0.002,5.31,215.4,92.9,201.0,100.0,22.355],[0.002,5.02,214.7,96.4,214.0,100.0,22.688],[0.002,4.54,187.4,74.7,160.0,53.0,22.623],[0.004,4.01,147.2,58.4,107.0,42.0,23.032],[0.005,3.43,115.6,41.7,84.0,25.0,22.917],[0.004,2.72,90.3,39.8,65.0,38.0,21.913],[0.02,2.09,78.1,32.4,66.0,25.0,24.962],[0.033,1.81,64.5,27.7,51.0,23.0,26.005],[0.044,1.37,43.2,25.3,22.0,23.0,28.344],[0.05,1.03,36.1,27.7,29.0,30.0,30.782],[0.058,0.91,33.5,27.6,31.0,null,32.437],[0.064,0.85,32.7,29.2,32.0,30.0,33.236],[0.067,0.8,35.3,24.5,38.0,21.0,33.944],[0.07,0.69,35.2,24.8,35.0,25.0,34.22],[0.063,0.67,38.6,23.8,42.0,23.0,33.869],[0.042,0.7,50.3,25.4,62.0,27.0,30.862],[0.033,0.72,64.6,31.7,79.0,39.0,28.245],[0.037,0.7,91.3,27.7,118.0,23.0,26.043],[0.02,0.73,73.7,26.0,56.0,24.0,25.777],[0.015,0.76,56.8,23.0,40.0,20.0,25.877],[0.01,0.81,46.9,25.9,37.0,29.0,23.118]]},{"f":"2024-02-21","c":3,"dom":["PM10","O3"],"mx":{"PM10":132.5,"PM25":44.4,"O3":0.136,"CO":2.29},"h":[[0.036,2.09,57.5,19.8,36.0,15.0,24.286],[0.043,2.09,44.7,16.4,32.0,13.0,23.634],[0.045,2.03,32.4,12.7,20.0,9.0,22.059],[0.032,1.68,26.2,10.4,20.0,8.0,20.334],[0.009,1.32,22.1,9.2,18.0,8.0,19.163],[0.002,1.14,28.0,9.1,34.0,9.0,18.377],[0.001,1.2,44.0,17.5,60.0,26.0,17.66],[0.001,1.44,70.5,25.8,97.0,34.0,17.206],[0.007,1.65,88.8,27.9,107.0,30.0,20.674],[0.029,1.76,88.9,26.4,89.0,25.0,25.578],[0.052,1.8,81.4,23.7,74.0,21.0,29.128],[0.074,1.81,62.7,18.4,44.0,13.0,31.278],[0.095,1.77,50.4,15.2,38.0,12.0,34.159],[0.115,1.66,49.7,13.6,49.0,12.0,36.378],[0.128,1.48,48.8,12.8,48.0,12.0,38.306],[0.136,1.21,44.4,15.4,40.0,18.0,39.564],[0.124,0.98,40.7,14.2,37.0,13.0,39.927],[0.105,0.88,37.4,14.6,34.0,15.0,39.658],[0.083,0.87,37.2,12.3,37.0,10.0,38.077],[0.046,0.96,40.1,12.6,43.0,13.0,33.786],[0.02,1.09,50.0,15.3,60.0,18.0,30.111],[0.006,1.42,63.0,20.7,76.0,26.0,27.694],[0.003,1.86,92.0,29.8,121.0,39.0,26.295],[0.002,2.29,132.5,44.4,173.0,59.0,24.17]]},{"f":"2024-02-24","c":3,"dom":["O3"],"mx":{"PM10":null,"PM25":34.0,"O3":0.156,"CO":3.15},"h":[[0.002,2.2,null,28.2,null,38.0,23.93],[0.001,2.59,null,32.1,null,36.0,22.281],[0.003,2.81,null,34.0,null,36.0,21.421],[0.001,2.93,null,27.0,null,20.0,21.114],[0.002,3.08,null,21.5,null,16.0,19.65],[0.002,3.15,null,19.8,null,18.0,19.169],[0.001,3.07,null,21.4,null,23.0,18.409],[0.002,2.89,null,28.7,null,36.0,18.039],[0.007,2.7,null,31.9,null,35.0,21.732],[0.026,2.38,null,28.9,null,26.0,26.14],[0.048,2.17,null,24.5,null,20.0,29.518],[0.072,2.01,null,20.2,null,16.0,32.44],[0.09,1.81,null,19.1,null,18.0,35.671],[0.101,1.63,null,17.1,null,15.0,38.029],[0.128,1.41,null,14.5,null,12.0,40.069],[0.156,1.17,null,15.8,null,17.0,41.032],[0.128,1.03,null,20.4,null,25.0,40.815],[0.109,0.96,null,18.2,null,16.0,40.703],[0.079,0.94,null,16.1,null,14.0,38.648],[0.031,1.02,null,13.0,null,10.0,34.265],[0.022,1.1,null,16.5,null,20.0,32.879],[0.019,1.17,null,17.8,null,19.0,31.23],[0.015,1.25,null,16.9,null,16.0,28.998],[0.003,1.41,null,16.4,null,16.0,26.87]]},{"f":"2024-05-31","c":3,"dom":["O3"],"mx":{"PM10":86.1,"PM25":null,"O3":0.142,"CO":1.25},"h":[[0.025,0.76,62.0,null,61.0,null,25.13],[0.03,0.79,59.5,null,57.0,null,24.172],[0.031,0.8,52.3,null,45.0,null,23.2],[0.027,0.81,45.1,null,38.0,null,22.811],[0.028,0.81,43.6,null,42.0,null,22.165],[0.026,0.82,41.3,null,39.0,null,21.5],[0.005,0.92,38.1,null,35.0,null,21.656],[0.007,1.01,50.1,null,62.0,null,23.077],[0.026,1.05,59.5,null,69.0,null,25.729],[0.047,1.07,57.8,null,56.0,null,27.431],[0.069,1.11,54.4,null,51.0,null,29.403],[0.104,1.15,55.7,null,57.0,null,31.407],[0.142,1.22,59.3,null,63.0,null,33.824],[0.123,1.25,75.2,null,91.0,null,35.429],[0.111,1.17,86.1,null,97.0,null,36.943],[0.117,1.08,69.5,null,53.0,null,37.801],[0.108,1.03,56.8,null,44.0,null,38.065],[0.091,0.98,50.9,null,45.0,null,37.787],[0.079,0.94,45.9,null,41.0,null,36.644],[0.065,0.92,48.0,null,50.0,null,33.915],[0.05,0.87,73.0,null,98.0,null,31.466],[0.044,0.85,70.5,null,68.0,null,29.575],[0.04,0.86,75.3,null,80.0,null,28.783],[0.04,0.88,72.1,null,69.0,null,27.592]]},{"f":"2024-06-01","c":3,"dom":["O3"],"mx":{"PM10":89.4,"PM25":null,"O3":0.146,"CO":1.12},"h":[[0.045,0.9,67.1,null,62.0,null,26.988],[0.038,0.93,66.0,null,65.0,null,26.173],[0.035,0.93,59.5,null,53.0,null,24.414],[0.028,0.91,54.8,null,50.0,null,24.221],[0.025,0.91,53.4,null,52.0,null,22.926],[0.025,0.89,49.7,null,46.0,null,22.343],[0.016,0.91,45.8,null,42.0,null,22.413],[0.024,0.92,49.4,null,53.0,null,24.064],[0.04,0.93,49.7,null,50.0,null,26.191],[0.059,0.96,51.7,null,54.0,null,28.584],[0.08,1.03,56.3,null,64.0,null,31.386],[0.107,1.06,79.5,null,101.0,null,33.322],[0.146,1.1,86.7,null,94.0,null,35.133],[0.143,1.12,89.4,null,92.0,null,36.501],[0.119,1.1,78.7,null,68.0,null,37.242],[0.09,1.06,69.3,null,60.0,null,37.405],[0.08,1.02,57.2,null,45.0,null,37.308],[0.061,1.0,46.6,null,36.0,null,35.107],[0.06,0.95,46.6,null,null,null,34.383],[0.055,0.93,64.2,null,73.0,null,33.373],[0.049,0.89,74.4,null,82.0,null,31.39],[0.045,0.89,79.5,null,84.0,null,30.192],[0.046,0.9,81.3,null,83.0,null,28.31],[0.043,0.91,68.5,null,56.0,null,27.357]]},{"f":"2024-12-25","c":4,"dom":["PM10","PM25"],"mx":{"PM10":228.7,"PM25":183.5,"O3":0.036,"CO":2.72},"h":[[0.002,0.82,50.0,33.5,68.0,51.0,14.726],[0.002,0.96,74.5,56.2,99.0,79.0,13.766],[0.002,1.09,85.8,65.6,97.0,75.0,13.098],[0.002,1.27,78.4,58.3,71.0,51.0,12.557],[0.002,1.54,90.7,68.2,103.0,78.0,11.925],[0.002,1.87,108.9,82.1,127.0,96.0,10.954],[0.002,2.21,135.5,105.6,162.0,129.0,10.541],[0.002,2.44,178.7,139.8,222.0,174.0,10.124],[0.003,2.64,196.4,156.9,214.0,174.0,12.048],[0.012,2.72,228.7,183.5,261.0,210.0,15.677],[0.027,2.62,203.4,168.3,178.0,153.0,19.32],[0.029,2.37,132.7,110.6,62.0,53.0,21.739],[0.031,2.05,76.8,62.8,21.0,15.0,23.315],[0.033,1.69,44.4,37.4,12.0,12.0,23.875],[0.036,1.3,32.2,23.2,20.0,9.0,24.647],[0.031,0.97,25.1,15.6,18.0,8.0,25.545],[0.028,0.59,17.5,11.8,10.0,8.0,25.05],[0.025,0.35,14.3,8.9,11.0,6.0,24.423],[0.021,0.29,13.1,6.9,12.0,5.0,22.186],[0.015,0.3,12.5,5.9,12.0,5.0,20.269],[0.01,0.36,17.2,10.0,22.0,14.0,18.506],[0.005,0.42,20.1,10.5,23.0,11.0,16.981],[0.006,0.48,30.5,13.7,41.0,17.0,16.056],[0.003,0.55,24.8,10.8,19.0,8.0,14.473]]}]};
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const D=window.DATOS,YR=[2023,2024],CY={2023:'#FFC83D',2024:'#4CC9F0'};
-const CAT=['Buena','Aceptable','Mala','Muy mala','Extrema'],COL=['#2ECC71','#FFC83D','#FF7A2F','#E5484D','#9B5DE5'];
-const MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const P={PM10:{n:'PM₁₀',u:'µg/m³',c:'#C9A66B',br:[45,60,132,213],i:2,r:4,d:0},PM25:{n:'PM₂.₅',u:'µg/m³',c:'#F28482',br:[15,33,79,130],i:3,r:5,d:0},O3:{n:'O₃',u:'ppm',c:'#4CC9F0',br:[.058,.09,.135,.175],i:0,r:0,d:3},CO:{n:'CO',u:'ppm',c:'#B5A6E0',br:[5,9,12,16],i:1,r:1,d:2}};
-const KS=Object.keys(P);
-const M=y=>D[y].meses,sum=(y,f)=>M(y).reduce((a,m)=>a+f(m),0);
-const avg=a=>{a=a.filter(x=>x!=null);return a.length?a.reduce((s,x)=>s+x,0)/a.length:null};
-const pc=(a,b)=>(b/a-1)*100,f1=(v,d=1)=>v==null?'—':v.toFixed(d);
-const cat=(k,v)=>{if(v==null)return -1;const b=P[k].br;if(v<b[0])return 0;for(let i=1;i<4;i++)if(v<=b[i])return i;return 4};
-const chip=c=>c<0?'<span class="chip cn">Sin dato</span>':`<span class="chip c${c}">${CAT[c]}</span>`;
-const bd=(d,low=true)=>d==null?'':`<span class="diff-badge ${Math.abs(d)<2?'diff-neutral':((d<0)===low?'diff-good':'diff-bad')}">${d>0?'+':''}${d.toFixed(0)}%</span>`;
-const legCat=id=>$(id).innerHTML=CAT.map((c,i)=>`<span><i style="background:${COL[i]}"></i>${c}</span>`).join('');
-document.addEventListener('mousemove',e=>{const t=e.target.dataset&&e.target.dataset.t,g=$('#tip');if(t){g.style.display='block';g.innerHTML=t;g.style.left=Math.min(e.clientX+14,innerWidth-270)+'px';g.style.top=e.clientY+14+'px'}else g.style.display='none'});
-function grid(x0,w,y0,h,mx,d){let s='';for(let i=0;i<=4;i++){const y=y0+h-h*i/4;s+=`<line x1="${x0}" x2="${x0+w}" y1="${y}" y2="${y}" stroke="#25506F" stroke-width=".5"/><text x="${x0-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#9DB6CB">${(mx*i/4).toFixed(d)}</text>`}return s}
-const pear=p=>{if(p.length<4)return null;const mx=avg(p.map(a=>a[0])),my=avg(p.map(a=>a[1]));const n=p.reduce((s,a)=>s+(a[0]-mx)*(a[1]-my),0),d=Math.sqrt(p.reduce((s,a)=>s+(a[0]-mx)**2,0)*p.reduce((s,a)=>s+(a[1]-my)**2,0));return d?n/d:null};
-
-/* ---- 1. KPIs ---- */
-const hcT=y=>[0,1,2,3,4].map(c=>sum(y,m=>m.hc[c])),tot=a=>a.reduce((x,y)=>x+y,0);
-function kpis(){
- const pm25=['PM25_mean'].map(k=>{const p=M(2023).map((m,i)=>[m[k],M(2024)[i][k]]).filter(x=>x[0]!=null&&x[1]!=null);return[avg(p.map(x=>x[0])),avg(p.map(x=>x[1])),p.length]})[0];
- const p10=(()=>{const p=M(2023).map((m,i)=>[m.PM10_mean,M(2024)[i].PM10_mean]).filter(x=>x[0]!=null&&x[1]!=null);return[avg(p.map(x=>x[0])),avg(p.map(x=>x[1])),p.length]})();
- const h=YR.map(y=>{const a=hcT(y),t=tot(a);return{b:100*a[0]/t,m:100*(a[2]+a[3]+a[4])/t,s:100*(a[3]+a[4])/t}});
- const sv=YR.map(y=>sum(y,m=>m.cnt[3]+m.cnt[4])),ex=YR.map(y=>sum(y,m=>m.cnt[4])),nd=YR.map(y=>sum(y,m=>m.n));
- const o3=YR.map(y=>Math.max(...M(y).map(m=>m.O3_max)));
- const bw=y=>{const a=M(y).map(m=>[m.mes,m.PM25_mean]);const s=[...a].sort((x,z)=>x[1]-z[1]);return[s[0],s[11]]};
- const k=(c,t,v,s,b)=>`<div class="card kpi" style="--c:${c}"><small style="color:var(--mut)">${t}</small><b>${v}</b><span>${s}</span><div style="margin-top:6px">${b||''}</div></div>`;
- const w23=bw(2023),w24=bw(2024);
- $('#kpis').innerHTML=[
- k('var(--c-pm25)','PM₂.₅ promedio anual ('+pm25[2]+' meses)',`${f1(pm25[0])} → ${f1(pm25[1])} <small>µg/m³</small>`,'Promedio de los promedios mensuales',bd(pc(pm25[0],pm25[1]))),
- k('var(--c-pm10)','PM₁₀ promedio ('+p10[2]+' meses comparables)',`${f1(p10[0])} → ${f1(p10[1])} <small>µg/m³</small>`,'Excluye ago–oct (sin PM₁₀ en 2023)',bd(pc(p10[0],p10[1]))),
- k('var(--cat-mala)','Horas en categoría Mala o peor',`${f1(h[0].m)}% → ${f1(h[1].m)}%`,`Buena: ${f1(h[0].b,0)}% → ${f1(h[1].b,0)}% de las horas`,bd(pc(h[0].m,h[1].m))),
- k('var(--cat-muymala)','Días Muy mala o Extrema',`${sv[0]} → ${sv[1]}`,`De ${nd[0]} y ${nd[1]} días con registro · Extrema: ${ex[0]} → ${ex[1]}`,bd(pc(sv[0],sv[1]))),
- k('var(--c-o3)','O₃ máximo horario del año',`${o3[0].toFixed(3)} → ${o3[1].toFixed(3)} <small>ppm</small>`,'Ambos años en Muy mala (≥ 0.136)',bd(pc(o3[0],o3[1]))),
- k('var(--cat-buena)','Mejor / peor mes (PM₂.₅)',`${MES[w23[0][0]-1]}·${MES[w23[1][0]-1]} → ${MES[w24[0][0]-1]}·${MES[w24[1][0]-1]}`,`2023: ${f1(w23[0][1])} / ${f1(w23[1][1])} · 2024: ${f1(w24[0][1])} / ${f1(w24[1][1])} µg/m³`,'')].join('');
- $('#kpiNote').innerHTML='<b>Lectura:</b> la mejora de 2024 se concentra en partículas finas y en las categorías bajas; la cola severa (Muy mala o peor) y el ozono permanecen igual. Las horas y los días solo cubren los días con registro del archivo.';
- $('#cobTxt').textContent=`${D[2023].dias.length} d en 2023 · ${D[2024].dias.length} d en 2024`;
-}
-
-/* ---- 2. Meses ---- */
-const V={PM25_mean:['PM₂.₅ promedio mensual','µg/m³',1,15,'Límite Buena 15 (referencia)'],PM10_mean:['PM₁₀ promedio mensual','µg/m³',1,45,'Límite Buena 45 (referencia)'],O3_max:['O₃ máximo horario','ppm',3,.135,'Muy mala desde 0.136'],CO_max:['CO máximo (dato mensual del archivo)','ppm',2,0,''],Temp_mean:['Temperatura media','°C',1,0,''],RH_mean:['Humedad relativa media','%',1,0,''],WS_mean:['Viento medio','m/s',1,0,'']};
-function drawMes(){const k=$('#vsel').value,[nm,u,d,ref,rl]=V[k],A=YR.map(y=>M(y).map(m=>m[k]));
- const mx=Math.max(...A.flat().filter(x=>x!=null),ref)*1.12,W=900,H=220,X0=48,Y0=12,bw=(W-X0)/12,y=v=>Y0+H-v/mx*H;let s=grid(X0,W-X0,Y0,H,mx,d);
- A.forEach((a,j)=>a.forEach((v,i)=>{const x=X0+i*bw+bw*.12+j*bw*.38;s+=v==null?`<text x="${x+bw*.18}" y="${Y0+H-5}" text-anchor="middle" font-size="10" fill="#62829D">s/d</text>`:`<rect x="${x}" y="${y(v)}" width="${bw*.36}" height="${Y0+H-y(v)}" rx="3" fill="${CY[YR[j]]}" data-t="<b>${MES[i]} ${YR[j]}</b><br>${nm}: <b>${v.toFixed(d)} ${u}</b>"/>`}));
- if(ref)s+=`<line x1="${X0}" x2="${W}" y1="${y(ref)}" y2="${y(ref)}" stroke="#fff" stroke-dasharray="5 4" opacity=".7"/><text x="${W-4}" y="${y(ref)-5}" text-anchor="end" font-size="11" fill="#fff">${rl}</text>`;
- MES.forEach((m,i)=>s+=`<text x="${X0+i*bw+bw/2}" y="${Y0+H+20}" text-anchor="middle" font-size="12" fill="#9DB6CB">${m}</text>`);$('#cMes').innerHTML=s;
- $('#vnote').textContent=k==='PM10_mean'?'PM₁₀ sin dato ago–oct 2023':k==='RH_mean'?'Humedad sin dato ene–may 2024 y jun 2023':k==='WS_mean'?'Viento sin dato ene–mar 2024':''}
-function tabMes(){const c=(a,b,d,low=true)=>`<td class="a">${f1(a,d)} → ${f1(b,d)} ${a!=null&&b!=null?bd(pc(a,b),low):''}</td>`;
- $('#tMes').innerHTML=MES.map((n,i)=>{const a=M(2023)[i],b=M(2024)[i],pm=m=>100*(m.hc[2]+m.hc[3]+m.hc[4])/Math.max(1,tot(m.hc));
- return`<tr><td><b>${n}</b></td><td class="a">${a.n}${a.n<10?'*':''} → ${b.n}${b.n<10?'*':''}</td><td class="a">${f1(pm(a),0)}% → ${f1(pm(b),0)}%</td>${c(a.PM25_mean,b.PM25_mean,1)}${c(a.PM10_mean,b.PM10_mean,1)}${c(a.O3_max,b.O3_max,3)}${c(a.CO_max,b.CO_max,2)}<td class="a">${f1(a.Temp_mean)} → ${f1(b.Temp_mean)}</td></tr>`}).join('')}
-
-/* ---- 3. Categorías ---- */
-function drawCats(){
- $('#catAn').innerHTML=YR.map(y=>{const a=hcT(y),t=tot(a),dc=[0,1,2,3,4].map(c=>sum(y,m=>m.cnt[c]));return`<div style="margin:12px 0"><b style="color:${CY[y]}">${y}</b> <span style="font-size:12px;color:var(--mut)">· ${t} h · días: ${dc.slice(1).map((n,i)=>CAT[i+1]+' '+n).join(', ')}</span><div style="display:flex;height:28px;border-radius:7px;overflow:hidden;margin-top:4px">${a.map((n,c)=>`<span style="width:${100*n/t}%;background:${COL[c]}" data-t="<b>${y} · ${CAT[c]}</b><br>${n} h (${(100*n/t).toFixed(1)}%)"></span>`).join('')}</div></div>`}).join('');
- legCat('#catLg');legCat('#catLg2');legCat('#catLg3');
- const dm=y=>KS.map(k=>sum(y,m=>m.dom[k])),mx=Math.max(...dm(2023),...dm(2024));
- $('#domB').innerHTML=KS.map((k,i)=>`<div style="margin:10px 0"><b>${P[k].n}</b>${YR.map(y=>`<div style="display:flex;align-items:center;gap:8px;font-size:12.5px"><span style="width:34px">${y}</span><div style="height:14px;border-radius:5px;background:${CY[y]};width:${Math.max(1,100*dm(y)[i]/mx*.8)}%" data-t="${y} · ${P[k].n}: ${dm(y)[i]} días; ${sum(y,m=>m.hp[k])} h ≥ Mala"></div><b>${dm(y)[i]} d</b></div>`).join('')}</div>`).join('');
- const W=900,H=210,X0=40,Y0=10,bw=(W-X0)/12;let s='';[0,25,50,75,100].forEach(v=>{const y=Y0+H-H*v/100;s+=`<line x1="${X0}" x2="${W}" y1="${y}" y2="${y}" stroke="#25506F" stroke-width=".5"/><text x="${X0-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#9DB6CB">${v}%</text>`});
- YR.forEach((yr,j)=>M(yr).forEach((m,i)=>{const t=tot(m.hc);if(!t)return;let acc=0;const x=X0+i*bw+bw*.1+j*bw*.4;m.hc.forEach((n,c)=>{const h=H*n/t;s+=`<rect x="${x}" y="${Y0+H-acc-h}" width="${bw*.38}" height="${h}" fill="${COL[c]}" opacity="${m.n<10?.4:1}" data-t="<b>${MES[i]} ${yr}</b> · ${m.n} días<br>${CAT[c]}: ${(100*n/t).toFixed(0)}% (${n} h)"/>`;acc+=h})}));
- MES.forEach((m,i)=>s+=`<text x="${X0+i*bw+bw/2}" y="${Y0+H+18}" text-anchor="middle" font-size="12" fill="#9DB6CB">${m}</text>`);$('#cCat').innerHTML=s}
-
-/* ---- 4. Atípicos ---- */
-function drawHeat(){YR.forEach(y=>{const mp={};D[y].dias.forEach(d=>mp[d.f]=d.c);const im=new Set(D.imp.filter(d=>d.f.startsWith(y)).map(d=>d.f));let s='';
- for(let d=1;d<=31;d++)s+=`<text x="${44+(d-1)*26+11}" y="12" text-anchor="middle" font-size="10" fill="#9DB6CB">${d}</text>`;
- MES.forEach((n,m)=>{s+=`<text x="38" y="${34+m*19}" text-anchor="end" font-size="11" fill="#9DB6CB">${n}</text>`;const nd=new Date(y,m+1,0).getDate();
-  for(let d=1;d<=nd;d++){const f=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,c=mp[f];s+=`<rect x="${44+(d-1)*26}" y="${20+m*19}" width="23" height="16" rx="3" fill="${c==null?'#13283d':c<0?'#4A5B6C':COL[c]}" ${im.has(f)?'stroke="#fff" stroke-width="1.6" style="cursor:pointer" onclick="goSim(\''+f+'\')"':''} data-t="<b>${d} ${n} ${y}</b><br>${c==null?'Sin registro horario':c<0?'Datos insuficientes':CAT[c]}"/>`}});
- $('#hm'+y).innerHTML=s})}
-function tabEv(){$('#tEv').innerHTML=D.imp.map(d=>`<tr class="cl2r" onclick="goSim('${d.f}')"><td><b>${d.f}</b></td><td>${chip(d.c)}</td><td>${d.dom.map(k=>P[k].n).join(' + ')||'—'}</td><td>${f1(d.mx.PM10,0)}</td><td>${f1(d.mx.PM25,0)}</td><td>${f1(d.mx.O3,3)}</td><td>${f1(d.mx.CO,2)}</td></tr>`).join('')}
-
-/* ---- 5. Horas ---- */
-function drawHoras(){const k=$('#hsel').value,S=YR.map(y=>D[y].perfil[k]),dg=k==='O3'?3:k==='CO'?2:1;
- const mx=Math.max(...S.flat().filter(x=>x!=null))*1.12,W=470,H=190,X0=46,Y0=10,x=h=>X0+h/23*W,y=v=>Y0+H-v/mx*H;let s=grid(X0,W,Y0,H,mx,dg);
- [0,3,6,9,12,15,18,21].forEach(h=>s+=`<text x="${x(h)}" y="${Y0+H+18}" text-anchor="middle" font-size="11" fill="#9DB6CB">${String(h).padStart(2,'0')}h</text>`);
- S.forEach((a,j)=>{s+=`<path d="${a.map((v,h)=>v==null?'':(h&&a[h-1]!=null?'L':'M')+x(h)+' '+y(v)).join('')}" fill="none" stroke="${CY[YR[j]]}" stroke-width="3"/>`;a.forEach((v,h)=>{if(v!=null)s+=`<circle cx="${x(h)}" cy="${y(v)}" r="4" fill="${CY[YR[j]]}" data-t="<b>${YR[j]} · ${String(h).padStart(2,'0')}:00</b><br>${v.toFixed(dg+1)}"/>`})});$('#cPerf').innerHTML=s;
- if(k==='ET'){$('#cPico').innerHTML='<text x="260" y="120" text-anchor="middle" fill="#9DB6CB" font-size="13">No aplica a temperatura</text>';return}
- const Pk=YR.map(y=>D[y].pico[k]),m2=Math.max(...Pk.flat(),1)*1.15,bw=W/24,y2=v=>Y0+H-v/m2*H;let t=grid(X0,W,Y0,H,m2,0);
- Pk.forEach((a,j)=>a.forEach((v,h)=>{t+=`<rect x="${X0+h*bw*1.0+j*bw*.4-bw*.2}" y="${y2(v)}" width="${bw*.4}" height="${Y0+H-y2(v)}" fill="${CY[YR[j]]}" data-t="<b>${YR[j]} · ${String(h).padStart(2,'0')}:00</b><br>${v} días con su máximo a esta hora"/>`}));
- [0,3,6,9,12,15,18,21].forEach(h=>t+=`<text x="${X0+h*bw+bw*.3}" y="${Y0+H+18}" text-anchor="middle" font-size="11" fill="#9DB6CB">${String(h).padStart(2,'0')}h</text>`);$('#cPico').innerHTML=t}
-
-/* ---- 6. Meteorología ---- */
-function drawMeteo(){const xk=$('#xsel').value,yk=$('#ysel').value,pt=[];YR.forEach(y=>M(y).forEach(m=>{if(m[xk]!=null&&m[yk]!=null)pt.push([m[xk],m[yk],y,m.mes])}));
- const xs=pt.map(p=>p[0]),ys=pt.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),y1=Math.max(...ys)*1.1,W=820,H=240,X0=60,Y0=12,dy=yk==='O3_max'?3:1;
- const x=v=>X0+(v-x0)/(x1-x0||1)*W,y=v=>Y0+H-v/y1*H;let s=grid(X0,W,Y0,H,y1,dy);
- for(let i=0;i<=4;i++)s+=`<text x="${X0+W*i/4}" y="${Y0+H+20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${(x0+(x1-x0)*i/4).toFixed(1)}</text>`;
- pt.forEach(p=>s+=`<circle cx="${x(p[0])}" cy="${y(p[1])}" r="7" fill="${CY[p[2]]}" fill-opacity=".85" stroke="#071626" data-t="<b>${MES[p[3]-1]} ${p[2]}</b><br>${p[0].toFixed(1)} · ${p[1].toFixed(dy)}"/><text x="${x(p[0])}" y="${y(p[1])-10}" text-anchor="middle" font-size="9" fill="#C7D9E8">${MES[p[3]-1]}</text>`);
- $('#cMet').innerHTML=s;const r=pear(pt.map(p=>[p[0],p[1]])),r3=YR.map(yr=>pear(pt.filter(p=>p[2]===yr).map(p=>[p[0],p[1]])));
- const lab=r==null?'—':Math.abs(r)<.3?'débil':Math.abs(r)<.6?'moderada':'fuerte',fr=v=>v==null?'—':v.toFixed(2);
- $('#metTxt').innerHTML=`<b>r global = ${fr(r)}</b> (${lab}; n = ${pt.length} meses) · 2023: ${fr(r3[0])} · 2024: ${fr(r3[1])}. Es una asociación entre promedios mensuales, no causalidad: la estacionalidad confunde la relación y solo se dispone de promedios mensuales de humedad y viento.`}
-
-/* ---- 7. Simulador de días clave ---- */
-let cur=0,hr=0,tm=null,apol='PM10';
-const HM=['Condiciones óptimas para actividades al aire libre.','Grupos sensibles deben considerar reducir esfuerzos en exteriores.','Grupos sensibles evitar actividad física exterior; población general reducir esfuerzos prolongados.','Riesgo grave: permanecer en interiores y suspender actividades exteriores.','Contingencia: permanecer en interiores con ventanas cerradas.'];
-function initSim(){$('#dsel').innerHTML=D.imp.map((d,i)=>`<option value="${i}">${d.f} · ${CAT[d.c]} · ${d.dom.map(k=>P[k].n).join('+')||'—'}</option>`).join('');
- $('#polb').innerHTML=KS.map(k=>`<button class="btn ${k===apol?'on':''}" data-k="${k}" style="padding:4px 10px">${P[k].n}</button>`).join('');
- $('#gauges').innerHTML=KS.map(k=>`<div class="gc" style="--c:${P[k].c}"><small>${P[k].n} (${P[k].u})</small><b id="g${k}">—</b><span id="c${k}"></span></div>`).join('');
- $$('#polb button').forEach(b=>b.onclick=()=>{apol=b.dataset.k;$$('#polb button').forEach(x=>x.classList.toggle('on',x===b));simDraw()});
- $('#dsel').onchange=e=>{cur=+e.target.value;hr=0;stop();simDraw()};$('#pv').onclick=()=>{cur=(cur+D.imp.length-1)%D.imp.length;$('#dsel').value=cur;hr=0;stop();simDraw()};$('#nx').onclick=()=>{cur=(cur+1)%D.imp.length;$('#dsel').value=cur;hr=0;stop();simDraw()};
- $('#hsl').oninput=e=>{hr=+e.target.value;stop();simDraw()};$('#play').onclick=()=>{if(tm)return stop();if(hr>=23)hr=0;$('#play').textContent='⏸ Pausa';tm=setInterval(()=>{if(hr>=23)return stop();hr++;simDraw()},650)};simDraw()}
-function stop(){clearInterval(tm);tm=null;$('#play').textContent='▶ Continuar'}
-function goSim(f){const i=D.imp.findIndex(d=>d.f===f);if(i<0)return;cur=i;$('#dsel').value=i;hr=0;stop();simDraw();$('#simulador').scrollIntoView({behavior:'smooth'})}
-function simDraw(){const d=D.imp[cur],p=P[apol],ix=d.h.map(r=>r[p.i]),rw=d.h.map(r=>r[p.r]),b=p.br,mx=Math.max(...ix.filter(v=>v!=null),...rw.filter(v=>v!=null),b[0]*1.2)*1.15,X0=54,W=680,Y0=14,H=230,x=h=>X0+h/23*W,y=v=>Y0+H-v/mx*H;let s='',lo=0;
- [...b.slice(0,3),mx].forEach((t,i)=>{const t1=Math.min(t,mx);if(lo<mx)s+=`<rect x="${X0}" y="${y(t1)}" width="${W}" height="${y(lo)-y(t1)}" fill="${COL[i]}" opacity=".13"/>`;lo=t});
- s+=grid(X0,W,Y0,H,mx,p.d);for(let h=0;h<24;h+=3)s+=`<text x="${x(h)}" y="${Y0+H+18}" text-anchor="middle" font-size="11" fill="#9DB6CB">${String(h).padStart(2,'0')}h</text>`;
- const path=a=>a.map((v,h)=>v==null?'':(h&&a[h-1]!=null?'L':'M')+x(h)+' '+y(v)).join('');
- if(apol==='PM10'||apol==='PM25')s+=`<path d="${path(rw)}" stroke="${p.c}" stroke-width="2" stroke-dasharray="5 4" fill="none" opacity=".8"/>`;
- s+=`<path d="${path(ix)}" stroke="${p.c}" stroke-width="3.5" fill="none"/>`;ix.forEach((v,h)=>{if(v!=null)s+=`<circle cx="${x(h)}" cy="${y(v)}" r="4" fill="${COL[Math.max(0,cat(apol,v))]}" stroke="#071626"/>`});
- s+=`<line x1="${x(hr)}" x2="${x(hr)}" y1="${Y0}" y2="${Y0+H}" stroke="#FFC83D" stroke-width="2"/>`;$('#cSim').innerHTML=s;
- const row=d.h[hr];let w=-1,dom=[];KS.forEach(k=>{const v=row[P[k].i],c=cat(k,v);$('#g'+k).textContent=v==null?'—':v.toFixed(P[k].d)+' '+P[k].u;$('#c'+k).innerHTML=chip(c);if(c>w){w=c;dom=[k]}else if(c===w&&c>=0)dom.push(k)});
- $('#ban').className='ban c'+w;$('#ban').innerHTML=`<h3>${d.f} · ${String(hr).padStart(2,'0')}:00 · ${w<0?'Sin datos':CAT[w]}</h3><p>${w<0?'Sin lecturas válidas.':HM[w]}</p><p style="font-size:13px"><b>Determinante:</b> ${dom.map(k=>P[k].n).join(' + ')||'—'}${row[6]!=null?' · '+row[6].toFixed(1)+' °C':''}</p>`;
- $('#hsl').value=hr;$('#clk').textContent=String(hr).padStart(2,'0')+':00'}
-
-/* ---- 8. Cobertura ---- */
-function tabCob(){const v=[['PM₁₀','PM10'],['PM₂.₅','PM25'],['O₃','O3'],['CO','CO'],['Temperatura','ET']];
- $('#tCob').innerHTML=`<thead><tr><th>% de horas con dato</th><th>2023</th><th>2024</th></tr></thead><tbody>${v.map(a=>`<tr><td>${a[0]}</td><td>${D[2023].cob[a[1]]}%</td><td>${D[2024].cob[a[1]]}%</td></tr>`).join('')}<tr><td><b>Días con registro</b></td><td>${D[2023].dias.length} de 365</td><td>${D[2024].dias.length} de 366</td></tr></tbody>`}
-
-$('#vsel').innerHTML=Object.keys(V).map(k=>`<option value="${k}">${V[k][0]}</option>`).join('');$('#vsel').onchange=drawMes;$('#hsel').onchange=drawHoras;$('#xsel').onchange=$('#ysel').onchange=drawMeteo;
-kpis();drawMes();tabMes();drawCats();drawHeat();tabEv();drawHoras();drawMeteo();initSim();tabCob();
-</script>
-</body>
+          criticalChartInfo = new Chart(
+            document.getElementById("criticalChart"),
+            {
+              type: "line",
+              data: {
+                labels: hours,
+                datasets: [
+                  {
+                    label: "PM10",
+                    data: pm10H,
+                    borderColor: "rgba(231, 76, 60, 1)",
+                  },
+                  {
+                    label: "PM2.5",
+                    data: pm25H,
+                    borderColor: "rgba(46, 204, 113, 1)",
+                  },
+                  {
+                    label: "O3 (x1000)",
+                    data: o3H,
+                    borderColor: "rgba(52, 152, 219, 1)",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } },
+              },
+            },
+          );
+        });
+      });
+    </script>
+  </body>
 </html>
