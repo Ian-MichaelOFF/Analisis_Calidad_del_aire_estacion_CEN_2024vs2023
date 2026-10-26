@@ -576,19 +576,27 @@
     <section id="comparativo" style="--c: var(--c-o3)">
       <div class="wrap">
         <div class="band">
-          <h2>⚡ Comparativo Interanual <span style="color: var(--mut); font-size: 0.6em">2023 vs 2024</span></h2>
+          <h2>
+            ⚡ Comparativo Interanual
+            <span style="color: var(--mut); font-size: 0.6em"
+              >2023 vs 2024</span
+            >
+          </h2>
           <p>
-            Evidencia para sustentar los cambios entre años: calidad de los datos,
-            promedios, horas por categoría NOM-172, estacionalidad, patrón horario,
-            meteorología y el evento de Año Nuevo. Estas gráficas siempre muestran ambos
-            años; el perfil horario y la meteorología respetan el mes elegido arriba.
+            Evidencia para sustentar los cambios entre años: calidad de los
+            datos, promedios, horas por categoría NOM-172, estacionalidad,
+            patrón horario, meteorología y el evento de Año Nuevo. Estas
+            gráficas siempre muestran ambos años; el perfil horario y la
+            meteorología respetan el mes elegido arriba.
           </p>
         </div>
 
         <div class="grid k4" id="cmp-means" style="margin-bottom: 24px"></div>
 
         <div class="tools" style="margin-bottom: 14px">
-          <div style="font-size: 13.5px; color: var(--mut)">Contaminante para Estacionalidad y Perfil horario:</div>
+          <div style="font-size: 13.5px; color: var(--mut)">
+            Contaminante para Estacionalidad y Perfil horario:
+          </div>
           <select id="cmp-var" class="btn" style="background: var(--bg2)">
             <option value="PM10">Partículas PM₁₀</option>
             <option value="PM25">Partículas PM₂.₅</option>
@@ -601,13 +609,18 @@
           <div class="card" style="--c: var(--cat-nodata)">
             <h3>Disponibilidad de datos</h3>
             <p style="font-size: 13px; color: var(--mut); margin-bottom: 16px">
-              % de horas con lectura válida por variable. Explica qué sí se puede comparar.
+              % de horas con lectura válida por variable. Explica qué sí se
+              puede comparar.
             </p>
             <div id="cmp-avail"></div>
             <p style="font-size: 12px; color: var(--mut)">
-              * Según el reporte; no vienen en los archivos del dashboard (SO₂ sin datos en 2024; NO/NO₂/NOx sin datos en 2023).
+              * Según el reporte; no vienen en los archivos del dashboard (SO₂
+              sin datos en 2024; NO/NO₂/NOx sin datos en 2023).
             </p>
-            <div class="trend-legend"><span style="color:#4CC9F0">■ 2024</span><span style="color:#FFC83D">■ 2023</span></div>
+            <div class="trend-legend">
+              <span style="color: #4cc9f0">■ 2024</span
+              ><span style="color: #ffc83d">■ 2023</span>
+            </div>
           </div>
 
           <div class="card" style="--c: var(--cat-buena)">
@@ -615,7 +628,11 @@
             <p style="font-size: 13px; color: var(--mut); margin-bottom: 12px">
               Horas en cada categoría (NowCast) por contaminante y año.
             </p>
-            <div id="cmp-legend-cat" class="trend-legend" style="margin: 0 0 14px"></div>
+            <div
+              id="cmp-legend-cat"
+              class="trend-legend"
+              style="margin: 0 0 14px"
+            ></div>
             <div id="cmp-hours"></div>
           </div>
 
@@ -624,8 +641,15 @@
             <p style="font-size: 13px; color: var(--mut); margin-bottom: 8px">
               Invierno alto, temporada de lluvias baja. Año completo.
             </p>
-            <svg id="cmp-season" viewBox="0 0 800 250" style="width: 100%; overflow: visible"></svg>
-            <div class="trend-legend"><span style="color:#4CC9F0">■ 2024 (sólida)</span><span style="color:#FFC83D">■ 2023 (punteada)</span></div>
+            <svg
+              id="cmp-season"
+              viewBox="0 0 800 250"
+              style="width: 100%; overflow: visible"
+            ></svg>
+            <div class="trend-legend">
+              <span style="color: #4cc9f0">■ 2024 (sólida)</span
+              ><span style="color: #ffc83d">-- 2023 (punteada)</span>
+            </div>
           </div>
 
           <div class="card" style="--c: var(--sky)">
@@ -633,39 +657,85 @@
             <p style="font-size: 13px; color: var(--mut); margin-bottom: 8px">
               Promedio de cada hora del día en el periodo seleccionado.
             </p>
-            <svg id="cmp-profile" viewBox="0 0 800 250" style="width: 100%; overflow: visible"></svg>
-            <div class="trend-legend"><span style="color:#4CC9F0">■ 2024 (sólida)</span><span style="color:#FFC83D">■ 2023 (punteada)</span></div>
+            <svg
+              id="cmp-profile"
+              viewBox="0 0 800 250"
+              style="width: 100%; overflow: visible"
+            ></svg>
+            <div class="trend-legend">
+              <span style="color: #4cc9f0">■ 2024 (sólida)</span
+              ><span style="color: #ffc83d">-- 2023 (punteada)</span>
+            </div>
           </div>
 
           <div class="card" style="grid-column: 1 / -1; --c: var(--cat-mala)">
             <h3>Influencia de la meteorología</h3>
             <p style="font-size: 13px; color: var(--mut); margin-bottom: 14px">
-              Cada punto es una hora (muestreo 1 de cada 3); la línea gruesa es el promedio por rango.
+              Cada punto es una hora (muestreo 1 de cada 3); la línea gruesa es
+              el promedio por rango.
             </p>
             <div class="grid k2" style="gap: 24px">
               <div>
-                <h4 style="font-size: 15px; margin-bottom: 6px">Temperatura vs Ozono (O₃)</h4>
-                <svg id="cmp-sc1" viewBox="0 0 420 285" style="width: 100%"></svg>
-                <div id="cmp-sc1-r" class="trend-legend" style="flex-wrap: wrap"></div>
+                <h4 style="font-size: 15px; margin-bottom: 6px">
+                  Temperatura vs Ozono (O₃)
+                </h4>
+                <svg
+                  id="cmp-sc1"
+                  viewBox="0 0 420 285"
+                  style="width: 100%"
+                ></svg>
+                <div
+                  id="cmp-sc1-r"
+                  class="trend-legend"
+                  style="flex-wrap: wrap"
+                ></div>
               </div>
               <div>
-                <h4 style="font-size: 15px; margin-bottom: 6px">Velocidad del viento vs PM₁₀</h4>
-                <svg id="cmp-sc2" viewBox="0 0 420 285" style="width: 100%"></svg>
-                <div id="cmp-sc2-r" class="trend-legend" style="flex-wrap: wrap"></div>
+                <h4 style="font-size: 15px; margin-bottom: 6px">
+                  Velocidad del viento vs PM₁₀
+                </h4>
+                <svg
+                  id="cmp-sc2"
+                  viewBox="0 0 420 285"
+                  style="width: 100%"
+                ></svg>
+                <div
+                  id="cmp-sc2-r"
+                  class="trend-legend"
+                  style="flex-wrap: wrap"
+                ></div>
               </div>
             </div>
           </div>
 
-          <div class="card" style="grid-column: 1 / -1; --c: var(--cat-muymala)">
+          <div
+            class="card"
+            style="grid-column: 1 / -1; --c: var(--cat-muymala)"
+          >
             <div class="tools">
               <div>
                 <h3>🎆 Evento atípico: “Efecto Año Nuevo” (1 de enero)</h3>
-                <p id="ny-text" style="font-size: 14px; color: var(--mut); margin-top: 4px"></p>
+                <p
+                  id="ny-text"
+                  style="font-size: 14px; color: var(--mut); margin-top: 4px"
+                ></p>
               </div>
-              <button class="btn on" onclick="goNewYear()">Ver 1 de enero en el simulador</button>
+              <button class="btn on" onclick="goNewYear()">
+                Ver 1 de enero en el simulador
+              </button>
             </div>
-            <svg id="cmp-ny" viewBox="0 0 800 250" style="width: 100%; overflow: visible"></svg>
-            <div class="trend-legend"><span style="color:#4CC9F0">■ 1 ene 2024 (sólida)</span><span style="color:#FFC83D">■ 1 ene 2023 (punteada)</span><span style="color:var(--mut)">PM₁₀ horario; fondo = categorías NOM-172</span></div>
+            <svg
+              id="cmp-ny"
+              viewBox="0 0 800 250"
+              style="width: 100%; overflow: visible"
+            ></svg>
+            <div class="trend-legend">
+              <span style="color: #4cc9f0">■ 1 ene 2024 (sólida)</span
+              ><span style="color: #ffc83d">-- 1 ene 2023 (punteada)</span
+              ><span style="color: var(--mut)"
+                >PM₁₀ horario; fondo = categorías NOM-172</span
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -777,7 +847,13 @@
                 class="btn"
                 style="background: var(--bg2)"
               ></select>
-              <button class="btn" onclick="goNewYear()" title="Evento atípico del 1 de enero">🎆 1 de enero</button>
+              <button
+                class="btn"
+                onclick="goNewYear()"
+                title="Evento atípico del 1 de enero"
+              >
+                🎆 1 de enero
+              </button>
               <button class="btn on" id="btn-play" style="min-width: 110px">
                 ▶ Iniciar
               </button>
@@ -838,7 +914,7 @@
                 >
                 &nbsp;&nbsp;&nbsp;
                 <span style="color: #ffc83d; font-weight: 700"
-                  >■ 2023 (Línea Punteada)</span
+                  >-- 2023 (Línea Punteada)</span
                 >
               </div>
             </div>
@@ -1306,7 +1382,7 @@
         // Leyenda
         if (isComp) {
           $("#trend-legend").innerHTML =
-            `<span style="color:#4CC9F0;">■ 2024: ${tName}</span><span style="color:#FFC83D;">■ 2023: ${tName}</span>`;
+            `<span style="color:#4CC9F0;">■ 2024: ${tName}</span><span style="color:#FFC83D;">-- 2023: ${tName}</span>`;
         } else {
           $("#trend-legend").innerHTML =
             `<span style="color:${tColor};">■ ${activeYear}: ${tName}</span>`;
@@ -1339,7 +1415,8 @@
       }
       function corrXY(h, cx, cy) {
         const p = h.filter(
-          (r) => r[cx] != null && r[cy] != null && !isNaN(r[cx]) && !isNaN(r[cy]),
+          (r) =>
+            r[cx] != null && r[cy] != null && !isNaN(r[cx]) && !isNaN(r[cy]),
         );
         if (p.length < 3) return null;
         const mx = p.reduce((a, r) => a + r[cx], 0) / p.length;
@@ -1365,8 +1442,11 @@
           Y0 = 14,
           Wc = W - X0 - 15,
           n = o.n;
-        const vals = o.series.flatMap((s) => s.arr.filter((v) => v != null && !isNaN(v)));
-        const maxVal = o.max != null ? o.max : (vals.length ? Math.max(...vals) : 1) * 1.18;
+        const vals = o.series.flatMap((s) =>
+          s.arr.filter((v) => v != null && !isNaN(v)),
+        );
+        const maxVal =
+          o.max != null ? o.max : (vals.length ? Math.max(...vals) : 1) * 1.18;
         const yf = (v) => Y0 + Hh - (v / maxVal) * Hh;
         const xf = (i) => X0 + (n > 1 ? i / (n - 1) : 0) * Wc;
         let s = "";
@@ -1436,8 +1516,12 @@
             const ch = ((b - a) / a) * 100;
             const good = ch < -0.5;
             const flat = Math.abs(ch) <= 5;
-            const chipC = good && !flat ? "#2ECC71" : flat ? "#9DB6CB" : "#FF7A2F";
-            const note = k === "PM10" ? '<div style="font-size:11.5px;color:var(--mut);margin-top:4px">2023 sin datos de ago–oct</div>' : "";
+            const chipC =
+              good && !flat ? "#2ECC71" : flat ? "#9DB6CB" : "#FF7A2F";
+            const note =
+              k === "PM10"
+                ? '<div style="font-size:11.5px;color:var(--mut);margin-top:4px">2023 sin datos de ago–oct</div>'
+                : "";
             return `<div class="card kpi" style="--c:${P[k].c}">
               <small>Promedio anual ${n} (${u})</small>
               <b>${fmtN(b, d)}</b>
@@ -1472,7 +1556,9 @@
 
       // 3) Horas por categoría
       function renderHoursCat() {
-        $("#cmp-legend-cat").innerHTML = CAT.map((n, i) => `<span style="color:${COL[i]}">■ ${n}</span>`).join("");
+        $("#cmp-legend-cat").innerHTML = CAT.map(
+          (n, i) => `<span style="color:${COL[i]}">■ ${n}</span>`,
+        ).join("");
         const out = [];
         ["PM10", "PM25", "O3", "CO"].forEach((k) =>
           [2023, 2024].forEach((y) => {
@@ -1498,18 +1584,46 @@
       function renderSeason() {
         const k = $("#cmp-var").value,
           c = RAW[k];
-        const mm = (h) => Array.from({ length: 12 }, (_, m) => colMean(h.filter((r) => r[11] === m + 1), c));
+        const mm = (h) =>
+          Array.from({ length: 12 }, (_, m) =>
+            colMean(
+              h.filter((r) => r[11] === m + 1),
+              c,
+            ),
+          );
         const a23 = mm(H23),
           a24 = mm(H24);
         const dg = k === "O3" ? 3 : 1;
-        const top = Math.max(...a23.filter((v) => v != null), ...a24.filter((v) => v != null));
+        const top = Math.max(
+          ...a23.filter((v) => v != null),
+          ...a24.filter((v) => v != null),
+        );
         const notes = [
-          { i: 0, v: a24[0], text: fmtN(a24[0], dg), color: C24, dy: a24[0] >= a23[0] ? -10 : 18 },
-          { i: 0, v: a23[0], text: fmtN(a23[0], dg), color: C23, dy: a23[0] > a24[0] ? -10 : 18 },
+          {
+            i: 0,
+            v: a24[0],
+            text: fmtN(a24[0], dg),
+            color: C24,
+            dy: a24[0] >= a23[0] ? -10 : 18,
+          },
+          {
+            i: 0,
+            v: a23[0],
+            text: fmtN(a23[0], dg),
+            color: C23,
+            dy: a23[0] > a24[0] ? -10 : 18,
+          },
         ];
         if (a23.some((v) => v == null)) {
           const firstNull = a23.findIndex((v) => v == null);
-          notes.push({ i: Math.min(11, firstNull + 1), v: top * 0.12, text: "2023 sin datos", color: "#9DB6CB", dot: false, dy: 0 });
+          notes.push({
+            i: Math.min(11, firstNull + 1),
+            v: top * 0.12,
+            text: "2023 sin datos",
+            color: "#9DB6CB",
+            dot: false,
+            dy: 0,
+          });
         }
         drawLines("cmp-season", {
           n: 12,
@@ -1546,9 +1660,16 @@
         const valid = p24.map((v, i) => [v, i]).filter((x) => x[0] != null);
         const mx = valid.reduce((a, b) => (b[0] > a[0] ? b : a));
         const mn = valid.reduce((a, b) => (b[0] < a[0] ? b : a));
-        const xb = k === "O3"
-          ? [{ a: 6, b: 8, label: "Mínimo" }, { a: 13, b: 15, label: "Pico O₃" }]
-          : [{ a: 7, b: 9, label: "Hora pico AM" }, { a: 19, b: 22, label: "Hora pico PM" }];
+        const xb =
+          k === "O3"
+            ? [
+                { a: 6, b: 8, label: "Mínimo" },
+                { a: 13, b: 15, label: "Pico O₃" },
+              ]
+            : [
+                { a: 7, b: 9, label: "Hora pico AM" },
+                { a: 19, b: 22, label: "Hora pico PM" },
+              ];
         drawLines("cmp-profile", {
           n: 24,
           dg,
@@ -1559,8 +1680,19 @@
           ],
           xl: [0, 3, 6, 9, 12, 15, 18, 21, 23].map((i) => [i, hhmm(i)]),
           notes: [
-            { i: mx[1], v: mx[0], text: `máx ${hhmm(mx[1])} · ${fmtN(mx[0], dg)}`, color: C24 },
-            { i: mn[1], v: mn[0], text: `mín ${hhmm(mn[1])} · ${fmtN(mn[0], dg)}`, color: C24, dy: 20 },
+            {
+              i: mx[1],
+              v: mx[0],
+              text: `máx ${hhmm(mx[1])} · ${fmtN(mx[0], dg)}`,
+              color: C24,
+            },
+            {
+              i: mn[1],
+              v: mn[0],
+              text: `mín ${hhmm(mn[1])} · ${fmtN(mn[0], dg)}`,
+              color: C24,
+              dy: 20,
+            },
           ],
         });
       }
@@ -1586,15 +1718,28 @@
         }
         s += `<text x="${X0 + Wc / 2}" y="${Y0 + Hh + 34}" text-anchor="middle" font-size="11.5" fill="#C7D9E8">${o.xl}</text>`;
         s += `<text x="12" y="${Y0 + Hh / 2}" transform="rotate(-90 12 ${Y0 + Hh / 2})" text-anchor="middle" font-size="11.5" fill="#C7D9E8">${o.yl}</text>`;
-        [[getH(2023), C23, 0.3], [getH(2024), C24, 0.3]].forEach(([h, col, op]) => {
+        [
+          [getH(2023), C23, 0.3],
+          [getH(2024), C24, 0.3],
+        ].forEach(([h, col, op]) => {
           let pts = "";
           const bins = {};
           for (let i = 0; i < h.length; i++) {
             const x = h[i][o.x],
               y = h[i][o.y];
-            if (x == null || y == null || isNaN(x) || isNaN(y) || x < o.xmin || x > o.xmax) continue;
-            (bins[Math.floor(x / o.bin)] = bins[Math.floor(x / o.bin)] || []).push(y);
-            if (i % 3 === 0 && y <= o.ymax) pts += `M${xf(x).toFixed(1)} ${yf(y).toFixed(1)}h0.1`;
+            if (
+              x == null ||
+              y == null ||
+              isNaN(x) ||
+              isNaN(y) ||
+              x < o.xmin ||
+              x > o.xmax
+            )
+              continue;
+            (bins[Math.floor(x / o.bin)] =
+              bins[Math.floor(x / o.bin)] || []).push(y);
+            if (i % 3 === 0 && y <= o.ymax)
+              pts += `M${xf(x).toFixed(1)} ${yf(y).toFixed(1)}h0.1`;
           }
           s += `<path d="${pts}" stroke="${col}" stroke-opacity="${op}" stroke-width="3" stroke-linecap="round" fill="none"/>`;
           let ln = "";
@@ -1604,15 +1749,41 @@
             .forEach((b) => {
               if (bins[b].length < 15) return;
               const m = bins[b].reduce((a, v) => a + v, 0) / bins[b].length;
-              ln += (ln ? "L" : "M") + xf((b + 0.5) * o.bin).toFixed(1) + " " + yf(Math.min(m, o.ymax)).toFixed(1);
+              ln +=
+                (ln ? "L" : "M") +
+                xf((b + 0.5) * o.bin).toFixed(1) +
+                " " +
+                yf(Math.min(m, o.ymax)).toFixed(1);
             });
           s += `<path d="${ln}" fill="none" stroke="${col}" stroke-width="3.5" stroke-linejoin="round" ${col === C23 ? 'stroke-dasharray="6 4"' : ""}/>`;
         });
         $("#" + id).innerHTML = s;
       }
       function renderMeteo() {
-        scatter("cmp-sc1", { x: 7, y: 0, xmin: 5, xmax: 40, ymin: 0, ymax: 0.16, yd: 2, bin: 2, xl: "Temperatura (°C)", yl: "O₃ (ppm)" });
-        scatter("cmp-sc2", { x: 10, y: 4, xmin: 0, xmax: 14, ymin: 0, ymax: 250, yd: 0, bin: 1, xl: "Viento (m/s) · eje PM₁₀ recortado a 250", yl: "PM₁₀ (µg/m³)" });
+        scatter("cmp-sc1", {
+          x: 7,
+          y: 0,
+          xmin: 5,
+          xmax: 40,
+          ymin: 0,
+          ymax: 0.16,
+          yd: 2,
+          bin: 2,
+          xl: "Temperatura (°C)",
+          yl: "O₃ (ppm)",
+        });
+        scatter("cmp-sc2", {
+          x: 10,
+          y: 4,
+          xmin: 0,
+          xmax: 14,
+          ymin: 0,
+          ymax: 250,
+          yd: 0,
+          bin: 1,
+          xl: "Viento (m/s) · eje PM₁₀ recortado a 250",
+          yl: "PM₁₀ (µg/m³)",
+        });
         const r = (cx, cy) =>
           [2023, 2024]
             .map((y) => {
@@ -1620,15 +1791,20 @@
               return `<span style="color:${y === 2024 ? C24 : C23}">r ${y} = ${v == null ? "—" : v.toFixed(2)}</span>`;
             })
             .join("");
-        $("#cmp-sc1-r").innerHTML = r(7, 0) + '<span style="color:var(--mut)">A mayor temperatura, más ozono</span>';
-        $("#cmp-sc2-r").innerHTML = r(10, 4) + '<span style="color:var(--mut)">Relación débil: el viento ayuda a diluir, pero no es el único factor</span>';
+        $("#cmp-sc1-r").innerHTML =
+          r(7, 0) +
+          '<span style="color:var(--mut)">A mayor temperatura, más ozono</span>';
+        $("#cmp-sc2-r").innerHTML =
+          r(10, 4) +
+          '<span style="color:var(--mut)">Relación débil: el viento ayuda a diluir, pero no es el único factor</span>';
       }
 
       // 7) Evento Año Nuevo
       function renderNY() {
         const a23 = H23.slice(0, 24).map((r) => r[4]);
         const a24 = H24.slice(0, 24).map((r) => r[4]);
-        const peak = (a) => a.reduce((b, v, i) => (v != null && v > b[0] ? [v, i] : b), [-1, 0]);
+        const peak = (a) =>
+          a.reduce((b, v, i) => (v != null && v > b[0] ? [v, i] : b), [-1, 0]);
         const p23 = peak(a23),
           p24 = peak(a24);
         const b = P.PM10.b;
@@ -1646,10 +1822,23 @@
             { arr: a23, color: C23, dash: true, w: 2.5 },
             { arr: a24, color: C24, w: 3.5 },
           ],
-          xl: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 23].map((i) => [i, hhmm(i)]),
+          xl: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 23].map((i) => [
+            i,
+            hhmm(i),
+          ]),
           notes: [
-            { i: p24[1], v: p24[0], text: `${p24[0]} µg/m³ · ${hhmm(p24[1])}`, color: C24 },
-            { i: p23[1], v: p23[0], text: `${p23[0]} µg/m³ · ${hhmm(p23[1])}`, color: C23 },
+            {
+              i: p24[1],
+              v: p24[0],
+              text: `${p24[0]} µg/m³ · ${hhmm(p24[1])}`,
+              color: C24,
+            },
+            {
+              i: p23[1],
+              v: p23[0],
+              text: `${p23[0]} µg/m³ · ${hhmm(p23[1])}`,
+              color: C23,
+            },
           ],
         });
         $("#ny-text").textContent =
