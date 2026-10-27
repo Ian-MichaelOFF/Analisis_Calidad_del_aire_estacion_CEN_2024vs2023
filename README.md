@@ -20,10 +20,9 @@ A partir de los criterios normativos de la **NOM-172-SEMARNAT-2023**, se calcula
 ## Novedades del Sprint 2
 
 1. **Pipeline de Procesamiento Multianual (2023 & 2024):**  
-   Se adaptaron los notebooks del Sprint 1 para procesar `CEN_marzo2023.csv` generando:
-   - `Datos/CEN_marzo2023_procesado.csv` (744 horas con NowCast de 12 h para partículas, promedio móvil de 8 h para CO e indicadores de la NOM-172).
-   - `Datos/numeralia_diaria_2023.csv` (31 días consolidados con el principio de máximo riesgo).
-   - `Datos/dashboard_2023.json` y `Datos/dashboard_2024.json`.
+   Los scripts de procesamiento anual generan los archivos JavaScript con los datos que utiliza el dashboard:
+   - `Datos/datos_2023.js`
+   - `Datos/datos_2024.js`
 
 2. **Reporte de Atípicos Homologado:**  
    Se generó `Datos/Reporte_Atipicos_CEN_marzo2023.xlsx` con el **mismo formato que el de 2024:
@@ -40,8 +39,8 @@ A partir de los criterios normativos de la **NOM-172-SEMARNAT-2023**, se calcula
 4. **Conmutación Interactiva en Todas las Gráficas:**  
    Cada gráfica y sección del dashboard (Numeralia, Calendario, Simulador, Mes Completo y Disponibilidad) cuenta con sus propios botones de alternancia `[2024]` / `[2023]` sincronizados en tiempo real.
 
-5. **Arquitectura de Datos Externa y Modular:**  
-   Se desacoplaron los datos del código fuente HTML; el dashboard carga asíncronamente los archivos desde `Datos/`, manteniendo compatibilidad total tanto en entornos web (`http://`) como en apertura local directa de escritorio (`file://`).
+5. **Carga de Datos:**
+   El dashboard incluye `Datos/datos_2023.js` y `Datos/datos_2024.js` desde `index.html`. No depende de archivos JSON ni de un bundle JavaScript de respaldo.
 
 ---
 
@@ -100,26 +99,24 @@ El análisis aplica estrictamente la **NOM-172-SEMARNAT-2023** (vigente desde en
 ```
 ├── index.html                           # Dashboard interactivo completo
 ├── README.md                            # Documentación del proyecto
-├── inspect_2024.py                      # Extractor de métricas y generador de JSON 2024
-├── procesar_2023.py                     # Pipeline NOM-172 para marzo 2023
-├── generar_reporte_atipicos_2023.py     # Generador del reporte de atípicos 2023 homologado
+├── BD_2023 (1).xlsx                     # Base de datos fuente 2023
+├── BD_2024 (1).xlsx                     # Base de datos fuente 2024
 │
 ├── Datos/
-│   ├── CEN_marzo.xlsx                   # Datos limpios y procesados de marzo 2024
-│   ├── CEN_marzo2023.csv                # Datos fuente horarios de marzo 2023
-│   ├── CEN_marzo2023.xlsx               # Datos fuente en Excel de marzo 2023
-│   ├── CEN_marzo2023_procesado.csv      # Salida horaria con NowCast y CO_8h (2023)
-│   ├── numeralia_diaria_2024.csv        # Resumen diario oficial de marzo 2024
-│   ├── numeralia_diaria_2023.csv        # Resumen diario oficial de marzo 2023
-│   ├── dashboard_2024.json              # Datos compactos para el dashboard (2024)
-│   ├── dashboard_2023.json              # Datos compactos para el dashboard (2023)
-│   ├── datos_dashboard.js               # Bundle JS de respaldo para ejecución local directa
-│   ├── Reporte_Atipicos_CEN_marzo.xlsx  # Auditoría y reporte de atípicos 2024
-│   └── Reporte_Atipicos_CEN_marzo2023.xlsx # Auditoría y reporte de atípicos 2023
+│   ├── BD_2023 (1).xlsx                 # Base de datos fuente 2023
+│   ├── BD_2024 (1).xlsx                 # Base de datos fuente 2024
+│   ├── datos_2023.js                    # Datos anuales de 2023 para el dashboard
+│   ├── datos_2024.js                    # Datos anuales de 2024 para el dashboard
+│   ├── numeralia_diaria_2023.csv        # Resumen diario 2023
+│   └── numeralia_diaria_2024.csv        # Resumen diario 2024
 │
 ├── Notebooks py/
-│   ├── Calculos_Diarios_CEN.ipynb       # Notebook de cálculo de indicadores diarios
-│   └── Indice_AIRE_Y_SALUD_CEN (1).ipynb# Notebook de cálculo horario del Índice
+│   ├── Calculos_Diarios_CEN.ipynb
+│   ├── Indice_AIRE_Y_SALUD_CEN (1).ipynb
+│   ├── generar_reporte_atipicos_2023.py
+│   ├── limpieza_años.py
+│   ├── procesar_2023_anual.py
+│   └── procesar_2024_anual.py
 │
 └── Doc/
     └── 26B_AVI_d04_sp1_eq1_Manzo_Mejía_Susana_Rubi.docx.pdf # Reporte Sprint 1
@@ -129,9 +126,9 @@ El análisis aplica estrictamente la **NOM-172-SEMARNAT-2023** (vigente desde en
 
 ## Cómo Ejecutar el Proyecto
 
-1. **Apertura Directa en Local :**
+1. **Apertura directa en local:**
    - Haz doble clic en `index.html` en el Explorador de Windows.
-   - El dashboard cargará de inmediato usando los datos de `Datos/datos_dashboard.js` sin requerir servidor web ni configuraciones adicionales.
+   - El dashboard cargará los datos desde `Datos/datos_2023.js` y `Datos/datos_2024.js`.
 
 ## Limitaciones Identificadas en los Datos
 
