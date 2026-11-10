@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AIMAJ · Estación Centro (CEN) · Análisis Multianual</title>
+    <title>AIMAJ · Estación Centro (CEN) · Análisis histórico 2015–2024</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,13 +12,21 @@
       rel="stylesheet"
     />
 
-    <!-- Carga de datos local para evitar CORS -->
+    <!-- Datos históricos locales (2015–2024) para evitar CORS -->
+    <script src="Datos/datos_2015.js"></script>
+    <script src="Datos/datos_2016.js"></script>
+    <script src="Datos/datos_2017.js"></script>
+    <script src="Datos/datos_2018.js"></script>
+    <script src="Datos/datos_2019.js"></script>
+    <script src="Datos/datos_2020.js"></script>
+    <script src="Datos/datos_2021.js"></script>
+    <script src="Datos/datos_2022.js"></script>
     <script src="Datos/datos_2023.js"></script>
     <script src="Datos/datos_2024.js"></script>
 
     <style>
       :root {
-        color-scheme: dark; /* Fuerza la renderización nativa oscura para desplegables */
+        color-scheme: dark;
         --bg: #071626;
         --bg2: #0b1f33;
         --bg-card: #112b44;
@@ -30,7 +38,6 @@
         --sky: #4cc9f0;
         --accent-purple: #9b5de5;
 
-        /* Colores NOM-172 */
         --cat-buena: #2ecc71;
         --cat-aceptable: #ffc83d;
         --cat-mala: #ff7a2f;
@@ -54,7 +61,7 @@
       }
       html {
         scroll-behavior: smooth;
-        scroll-padding-top: 80px;
+        scroll-padding-top: 120px;
       }
       body {
         background: var(--bg);
@@ -84,17 +91,17 @@
         outline-offset: 2px;
       }
 
-      /* Navegación */
       nav {
         position: sticky;
         top: 0;
         z-index: 100;
-        background: rgba(7, 22, 38, 0.92);
+        background: rgba(7, 22, 38, 0.94);
         backdrop-filter: blur(12px);
         display: flex;
-        gap: 8px;
-        padding: 12px 20px;
+        gap: 10px;
+        padding: 10px 18px;
         align-items: center;
+        flex-wrap: wrap;
         border-bottom: 1px solid var(--line);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       }
@@ -102,43 +109,68 @@
         font: 800 19px "Outfit";
         color: var(--sun);
         text-decoration: none;
-        margin-right: 14px;
+        margin-right: 6px;
         white-space: nowrap;
       }
-      nav a {
+      .nav-links {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      nav a.nav-link {
         color: var(--tx);
         text-decoration: none;
-        font-size: 13.5px;
+        font-size: 13px;
         font-weight: 500;
-        padding: 6px 12px;
+        padding: 6px 10px;
         border-radius: 8px;
         transition: var(--transition);
         white-space: nowrap;
       }
-      nav a:hover {
+      nav a.nav-link:hover {
         background: var(--bg-card);
         color: var(--sun);
       }
 
       .view-controls {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         gap: 8px;
         margin-left: auto;
         background: var(--bg2);
-        padding: 5px;
-        border-radius: 10px;
+        padding: 6px 8px;
+        border-radius: 12px;
         border: 1px solid var(--line);
+        flex-wrap: wrap;
       }
-
-      /* Corrección UI de Selectores Desplegables */
+      .year-picker {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .year-picker label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--mut);
+        text-transform: uppercase;
+        padding-left: 2px;
+      }
+      .year-picker select,
       select.btn,
       select#month-selector {
         background: var(--bg-card) !important;
         color: var(--tx) !important;
         outline: none;
         border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
       }
+      .year-picker select:focus,
       select.btn:focus,
       select#month-selector:focus {
         border-color: var(--sun);
@@ -150,24 +182,17 @@
         font-weight: 500;
       }
 
-      #month-selector {
-        border-radius: 8px;
-        padding: 6px 12px;
-        font-size: 13.5px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
       .btn-y {
         background: transparent;
         border: 0;
-        padding: 6px 14px;
+        padding: 6px 12px;
         border-radius: 7px;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
         color: var(--mut);
         transition: var(--transition);
+        white-space: nowrap;
       }
       .btn-y.active {
         background: var(--sun);
@@ -179,14 +204,13 @@
         background: var(--card-border);
       }
 
-      /* Layout general */
       .wrap {
-        max-width: 1200px;
+        max-width: 1280px;
         margin: auto;
         padding: 0 16px;
       }
       section {
-        padding: 60px 0;
+        padding: 56px 0;
         border-bottom: 1px solid rgba(37, 80, 111, 0.4);
       }
       section:nth-of-type(even) {
@@ -205,7 +229,7 @@
       .band p {
         margin: 8px 0 0;
         color: var(--mut);
-        max-width: 54em;
+        max-width: 60em;
         font-size: 15px;
       }
 
@@ -214,23 +238,23 @@
         gap: 20px;
       }
       .k4 {
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       }
       .k2 {
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      }
+      .k3 {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       }
 
       .card {
         background: rgba(17, 43, 68, 0.75);
         backdrop-filter: blur(8px);
         border-radius: 14px;
-        padding: 24px;
+        padding: 22px;
         border: 1px solid var(--card-border);
         border-top: 4px solid var(--c, var(--sky));
         box-shadow: var(--shadow);
-        transition:
-          transform 0.2s ease,
-          border-color 0.2s ease;
       }
 
       .kpi {
@@ -240,7 +264,7 @@
       }
       .kpi b {
         display: block;
-        font: 800 36px "Outfit";
+        font: 800 34px "Outfit";
         color: var(--c, var(--sun));
         line-height: 1.1;
         margin: 4px 0 6px;
@@ -254,19 +278,19 @@
       .hero {
         position: relative;
         overflow: hidden;
-        padding: 70px 20px;
+        padding: 62px 20px;
         background: radial-gradient(circle at 80% 20%, #153a5b 0%, #081b2e 70%);
         border-bottom: 1px solid var(--line);
       }
       .hero h1 {
-        font-size: clamp(32px, 5vw, 56px);
+        font-size: clamp(32px, 5vw, 54px);
         font-weight: 800;
-        max-width: 14em;
+        max-width: 16em;
         letter-spacing: -1px;
         margin-bottom: 16px;
       }
       .hero p {
-        max-width: 50em;
+        max-width: 58em;
         font-size: 17px;
         color: #c7d9e8;
       }
@@ -284,16 +308,47 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
+      .hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .badge-obs {
+        background: rgba(76, 201, 240, 0.16);
+        color: #8ee7ff;
+        border: 1px solid rgba(76, 201, 240, 0.45);
+      }
+      .badge-pred {
+        background: rgba(155, 93, 229, 0.18);
+        color: #d3b6ff;
+        border: 1px solid rgba(155, 93, 229, 0.55);
+      }
+      .badge-hist {
+        background: rgba(255, 200, 61, 0.14);
+        color: var(--sun);
+        border: 1px solid rgba(255, 200, 61, 0.45);
+      }
 
-      /* Botones estándar (se excluyen los selectores para evitar el color sólido oscurecedor) */
       button.btn {
         background: var(--bg-card);
         border: 1px solid var(--line);
         color: var(--tx);
         border-radius: 9px;
-        padding: 8px 16px;
+        padding: 8px 14px;
         cursor: pointer;
-        font-size: 13.5px;
+        font-size: 13px;
         font-weight: 600;
         transition: var(--transition);
         display: inline-flex;
@@ -306,17 +361,6 @@
         color: #071626;
         border-color: var(--sun);
         box-shadow: 0 2px 10px rgba(255, 200, 61, 0.25);
-      }
-      select.btn {
-        border-radius: 9px;
-        padding: 8px 16px;
-        cursor: pointer;
-        font-size: 13.5px;
-        font-weight: 600;
-        transition: var(--transition);
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
       }
 
       .tools {
@@ -393,7 +437,6 @@
         color: #fff;
       }
 
-      /* Tendencias (Nuevas guías visuales integradas en el JS) */
       .trend-container {
         background: #091624;
         border-radius: 10px;
@@ -405,31 +448,392 @@
         display: flex;
         gap: 16px;
         justify-content: center;
+        flex-wrap: wrap;
         font-size: 13px;
         font-weight: 600;
         margin-top: 12px;
       }
 
+      #tip {
+        position: fixed;
+        background: rgba(8, 27, 46, 0.97);
+        border: 1px solid var(--sun);
+        padding: 10px 14px;
+        font-size: 13px;
+        border-radius: 8px;
+        pointer-events: none;
+        display: none;
+        z-index: 9999;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      }
+
+      .note {
+        font-size: 12.5px;
+        color: var(--mut);
+        line-height: 1.45;
+      }
+      .mini-title {
+        font-size: 13px;
+        color: var(--mut);
+        margin-bottom: 10px;
+      }
+
+      /* Histórico */
+      .hist-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 12.5px;
+        color: var(--mut);
+        margin-top: 10px;
+      }
+      .hist-cat-row {
+        display: grid;
+        grid-template-columns: 52px 1fr 68px;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 7px;
+        font-size: 12.5px;
+      }
+      .hist-cat-bar {
+        display: flex;
+        height: 15px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #000;
+      }
+      .hist-cat-bar span {
+        height: 100%;
+      }
+      .heatmap-wrap {
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .heatmap {
+        display: grid;
+        gap: 3px;
+        min-width: 620px;
+        margin-top: 10px;
+      }
+      .heatmap .hm-head {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: var(--mut);
+        text-align: center;
+        padding: 2px 0;
+      }
+      .heatmap .hm-row-label {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--tx);
+        display: flex;
+        align-items: center;
+        padding-right: 4px;
+      }
+      .heat-cell {
+        min-height: 24px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #071626;
+        cursor: default;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+      }
+      .heat-cell.empty {
+        background: #23364a !important;
+        color: #7d94a8;
+      }
+      .scale-legend {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--mut);
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      .scale-bar {
+        width: 150px;
+        height: 9px;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #2c7bb6, #abd9e9, #ffffbf, #fdae61, #d7191c);
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table.data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      table.data-table th,
+      table.data-table td {
+        padding: 8px 9px;
+        border-bottom: 1px solid rgba(37, 80, 111, 0.55);
+        text-align: left;
+        white-space: nowrap;
+      }
+      table.data-table th {
+        color: var(--mut);
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      table.data-table td.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .chip {
+        display: inline-block;
+        padding: 2px 7px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 800;
+        color: #071626;
+      }
+
+      /* Modelo predictivo */
+      .pred-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .metric-card {
+        background: #091624;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .metric-card small {
+        color: var(--mut);
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .metric-card b {
+        display: block;
+        font: 800 24px "Outfit";
+        margin-top: 4px;
+      }
+      .pred-chart-card {
+        background: #091624;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .pred-chart-card h4 {
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+      .pred-chart-card p {
+        font-size: 12px;
+        color: var(--mut);
+        margin-bottom: 6px;
+      }
+      .obs-pred-legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--mut);
+        margin-top: 8px;
+      }
+      .model-note {
+        background: rgba(155, 93, 229, 0.1);
+        border: 1px solid rgba(155, 93, 229, 0.35);
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 13px;
+        color: #d9c8f5;
+        margin-bottom: 16px;
+      }
+      .importance-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .importance-list span {
+        background: var(--bg-card);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11.5px;
+        color: var(--tx);
+      }
+
+      /* Simulador */
+      .sim-topbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+        background: var(--bg2);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 8px;
+      }
+      .sim-topbar .year-chip {
+        border: 1px solid var(--line);
+        background: var(--bg-card);
+        color: var(--tx);
+        border-radius: 8px;
+        padding: 6px 11px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .sim-topbar .year-chip.active {
+        background: var(--sun);
+        color: #071626;
+        border-color: var(--sun);
+      }
+      .sim-topbar .year-chip.dim {
+        opacity: 0.55;
+      }
+      .sim-topbar .spacer {
+        flex: 1;
+      }
+      .speed-group {
+        display: flex;
+        gap: 2px;
+        background: var(--bg-card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 2px;
+      }
+      .speed-group button {
+        border: 0;
+        background: transparent;
+        color: var(--mut);
+        border-radius: 6px;
+        padding: 5px 9px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .speed-group button.active {
+        background: var(--sun);
+        color: #071626;
+      }
+      .sim-auto {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12.5px;
+        color: var(--mut);
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .sim-auto input {
+        accent-color: var(--sun);
+      }
+      .sim-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .sim-progress input {
+        flex: 1;
+        height: 8px;
+        accent-color: var(--sun);
+      }
+      #sim-clock {
+        font: 800 28px "Outfit";
+        color: var(--sun);
+        min-width: 74px;
+        text-align: right;
+      }
       .sim-layout {
         display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        gap: 20px;
-        margin-top: 20px;
+        grid-template-columns: 1.55fr 1fr;
+        gap: 18px;
+        margin-top: 12px;
       }
-      @media (max-width: 900px) {
+      @media (max-width: 980px) {
         .sim-layout {
           grid-template-columns: 1fr;
         }
       }
-
+      .sim-scene {
+        position: relative;
+        background: #091624;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        overflow: hidden;
+        min-height: 330px;
+      }
+      #sim-scene {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      #clouds .cloud {
+        animation: cloudDrift 22s ease-in-out infinite alternate;
+      }
+      #clouds .cloud-2 {
+        animation-duration: 29s;
+        animation-delay: -9s;
+      }
+      #clouds .cloud-3 {
+        animation-duration: 17s;
+        animation-delay: -4s;
+      }
+      @keyframes cloudDrift {
+        0% { transform: translate(-24px, 0); }
+        50% { transform: translate(0, -5px); }
+        100% { transform: translate(28px, 0); }
+      }
+      .scene-overlay {
+        position: absolute;
+        left: 16px;
+        top: 12px;
+        background: rgba(7, 22, 38, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        padding: 8px 12px;
+        backdrop-filter: blur(4px);
+        pointer-events: none;
+      }
+      .scene-overlay b {
+        font: 800 28px "Outfit";
+        color: #fff;
+        display: block;
+        line-height: 1;
+      }
+      .scene-overlay span {
+        display: block;
+        font-size: 11.5px;
+        color: #d6e6f3;
+        margin-top: 4px;
+      }
+      .scene-label {
+        position: absolute;
+        right: 12px;
+        bottom: 10px;
+        font-size: 10.5px;
+        color: rgba(255, 255, 255, 0.65);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        pointer-events: none;
+      }
       .gauges {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 10px;
       }
       .gc {
         background: var(--bg-card);
-        padding: 14px;
+        padding: 12px;
         border-radius: 10px;
         border-left: 5px solid var(--c);
         border-top: 1px solid var(--card-border);
@@ -438,18 +842,18 @@
       }
       .gc small {
         color: var(--mut);
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 500;
       }
       .gc b {
         display: block;
-        font: 700 22px "Outfit";
-        margin: 4px 0;
+        font: 700 21px "Outfit";
+        margin: 3px 0;
       }
       .gb {
         height: 8px;
         display: flex;
-        margin-top: 8px;
+        margin-top: 7px;
         background: #000;
         position: relative;
         border-radius: 4px;
@@ -468,103 +872,143 @@
         box-shadow: 0 0 6px #fff;
         transition: left 0.3s ease;
       }
-
       #sim-ban {
         background: var(--bg2);
-        padding: 20px;
+        padding: 16px;
         border-radius: 12px;
-        font-size: 14px;
+        font-size: 13.5px;
         border: 1px solid var(--line);
-        margin-bottom: 16px;
-        min-height: 100px;
+        margin-top: 12px;
+        min-height: 110px;
       }
-      #tip {
-        position: fixed;
-        background: rgba(8, 27, 46, 0.95);
-        border: 1px solid var(--sun);
-        padding: 10px 14px;
-        font-size: 13px;
-        border-radius: 8px;
-        pointer-events: none;
-        display: none;
-        z-index: 9999;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      .sim-chart-wrap {
+        margin-top: 18px;
+        background: #091624;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .sim-chart-head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .sim-chart-head h3 {
+        font-size: 19px;
+      }
+
+      @media (max-width: 760px) {
+        .view-controls {
+          width: 100%;
+          margin-left: 0;
+        }
+        .year-picker {
+          flex: 1;
+        }
+        .year-picker select {
+          width: 100%;
+        }
+        .k2 {
+          grid-template-columns: 1fr;
+        }
+        .gauges {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
     <div id="tip"></div>
 
-    <!-- NAVEGACIÓN -->
     <nav aria-label="Navegación principal">
       <a href="#" class="brand">☀ AIMAJ · SIMAJ</a>
-      <a href="#numeralia">Comportamiento</a>
-      <a href="#comparativo">Comparativo 23 vs 24</a>
-      <a href="#calendario">Calendario Analítico</a>
-      <a href="#tendencias">Tendencias</a>
-      <a href="#simulador">Simulador Horario</a>
+      <div class="nav-links">
+        <a class="nav-link" href="#numeralia">Comportamiento</a>
+        <a class="nav-link" href="#comparativo">Comparativo</a>
+        <a class="nav-link" href="#calendario">Calendario</a>
+        <a class="nav-link" href="#tendencias">Tendencias</a>
+        <a class="nav-link" href="#historico">Histórico 10 años</a>
+        <a class="nav-link" href="#prediccion">Predicción</a>
+        <a class="nav-link" href="#simulador">Simulador</a>
+      </div>
 
       <div class="view-controls">
-        <select id="month-selector">
-          <option value="0" selected>Vista Macro: Todo el año</option>
-          <option value="1">Enero</option>
-          <option value="2">Febrero</option>
-          <option value="3">Marzo</option>
-          <option value="4">Abril</option>
-          <option value="5">Mayo</option>
-          <option value="6">Junio</option>
-          <option value="7">Julio</option>
-          <option value="8">Agosto</option>
-          <option value="9">Septiembre</option>
-          <option value="10">Octubre</option>
-          <option value="11">Noviembre</option>
-          <option value="12">Diciembre</option>
-        </select>
-        <button class="btn-y btn-y24 active" onclick="setMode(2024)">
-          2024
-        </button>
-        <button class="btn-y btn-y23" onclick="setMode(2023)">2023</button>
-        <button class="btn-y btn-ycomp" onclick="setMode('comp')">
-          ⚡ Comparar 23 vs 24
-        </button>
+        <div class="year-picker">
+          <label for="year-base">Año base</label>
+          <select id="year-base"></select>
+        </div>
+        <div class="year-picker">
+          <label for="year-compare">Comparar con</label>
+          <select id="year-compare"></select>
+        </div>
+        <div class="year-picker">
+          <label for="month-selector">Periodo</label>
+          <select id="month-selector">
+            <option value="0" selected>Todo el año</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+        </div>
       </div>
     </nav>
 
     <header class="hero">
       <div class="wrap">
-        <span class="tag">Ingeniería Informática · Sprint 2</span>
-        <h1>Análisis Multianual CEN</h1>
+        <span class="tag">Sprint 3 · Dashboard final de la agencia</span>
+        <h1>Análisis histórico 2015–2024 · Estación Centro (CEN)</h1>
         <p>
-          Evaluación de calidad del aire y meteorología bajo la
-          NOM-172-SEMARNAT-2023. Explora tendencias anuales, aísla meses
-          críticos o cruza variables por hora en comparativa directa.
+          Evaluación multianual de calidad del aire y meteorología bajo la
+          NOM-172-SEMARNAT-2023. El tablero distingue datos observados,
+          resultados históricos, comparaciones entre años y valores predichos
+          por el modelo. La estación Centro (CEN) representa el entorno urbano
+          de Guadalajara; sus resultados no deben extrapolarse a toda el AMG.
         </p>
+        <div class="hero-badges">
+          <span class="badge badge-obs">● Observado</span>
+          <span class="badge badge-hist">● Histórico 2015–2024</span>
+          <span class="badge badge-pred">● Predicho por modelo</span>
+        </div>
       </div>
     </header>
 
     <section id="numeralia" style="--c: var(--sun)">
       <div class="wrap">
         <div class="band">
-          <h2>☀ Comportamiento <span class="lbl-ctx">Anual 2024</span></h2>
+          <h2>☀ Comportamiento <span class="lbl-ctx" id="ctx-resumen"></span></h2>
           <p>
-            Distribución de categorías y contaminantes relevantes. Identifica
-            los periodos con mejores y peores condiciones a simple vista.
+            Distribución de categorías diarias y contaminantes que determinan
+            la peor categoría del día. La vista respeta el año base y el
+            periodo seleccionados en la barra superior.
           </p>
         </div>
         <div class="grid k4" id="kpis" style="margin-bottom: 24px"></div>
         <div class="grid k2">
           <div class="card" style="--c: var(--cat-buena)">
             <h3>Distribución AIRE Y SALUD</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 16px">
-              Frecuencia de categorías según el criterio más estricto.
+            <p class="mini-title">
+              Días por categoría según el criterio más estricto. La barra clara
+              corresponde al año de comparación.
             </p>
             <div id="dist-cat"></div>
           </div>
           <div class="card" style="--c: var(--sky)">
             <h3>Impacto de Contaminantes</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 16px">
-              Días en los que cada contaminante determinó la peor categoría.
+            <p class="mini-title">
+              Días en los que cada contaminante determinó la peor categoría
+              diaria.
             </p>
             <div id="dist-pol"></div>
           </div>
@@ -572,22 +1016,19 @@
       </div>
     </section>
 
-    <!-- COMPARATIVO INTERANUAL 2023 vs 2024 (agregado para el Sprint 2) -->
     <section id="comparativo" style="--c: var(--c-o3)">
       <div class="wrap">
         <div class="band">
           <h2>
             ⚡ Comparativo Interanual
-            <span style="color: var(--mut); font-size: 0.6em"
-              >2023 vs 2024</span
-            >
+            <span class="lbl-ctx" id="ctx-cmp"></span>
           </h2>
           <p>
-            Evidencia para sustentar los cambios entre años: calidad de los
-            datos, promedios, horas por categoría NOM-172, estacionalidad,
-            patrón horario, meteorología y el evento de Año Nuevo. Estas
-            gráficas siempre muestran ambos años; el perfil horario y la
-            meteorología respetan el mes elegido arriba.
+            Evidencia para sustentar los cambios entre los dos años
+            seleccionados: disponibilidad de datos, promedios, horas por
+            categoría NOM-172, estacionalidad, patrón horario, meteorología y
+            el evento de Año Nuevo. Las series se etiquetan con el año y la
+            variable para evitar ambigüedad.
           </p>
         </div>
 
@@ -595,7 +1036,7 @@
 
         <div class="tools" style="margin-bottom: 14px">
           <div style="font-size: 13.5px; color: var(--mut)">
-            Contaminante para Estacionalidad y Perfil horario:
+            Contaminante para estacionalidad, perfil horario y dispersión:
           </div>
           <select id="cmp-var" class="btn" style="background: var(--bg2)">
             <option value="PM10">Partículas PM₁₀</option>
@@ -608,134 +1049,79 @@
         <div class="grid k2">
           <div class="card" style="--c: var(--cat-nodata)">
             <h3>Disponibilidad de datos</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 16px">
-              % de horas con lectura válida por variable. Explica qué sí se
-              puede comparar.
+            <p class="mini-title">
+              % de horas con lectura válida por variable en el periodo
+              seleccionado. Explica qué sí se puede comparar.
             </p>
             <div id="cmp-avail"></div>
-            <p style="font-size: 12px; color: var(--mut)">
-              * Según el reporte; no vienen en los archivos del dashboard (SO₂
-              sin datos en 2024; NO/NO₂/NOx sin datos en 2023).
-            </p>
-            <div class="trend-legend">
-              <span style="color: #4cc9f0">■ 2024</span
-              ><span style="color: #ffc83d">■ 2023</span>
-            </div>
+            <p class="note" id="cmp-avail-note"></p>
           </div>
 
           <div class="card" style="--c: var(--cat-buena)">
             <h3>Horas por categoría NOM-172</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 12px">
-              Horas en cada categoría (NowCast) por contaminante y año.
+            <p class="mini-title">
+              Horas en cada categoría (NowCast cuando está disponible) por
+              contaminante y año.
             </p>
-            <div
-              id="cmp-legend-cat"
-              class="trend-legend"
-              style="margin: 0 0 14px"
-            ></div>
+            <div id="cmp-legend-cat" class="trend-legend" style="margin: 0 0 14px"></div>
             <div id="cmp-hours"></div>
           </div>
 
           <div class="card" style="--c: var(--cat-aceptable)">
             <h3>Estacionalidad: promedio mensual</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 8px">
-              Invierno alto, temporada de lluvias baja. Año completo.
+            <p class="mini-title">
+              Promedio mensual del contaminante seleccionado. Año completo.
             </p>
-            <svg
-              id="cmp-season"
-              viewBox="0 0 800 250"
-              style="width: 100%; overflow: visible"
-            ></svg>
-            <div class="trend-legend">
-              <span style="color: #4cc9f0">■ 2024 (sólida)</span
-              ><span style="color: #ffc83d">-- 2023 (punteada)</span>
-            </div>
+            <svg id="cmp-season" viewBox="0 0 800 250" style="width: 100%; overflow: visible"></svg>
+            <div class="trend-legend" id="cmp-season-legend"></div>
           </div>
 
           <div class="card" style="--c: var(--sky)">
             <h3>Perfil horario promedio (24 h)</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 8px">
+            <p class="mini-title">
               Promedio de cada hora del día en el periodo seleccionado.
             </p>
-            <svg
-              id="cmp-profile"
-              viewBox="0 0 800 250"
-              style="width: 100%; overflow: visible"
-            ></svg>
-            <div class="trend-legend">
-              <span style="color: #4cc9f0">■ 2024 (sólida)</span
-              ><span style="color: #ffc83d">-- 2023 (punteada)</span>
-            </div>
+            <svg id="cmp-profile" viewBox="0 0 800 250" style="width: 100%; overflow: visible"></svg>
+            <div class="trend-legend" id="cmp-profile-legend"></div>
           </div>
 
           <div class="card" style="grid-column: 1 / -1; --c: var(--cat-mala)">
             <h3>Influencia de la meteorología</h3>
-            <p style="font-size: 13px; color: var(--mut); margin-bottom: 14px">
+            <p class="mini-title">
               Cada punto es una hora (muestreo 1 de cada 3); la línea gruesa es
-              el promedio por rango.
+              el promedio por rango. La etiqueta <b>r</b> es el coeficiente de
+              Pearson: valores cercanos a ±1 indican relación lineal más fuerte.
             </p>
             <div class="grid k2" style="gap: 24px">
               <div>
                 <h4 style="font-size: 15px; margin-bottom: 6px">
                   Temperatura vs Ozono (O₃)
                 </h4>
-                <svg
-                  id="cmp-sc1"
-                  viewBox="0 0 420 285"
-                  style="width: 100%"
-                ></svg>
-                <div
-                  id="cmp-sc1-r"
-                  class="trend-legend"
-                  style="flex-wrap: wrap"
-                ></div>
+                <svg id="cmp-sc1" viewBox="0 0 420 285" style="width: 100%"></svg>
+                <div id="cmp-sc1-r" class="trend-legend" style="flex-wrap: wrap"></div>
               </div>
               <div>
                 <h4 style="font-size: 15px; margin-bottom: 6px">
                   Velocidad del viento vs PM₁₀
                 </h4>
-                <svg
-                  id="cmp-sc2"
-                  viewBox="0 0 420 285"
-                  style="width: 100%"
-                ></svg>
-                <div
-                  id="cmp-sc2-r"
-                  class="trend-legend"
-                  style="flex-wrap: wrap"
-                ></div>
+                <svg id="cmp-sc2" viewBox="0 0 420 285" style="width: 100%"></svg>
+                <div id="cmp-sc2-r" class="trend-legend" style="flex-wrap: wrap"></div>
               </div>
             </div>
           </div>
 
-          <div
-            class="card"
-            style="grid-column: 1 / -1; --c: var(--cat-muymala)"
-          >
+          <div class="card" style="grid-column: 1 / -1; --c: var(--cat-muymala)">
             <div class="tools">
               <div>
                 <h3>🎆 Evento atípico: “Efecto Año Nuevo” (1 de enero)</h3>
-                <p
-                  id="ny-text"
-                  style="font-size: 14px; color: var(--mut); margin-top: 4px"
-                ></p>
+                <p id="ny-text" style="font-size: 14px; color: var(--mut); margin-top: 4px"></p>
               </div>
               <button class="btn on" onclick="goNewYear()">
                 Ver 1 de enero en el simulador
               </button>
             </div>
-            <svg
-              id="cmp-ny"
-              viewBox="0 0 800 250"
-              style="width: 100%; overflow: visible"
-            ></svg>
-            <div class="trend-legend">
-              <span style="color: #4cc9f0">■ 1 ene 2024 (sólida)</span
-              ><span style="color: #ffc83d">-- 1 ene 2023 (punteada)</span
-              ><span style="color: var(--mut)"
-                >PM₁₀ horario; fondo = categorías NOM-172</span
-              >
-            </div>
+            <svg id="cmp-ny" viewBox="0 0 800 250" style="width: 100%; overflow: visible"></svg>
+            <div class="trend-legend" id="cmp-ny-legend"></div>
           </div>
         </div>
       </div>
@@ -747,37 +1133,30 @@
           <div class="tools">
             <div>
               <h3 style="font-size: 24px">
-                🗓 Calendario Analítico (<span class="lbl-ctx">Anual 2024</span
-                >)
+                🗓 Calendario Analítico <span class="lbl-ctx" id="ctx-cal"></span>
               </h3>
-              <p style="font-size: 14px; color: var(--mut); margin-top: 4px">
+              <p class="mini-title">
                 Haz clic en cualquier bloque para aislar ese periodo en el
-                simulador horario.
+                simulador horario. Los bloques grises indican ausencia de datos
+                suficientes.
               </p>
             </div>
             <div
               id="granularity-container"
               style="
-                display: none;
                 background: var(--bg2);
                 padding: 6px;
                 border-radius: 8px;
                 border: 1px solid var(--line);
               "
             >
-              <label
-                style="
-                  font-size: 13px;
-                  color: var(--mut);
-                  margin-right: 8px;
-                  font-weight: 600;
-                "
+              <label style="font-size: 13px; color: var(--mut); margin-right: 8px; font-weight: 600"
                 >Agrupar por:</label
               >
               <select id="sel-granularity" class="btn" style="border: none">
                 <option value="meses" selected>Meses (12 bloques)</option>
                 <option value="semanas">Semanas (52 bloques)</option>
-                <option value="dias">Días (365 bloques)</option>
+                <option value="dias">Días</option>
               </select>
             </div>
           </div>
@@ -786,7 +1165,6 @@
       </div>
     </section>
 
-    <!-- SECCIÓN TENDENCIAS CONTINUAS ACTUALIZADA -->
     <section id="tendencias" style="--c: var(--accent-purple)">
       <div class="wrap">
         <div class="card" style="--c: var(--accent-purple)">
@@ -794,18 +1172,16 @@
             <div>
               <h3 style="font-size: 24px">
                 📈 Evolución y Tendencias Continuas
+                <span class="lbl-ctx" id="ctx-trend"></span>
               </h3>
-              <p style="font-size: 14px; color: var(--mut); margin-top: 4px">
-                Visualiza el desarrollo diario de los contaminantes y la
-                meteorología en el periodo seleccionado.
+              <p class="mini-title">
+                Desarrollo diario de los contaminantes y la meteorología en el
+                periodo seleccionado. La serie observada del año base se
+                compara con la del año de referencia.
               </p>
             </div>
             <div>
-              <select
-                id="sel-trend-var"
-                class="btn"
-                style="background: var(--bg2)"
-              >
+              <select id="sel-trend-var" class="btn" style="background: var(--bg2)">
                 <option value="PM10">Partículas PM₁₀</option>
                 <option value="PM25">Partículas PM₂.₅</option>
                 <option value="O3">Ozono (O₃)</option>
@@ -816,11 +1192,7 @@
           </div>
 
           <div class="trend-container">
-            <svg
-              id="trend-chart"
-              viewBox="0 0 800 200"
-              style="width: 100%; overflow: visible"
-            ></svg>
+            <svg id="trend-chart" viewBox="0 0 800 200" style="width: 100%; overflow: visible"></svg>
           </div>
 
           <div class="trend-legend" id="trend-legend"></div>
@@ -828,100 +1200,409 @@
       </div>
     </section>
 
+    <section id="historico" style="--c: var(--sun)">
+      <div class="wrap">
+        <div class="band">
+          <h2>
+            🧭 Análisis histórico de la estación
+            <span class="badge badge-obs" style="font-size: 11px; vertical-align: middle">Observado</span>
+          </h2>
+          <p>
+            Aproximadamente diez años de registros (2015–2024). Las gráficas
+            buscan tendencias de largo plazo, comportamiento anual y
+            estacional, meses críticos, años o eventos atípicos, cambios en las
+            categorías y discontinuidades de los datos. Si la disponibilidad no
+            permite sostener una comparación, se indica explícitamente.
+          </p>
+        </div>
+
+        <div class="tools">
+          <div style="font-size: 13.5px; color: var(--mut)">
+            Variable para tendencia, mapa de calor y eventos atípicos:
+          </div>
+          <select id="sel-hist-var" class="btn" style="background: var(--bg2)">
+            <option value="PM10">Partículas PM₁₀</option>
+            <option value="PM25">Partículas PM₂.₅</option>
+            <option value="O3">Ozono (O₃)</option>
+            <option value="CO">Monóxido de Carbono (CO)</option>
+            <option value="TEMP">Temperatura Media (°C)</option>
+          </select>
+        </div>
+
+        <div class="grid k2" style="margin-bottom: 20px">
+          <div class="card" style="--c: var(--sun)">
+            <h3>Tendencia anual de la concentración</h3>
+            <p class="mini-title">
+              Promedio anual de la variable seleccionada. La línea punteada es
+              el ajuste lineal de largo plazo.
+            </p>
+            <svg id="hist-annual" viewBox="0 0 800 250" style="width: 100%; overflow: visible"></svg>
+            <p class="note" id="hist-trend-note"></p>
+            <div class="trend-legend" id="hist-annual-legend"></div>
+          </div>
+
+          <div class="card" style="--c: var(--cat-mala)">
+            <h3>Cambios en categorías AIRE Y SALUD</h3>
+            <p class="mini-title">
+              Porcentaje de días por categoría en cada año. Permite ver si el
+              riesgo aumenta, disminuye o se mantiene.
+            </p>
+            <div id="hist-cats"></div>
+            <div class="hist-legend" id="hist-cats-legend"></div>
+          </div>
+        </div>
+
+        <div class="grid k2" style="margin-bottom: 20px">
+          <div class="card" style="grid-column: 1 / -1; --c: var(--cat-mala)">
+            <h3>Mapa de calor año × mes</h3>
+            <p class="mini-title">
+              Promedio mensual de la variable seleccionada. Las celdas rojas
+              señalan los periodos críticos; las grises, ausencia de datos.
+            </p>
+            <div class="heatmap-wrap"><div id="hist-heatmap"></div></div>
+            <div class="scale-legend">
+              <span>Menor</span><span class="scale-bar"></span><span>Mayor</span>
+            </div>
+            <p class="note" id="hist-critical"></p>
+          </div>
+
+          <div class="card" style="grid-column: 1 / -1; --c: var(--cat-nodata)">
+            <h3>Disponibilidad, ausencia y discontinuidad</h3>
+            <p class="mini-title">
+              Porcentaje de horas válidas por variable y año. Permite
+              identificar sensores intermitentes y periodos no comparables.
+            </p>
+            <div class="heatmap-wrap"><div id="hist-avail"></div></div>
+            <div class="scale-legend">
+              <span>0 %</span><span class="scale-bar" style="background: linear-gradient(90deg, #d7191c, #fdae61, #ffffbf, #abd9e9, #2c7bb6)"></span><span>100 %</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid k2">
+          <div class="card" style="--c: var(--accent-purple)">
+            <h3>Años atípicos y eventos relevantes</h3>
+            <p class="mini-title">
+              Años con promedio anual alejado de la media histórica y los cinco
+              días de mayor concentración de la variable seleccionada.
+            </p>
+            <div id="hist-atypical"></div>
+            <div class="table-wrap" style="margin-top: 14px">
+              <table class="data-table" id="hist-events"></table>
+            </div>
+            <p class="note" id="hist-events-note"></p>
+          </div>
+
+          <div class="card" style="--c: var(--sky)">
+            <h3>Lectura rápida para decisiones</h3>
+            <div id="hist-reading" style="font-size: 14px; color: #c7d9e8"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prediccion" style="--c: var(--accent-purple)">
+      <div class="wrap">
+        <div class="band">
+          <h2>
+            🔮 Modelo predictivo
+            <span class="badge badge-pred" style="font-size: 11px; vertical-align: middle">Predicho</span>
+          </h2>
+          <p>
+            Predicción de la concentración del contaminante seleccionado a
+            +1, +2 y +3 horas. El modelo se entrena con los nueve años
+            restantes y se evalúa con el año base. Los valores predichos se
+            muestran separados de los observados y no sustituyen el monitoreo.
+          </p>
+        </div>
+
+        <div class="tools">
+          <div style="font-size: 13.5px; color: var(--mut)">
+            Contaminante a predecir:
+          </div>
+          <select id="sel-pred-var" class="btn" style="background: var(--bg2)">
+            <option value="PM10">Partículas PM₁₀</option>
+            <option value="PM25">Partículas PM₂.₅</option>
+            <option value="O3">Ozono (O₃)</option>
+            <option value="CO">Monóxido de Carbono (CO)</option>
+          </select>
+        </div>
+
+        <div class="model-note" id="pred-model-note"></div>
+        <div id="pred-status" style="font-size: 13.5px; color: var(--mut); margin-bottom: 14px"></div>
+
+        <div class="pred-metrics-grid" id="pred-metrics"></div>
+
+        <div class="grid k3" id="pred-charts" style="margin-bottom: 18px"></div>
+
+        <div class="card" style="--c: var(--accent-purple); margin-bottom: 18px">
+          <h3>Comportamiento del error del modelo</h3>
+          <p class="mini-title">
+            Error absoluto por horizonte de predicción en el periodo de prueba.
+            Una curva más alta indica mayor dificultad para anticipar cambios.
+          </p>
+          <svg id="pred-error" viewBox="0 0 800 230" style="width: 100%; overflow: visible"></svg>
+          <div class="obs-pred-legend" id="pred-error-legend"></div>
+        </div>
+
+        <div class="grid k2">
+          <div class="card" style="--c: var(--cat-aceptable)">
+            <h3>Confiabilidad de la predicción</h3>
+            <div id="pred-reliability" style="font-size: 14px; color: #c7d9e8"></div>
+          </div>
+          <div class="card" style="--c: var(--sky)">
+            <h3>Variables más influyentes (+1 h)</h3>
+            <p class="mini-title">
+              Coeficientes estandarizados del modelo. El signo indica si la
+              variable empuja la concentración hacia arriba o hacia abajo.
+            </p>
+            <div class="importance-list" id="pred-importance"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="simulador" style="--c: var(--c-pm10)">
       <div class="wrap">
         <div class="card" style="--c: var(--c-pm10)" id="sect-sim">
-          <div class="tools">
+          <div class="tools" style="margin-bottom: 10px">
             <div>
               <h3 style="font-size: 24px">
                 🌤 Simulador Horario y Meteorología
+                <span class="lbl-ctx" id="ctx-sim"></span>
               </h3>
-              <p style="font-size: 14px; color: var(--mut); margin-top: 4px">
-                Analiza la relación directa entre contaminantes, temperatura y
-                viento hora por hora.
+              <p class="mini-title">
+                Recorre el día hora por hora. La escena representa de forma
+                esquemática la Torre RIU y el puente Matute Remus de
+                Guadalajara; la neblina y el color del cielo responden a la
+                calidad del aire y a la hora.
               </p>
             </div>
-            <div style="display: flex; gap: 12px; align-items: center">
-              <select
-                id="sel-sim-day"
-                class="btn"
-                style="background: var(--bg2)"
-              ></select>
-              <button
-                class="btn"
-                onclick="goNewYear()"
-                title="Evento atípico del 1 de enero"
-              >
-                🎆 1 de enero
-              </button>
-              <button class="btn on" id="btn-play" style="min-width: 110px">
-                ▶ Iniciar
-              </button>
-              <span
-                id="sim-clock"
-                style="
-                  font: 800 24px &quot;Outfit&quot;;
-                  color: var(--sun);
-                  min-width: 60px;
-                "
-                >00:00</span
-              >
+            <button class="btn" onclick="goNewYear()" title="Evento atípico del 1 de enero">
+              🎆 1 de enero
+            </button>
+          </div>
+
+          <div class="sim-topbar">
+            <button class="year-chip active" id="sim-year-base"></button>
+            <button class="year-chip dim" id="sim-year-compare"></button>
+            <button class="btn" id="sim-prev">◀ Día anterior</button>
+            <select id="sel-sim-day" class="btn" style="background: var(--bg2)"></select>
+            <button class="btn" id="sim-next">Día siguiente ▶</button>
+            <button class="btn on" id="sim-continue" style="min-width: 108px">▶ Continuar</button>
+            <div class="speed-group" aria-label="Velocidad de reproducción">
+              <button data-speed="1" class="active">1×</button>
+              <button data-speed="2">2×</button>
+              <button data-speed="4">4×</button>
+            </div>
+            <label class="sim-auto">
+              <input type="checkbox" id="sim-auto" />
+              Seguir automáticamente
+            </label>
+            <span class="spacer"></span>
+            <span id="sim-focus-label" style="font-size: 12px; color: var(--mut); font-weight: 600"></span>
+          </div>
+
+          <div class="sim-progress">
+            <input type="range" id="sim-range" min="0" max="23.99" step="0.01" value="0" />
+            <span id="sim-clock">00:00</span>
+          </div>
+
+          <div class="sim-layout">
+            <div class="sim-scene">
+              <svg id="sim-scene" viewBox="0 0 760 330" preserveAspectRatio="xMidYMid meet" aria-label="Escena esquemática de Guadalajara">
+                <defs>
+                  <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop id="skyTop" offset="0%" stop-color="#0b1f33" />
+                    <stop id="skyBottom" offset="100%" stop-color="#153a5b" />
+                  </linearGradient>
+                  <radialGradient id="sunGlow">
+                    <stop offset="0%" stop-color="#ffc83d" stop-opacity="0.75" />
+                    <stop offset="100%" stop-color="#ffc83d" stop-opacity="0" />
+                  </radialGradient>
+                  <linearGradient id="towerGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#162b40" />
+                    <stop offset="55%" stop-color="#294b68" />
+                    <stop offset="100%" stop-color="#102236" />
+                  </linearGradient>
+                  <linearGradient id="hazeGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#ffc83d" stop-opacity="0" />
+                    <stop offset="100%" stop-color="#ffc83d" stop-opacity="0.4" />
+                  </linearGradient>
+                  <filter id="riuGlow" x="-80%" y="-80%" width="260%" height="260%">
+                    <feFlood flood-color="#ffffff" result="white" />
+                    <feComposite in="white" in2="SourceAlpha" operator="in" result="whiteText" />
+                    <feGaussianBlur in="whiteText" stdDeviation="2.8" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter id="carLightGlow" x="-250%" y="-250%" width="600%" height="600%">
+                    <feGaussianBlur stdDeviation="2.4" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <rect width="760" height="330" fill="url(#skyGrad)" />
+                <g id="stars" opacity="0"></g>
+                <circle id="sunGlowCircle" cx="600" cy="80" r="58" fill="url(#sunGlow)" />
+                <circle id="sun" cx="600" cy="80" r="20" fill="#ffc83d" />
+                <g id="clouds" opacity="0.55" fill="#dbeaf5">
+                  <g class="cloud cloud-1">
+                    <ellipse cx="150" cy="80" rx="56" ry="17" />
+                    <ellipse cx="118" cy="84" rx="32" ry="14" />
+                    <ellipse cx="182" cy="84" rx="38" ry="15" />
+                    <ellipse cx="150" cy="68" rx="30" ry="20" />
+                    <ellipse cx="126" cy="70" rx="20" ry="14" />
+                  </g>
+                  <g class="cloud cloud-2">
+                    <ellipse cx="520" cy="54" rx="48" ry="14" />
+                    <ellipse cx="492" cy="58" rx="28" ry="12" />
+                    <ellipse cx="548" cy="58" rx="30" ry="12" />
+                    <ellipse cx="520" cy="44" rx="24" ry="16" />
+                  </g>
+                  <g class="cloud cloud-3">
+                    <ellipse cx="350" cy="112" rx="38" ry="11" />
+                    <ellipse cx="330" cy="115" rx="22" ry="9" />
+                    <ellipse cx="372" cy="115" rx="24" ry="9" />
+                    <ellipse cx="350" cy="105" rx="18" ry="12" />
+                  </g>
+                </g>
+
+                <!-- Skyline lejano -->
+                <g id="skyline" fill="#0d2134" opacity="0.95">
+                  <rect x="0" y="238" width="34" height="62" />
+                  <rect x="36" y="218" width="28" height="82" />
+                  <rect x="68" y="246" width="40" height="54" />
+                  <rect x="112" y="228" width="26" height="72" />
+                  <rect x="142" y="250" width="46" height="50" />
+                  <rect x="192" y="232" width="30" height="68" />
+                  <rect x="226" y="244" width="52" height="56" />
+                  <rect x="282" y="224" width="26" height="76" />
+                  <rect x="312" y="248" width="44" height="52" />
+                  <rect x="360" y="236" width="32" height="64" />
+                  <rect x="396" y="250" width="48" height="50" />
+                  <rect x="448" y="226" width="26" height="74" />
+                  <rect x="478" y="246" width="40" height="54" />
+                  <rect x="522" y="232" width="30" height="68" />
+                  <rect x="556" y="248" width="44" height="52" />
+                  <rect x="604" y="228" width="26" height="72" />
+                  <rect x="634" y="246" width="38" height="54" />
+                  <rect x="676" y="236" width="30" height="64" />
+                  <rect x="710" y="250" width="50" height="50" />
+                </g>
+
+                <!-- Torre RIU esquemática -->
+                <g id="riuTower">
+                  <polygon points="548,292 548,88 584,64 620,88 620,292" fill="url(#towerGrad)" stroke="#f4f8fb" stroke-width="4" stroke-linejoin="round" />
+                  <polygon points="584,64 620,88 584,78 548,88" fill="#9dc6e2" opacity="0.55" />
+                  <g stroke="#5eead4" stroke-width="3.5" opacity="0.7">
+                    <line x1="550" y1="104" x2="618" y2="104" />
+                    <line x1="550" y1="120" x2="618" y2="120" />
+                    <line x1="550" y1="136" x2="618" y2="136" />
+                    <line x1="550" y1="152" x2="618" y2="152" />
+                    <line x1="550" y1="168" x2="618" y2="168" />
+                    <line x1="550" y1="184" x2="618" y2="184" />
+                    <line x1="550" y1="200" x2="618" y2="200" />
+                    <line x1="550" y1="216" x2="618" y2="216" />
+                    <line x1="550" y1="232" x2="618" y2="232" />
+                    <line x1="550" y1="248" x2="618" y2="248" />
+                    <line x1="550" y1="264" x2="618" y2="264" />
+                    <line x1="550" y1="280" x2="618" y2="280" />
+                  </g>
+                  <text x="584" y="98" text-anchor="middle" font-family="Outfit, sans-serif" font-size="12" font-weight="800" id="riuText" fill="#ff2b2b">RIU</text>
+                </g>
+
+                <!-- Anexo acristalado inferior izquierdo -->
+                <g id="riuAnnex">
+                  <path d="M549,236 H492 V292 H549" fill="url(#towerGrad)" stroke="#f4f8fb" stroke-width="4" stroke-linejoin="round" />
+                  <g stroke="#5eead4" stroke-width="3.5" opacity="0.7">
+                    <line x1="492" y1="248" x2="550" y2="248" />
+                    <line x1="492" y1="264" x2="550" y2="264" />
+                  </g>
+                </g>
+
+                <!-- Puente Matute Remus esquemático -->
+                <g id="bridge">
+                  <rect x="0" y="276" width="760" height="14" fill="#20384d" />
+                  <rect x="0" y="288" width="760" height="5" fill="#0b1a29" />
+                  <polygon points="106,276 158,152 210,276" fill="none" stroke="#d9e9f4" stroke-width="6" />
+                  <polygon points="188,276 240,152 292,276" fill="none" stroke="#d9e9f4" stroke-width="6" />
+                  <g stroke="#d9e9f4" stroke-width="1.4" opacity="0.85">
+                    <line x1="158" y1="152" x2="72" y2="276" />
+                    <line x1="158" y1="152" x2="108" y2="276" />
+                    <line x1="158" y1="152" x2="184" y2="276" />
+                    <line x1="158" y1="152" x2="214" y2="276" />
+                    <line x1="158" y1="152" x2="90" y2="276" />
+                    <line x1="158" y1="152" x2="146" y2="276" />
+                    <line x1="158" y1="152" x2="200" y2="276" />
+                    <line x1="240" y1="152" x2="184" y2="276" />
+                    <line x1="240" y1="152" x2="266" y2="276" />
+                    <line x1="240" y1="152" x2="300" y2="276" />
+                    <line x1="240" y1="152" x2="330" y2="276" />
+                    <line x1="240" y1="152" x2="210" y2="276" />
+                    <line x1="240" y1="152" x2="280" y2="276" />
+                    <line x1="240" y1="152" x2="315" y2="276" />
+                  </g>
+                  <g id="cars">
+                    <g id="car1" transform="translate(40,0)">
+                      <rect x="0" y="270" width="18" height="7" rx="2" fill="#ffc83d" />
+                      <circle class="car-light" cx="16.5" cy="273.5" r="1.8" fill="#fffbe6" />
+                      <circle class="car-light" cx="1.5" cy="273.5" r="1.3" fill="#ff3b3b" />
+                    </g>
+                    <g id="car2" transform="translate(220,0)">
+                      <rect x="0" y="270" width="18" height="7" rx="2" fill="#4cc9f0" />
+                      <circle class="car-light" cx="16.5" cy="273.5" r="1.8" fill="#fffbe6" />
+                      <circle class="car-light" cx="1.5" cy="273.5" r="1.3" fill="#ff3b3b" />
+                    </g>
+                    <g id="car3" transform="translate(360,0)">
+                      <rect x="0" y="270" width="18" height="7" rx="2" fill="#f28482" />
+                      <circle class="car-light" cx="16.5" cy="273.5" r="1.8" fill="#fffbe6" />
+                      <circle class="car-light" cx="1.5" cy="273.5" r="1.3" fill="#ff3b3b" />
+                    </g>
+                  </g>
+                </g>
+
+                <!-- Suelo y vegetación -->
+                <rect x="0" y="292" width="760" height="38" fill="#0a1724" />
+                <g fill="#123249" opacity="0.9">
+                  <rect x="0" y="292" width="760" height="4" />
+                  <rect x="24" y="300" width="10" height="18" />
+                  <rect x="52" y="304" width="14" height="14" />
+                  <rect x="640" y="300" width="12" height="18" />
+                  <rect x="680" y="304" width="16" height="14" />
+                  <rect x="720" y="300" width="10" height="18" />
+                </g>
+
+                <rect id="haze" x="0" y="120" width="760" height="210" fill="url(#hazeGrad)" opacity="0.18" />
+              </svg>
+              <div class="scene-overlay">
+                <b id="scene-temp">— °C</b>
+                <span id="scene-wind">temperatura · viento</span>
+                <span id="scene-pm">PM₁₀: —</span>
+              </div>
+              <div class="scene-label">Guadalajara · CEN</div>
+            </div>
+
+            <div>
+              <div class="gauges" id="sim-gauges"></div>
+              <div id="sim-ban"></div>
             </div>
           </div>
-          <div
-            style="
-              display: flex;
-              gap: 10px;
-              margin-bottom: 16px;
-              flex-wrap: wrap;
-            "
-            id="sim-pols"
-          ></div>
-          <div class="sim-layout">
-            <div>
-              <svg
-                id="sim-chart"
-                viewBox="0 0 760 260"
-                style="
-                  width: 100%;
-                  background: #091624;
-                  border-radius: 10px;
-                  border: 1px solid var(--line);
-                  cursor: crosshair;
-                "
-              ></svg>
-              <input
-                type="range"
-                id="sim-range"
-                min="0"
-                max="23.99"
-                step="0.01"
-                value="0"
-                style="width: 100%; margin-top: 12px"
-              />
-              <div
-                id="sim-legend"
-                style="
-                  margin-top: 8px;
-                  font-size: 12.5px;
-                  text-align: center;
-                  color: var(--mut);
-                  display: none;
-                "
-              >
-                <span style="color: #4cc9f0; font-weight: 700"
-                  >■ 2024 (Línea Sólida)</span
-                >
-                &nbsp;&nbsp;&nbsp;
-                <span style="color: #ffc83d; font-weight: 700"
-                  >-- 2023 (Línea Punteada)</span
-                >
-              </div>
+
+          <div class="sim-chart-wrap">
+            <div class="sim-chart-head">
+              <h3>Evolución horaria</h3>
+              <div id="sim-pols" style="display: flex; gap: 6px; flex-wrap: wrap"></div>
             </div>
-            <div>
-              <div id="sim-ban"></div>
-              <div class="gauges" id="sim-gauges"></div>
-            </div>
+            <svg id="sim-chart" viewBox="0 0 760 260" style="width: 100%; background: #091624; border-radius: 10px; border: 1px solid var(--line); cursor: crosshair"></svg>
+            <div id="sim-legend" class="trend-legend" style="display: none"></div>
           </div>
         </div>
       </div>
@@ -931,232 +1612,456 @@
       const $ = (s) => document.querySelector(s);
       const $$ = (s) => [...document.querySelectorAll(s)];
 
-      const CAT = [
-        "Buena",
-        "Aceptable",
-        "Mala",
-        "Muy mala",
-        "Extremadamente mala",
-      ];
+      const YEARS = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
+      const CAT = ["Buena", "Aceptable", "Mala", "Muy mala", "Extremadamente mala"];
       const COL = ["#2ECC71", "#FFC83D", "#FF7A2F", "#E5484D", "#9B5DE5"];
-      const mN = [
-        "Anual",
-        "Ene",
-        "Feb",
-        "Mar",
-        "Abr",
-        "May",
-        "Jun",
-        "Jul",
-        "Ago",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dic",
-      ];
+      const mN = ["Anual", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
       const P = {
-        PM10: {
-          n: "PM₁₀",
-          u: "µg/m³",
-          i: 2,
-          c: "#C9A66B",
-          b: [45, 60, 132, 213],
-          dg: 0,
-        },
-        PM25: {
-          n: "PM₂.₅",
-          u: "µg/m³",
-          i: 3,
-          c: "#F28482",
-          b: [15, 33, 79, 130],
-          dg: 0,
-        },
-        O3: {
-          n: "O₃",
-          u: "ppm",
-          i: 0,
-          c: "#4CC9F0",
-          b: [0.058, 0.09, 0.135, 0.175],
-          dg: 3,
-        },
-        CO: { n: "CO", u: "ppm", i: 1, c: "#B5A6E0", b: [5, 9, 12, 16], dg: 2 },
+        PM10: { n: "PM₁₀", u: "µg/m³", key: "pm10", c: "#C9A66B", b: [45, 60, 132, 213], dg: 0 },
+        PM25: { n: "PM₂.₅", u: "µg/m³", key: "pm25", c: "#F28482", b: [15, 33, 79, 130], dg: 0 },
+        O3: { n: "O₃", u: "ppm", key: "o3", c: "#4CC9F0", b: [0.058, 0.09, 0.135, 0.175], dg: 3 },
+        CO: { n: "CO", u: "ppm", key: "co8", c: "#B5A6E0", b: [5, 9, 12, 16], dg: 2 },
       };
       const KS = Object.keys(P);
 
-      let activeYear = 2024;
-      let activeMonth = 0;
-      let granularity = "meses";
-      let activeTrendVar = "PM10";
+      const num = (v) => (v == null || Number.isNaN(Number(v)) ? null : Number(v));
+      const isNum = (v) => v != null && !Number.isNaN(v);
+      const mean = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : null);
+      const valid = (a) => a.filter(isNum);
+      const meanValid = (a, min = 1) => {
+        const v = valid(a);
+        return v.length >= min ? mean(v) : null;
+      };
+      const maxValid = (a, min = 1) => {
+        const v = valid(a);
+        return v.length >= min ? Math.max(...v) : null;
+      };
+      const fmt = (v, d = 1) => (isNum(v) ? Number(v).toFixed(d) : "—");
+      const pct = (n, d) => (d ? (100 * n) / d : 0);
+      const hhmm = (i) => String(Math.floor(i)).padStart(2, "0") + ":00";
 
-      let D24 = window.DATA_2024 ? window.DATA_2024.d : [];
-      let H24 = window.DATA_2024 ? window.DATA_2024.h : [];
-      let D23 = window.DATA_2023 ? window.DATA_2023.d : [];
-      let H23 = window.DATA_2023 ? window.DATA_2023.h : [];
+      const CAT_REC = [
+        "Calidad BUENA: la población puede realizar actividades al aire libre sin restricciones.",
+        "Calidad ACEPTABLE: grupos sensibles pueden presentar molestias; considera reducir esfuerzos prolongados.",
+        "Calidad MALA: grupos sensibles deben evitar actividades físicas al aire libre; población general reducir esfuerzos prolongados.",
+        "Calidad MUY MALA: evitar actividades al aire libre; grupos sensibles deben permanecer en interiores.",
+        "Calidad EXTREMADAMENTE MALA: suspender actividades al aire libre y seguir indicaciones de protección civil.",
+      ];
 
-      function getD(y) {
-        return activeMonth === 0
-          ? y === 2024
-            ? D24
-            : D23
-          : (y === 2024 ? D24 : D23).filter((x) => x.m === activeMonth);
-      }
-      function getH(y) {
-        return activeMonth === 0
-          ? y === 2024
-            ? H24
-            : H23
-          : (y === 2024 ? H24 : H23).filter((x) => x[11] === activeMonth);
-      }
+      const DATA = {};
+      const state = {
+        baseYear: 2024,
+        compareYear: 2023,
+        activeMonth: 0,
+        granularity: "meses",
+        activeTrendVar: "PM10",
+        activeHistVar: "PM10",
+        activePredVar: "PM10",
+        focusYear: 2024,
+        simDay: 0,
+        simTime: 8,
+        simPol: "PM10",
+        isPlaying: false,
+        simSpeed: 1,
+        autoFollow: false,
+        lastRenderedHour: -1,
+        lastFrameTime: 0,
+      };
+
       function cat(k, v) {
-        if (v == null) return -1;
-        let b = P[k].b;
+        if (!isNum(v)) return -1;
+        const b = P[k].b;
         if (v < b[0]) return 0;
         for (let i = 1; i < 4; i++) if (v <= b[i]) return i;
         return 4;
       }
 
-      function getModeCat(arr) {
+      function modeCat(values) {
         const counts = {};
-        let maxCount = 0,
-          maxVal = -1;
-        arr.forEach((val) => {
-          if (val >= 0) {
-            counts[val] = (counts[val] || 0) + 1;
-            if (counts[val] > maxCount) {
-              maxCount = counts[val];
-              maxVal = val;
-            }
+        let best = -1;
+        let bestCount = 0;
+        values.forEach((v) => {
+          if (v < 0) return;
+          counts[v] = (counts[v] || 0) + 1;
+          if (counts[v] > bestCount) {
+            bestCount = counts[v];
+            best = v;
           }
         });
-        return maxVal;
+        return best;
       }
 
-      $("#month-selector").addEventListener("change", (e) => {
-        activeMonth = parseInt(e.target.value);
-        renderAll();
-      });
-      $("#sel-granularity").addEventListener("change", (e) => {
-        granularity = e.target.value;
-        renderCal(activeYear === "comp");
-      });
-      $("#sel-trend-var").addEventListener("change", (e) => {
-        activeTrendVar = e.target.value;
-        renderTrend(activeYear === "comp");
-      });
-
-      function setMode(modeStr) {
-        activeYear = modeStr;
-        $$(".btn-y").forEach((b) => b.classList.remove("active"));
-        $(
-          `.btn-y${modeStr === "comp" ? "comp" : modeStr === 2024 ? "24" : "23"}`,
-        ).classList.add("active");
-        renderAll();
+      function yearColor(y) {
+        return y === state.baseYear ? "#4CC9F0" : "#FFC83D";
       }
 
-      function renderAll() {
-        if (!D24.length || !D23.length) {
-          alert(
-            "Asegúrate de haber generado los archivos datos_2023.js y datos_2024.js",
-          );
+      /* ===================== Normalización de datos ===================== */
+      function buildYear(y) {
+        const raw = window["DATA_" + y];
+        if (!raw || !raw.h || !raw.h.length) return null;
+        const isNew = y >= 2023;
+
+        const hours = raw.h.map((r, i) => {
+          const date = new Date(Date.UTC(y, 0, 1) + i * 3600000);
+          return {
+            i,
+            year: y,
+            date,
+            month: date.getUTCMonth() + 1,
+            day: date.getUTCDate(),
+            hour: date.getUTCHours(),
+            o3: num(r[0]),
+            co: num(r[1]),
+            co8: null,
+            pm10: num(r[4]),
+            pm25: num(r[5]),
+            no2: isNew ? null : num(r[2]),
+            so2: isNew ? null : num(r[3]),
+            pb: isNew ? null : num(r[6]),
+            temp: num(r[7]),
+            rh: isNew ? num(r[9]) : num(r[8]),
+            wds: isNew ? num(r[8]) : num(r[9]),
+            wsp: num(r[10]),
+          };
+        });
+
+        for (let i = 0; i < hours.length; i++) {
+          let s = 0;
+          let n = 0;
+          for (let j = Math.max(0, i - 7); j <= i; j++) {
+            const v = hours[j].co;
+            if (isNum(v)) {
+              s += v;
+              n++;
+            }
+          }
+          if (n >= 6) hours[i].co8 = s / n;
+        }
+        if (isNew) {
+          hours.forEach((h, i) => {
+            if (h.co8 == null) h.co8 = num(raw.h[i][6]);
+          });
+        }
+
+        const days = [];
+        for (let d = 0; d < Math.ceil(hours.length / 24); d++) {
+          const chunk = hours.slice(d * 24, (d + 1) * 24);
+          if (!chunk.length) continue;
+          const pm10 = meanValid(chunk.map((x) => x.pm10), 18);
+          const pm25 = meanValid(chunk.map((x) => x.pm25), 18);
+          const o3 = maxValid(chunk.map((x) => x.o3), 18);
+          const co = maxValid(chunk.map((x) => x.co8), 18);
+          const temp = meanValid(chunk.map((x) => x.temp), 12);
+          const cats = {
+            PM10: cat("PM10", pm10),
+            PM25: cat("PM25", pm25),
+            O3: cat("O3", o3),
+            CO: cat("CO", co),
+          };
+          let c = -1;
+          Object.values(cats).forEach((v) => {
+            if (v > c) c = v;
+          });
+          const r = c < 0 ? [] : Object.keys(cats).filter((k) => cats[k] === c);
+          days.push({
+            di: d,
+            year: y,
+            month: chunk[0].month,
+            day: chunk[0].day,
+            date: chunk[0].date,
+            c,
+            r,
+            pm10,
+            pm25,
+            o3,
+            co,
+            temp,
+            v: [pm10, pm25, o3, co],
+          });
+        }
+
+        const avail = {
+          O3: pct(hours.filter((h) => isNum(h.o3)).length, hours.length),
+          CO: pct(hours.filter((h) => isNum(h.co8)).length, hours.length),
+          PM10: pct(hours.filter((h) => isNum(h.pm10)).length, hours.length),
+          PM25: pct(hours.filter((h) => isNum(h.pm25)).length, hours.length),
+          NO2: pct(hours.filter((h) => isNum(h.no2)).length, hours.length),
+          SO2: pct(hours.filter((h) => isNum(h.so2)).length, hours.length),
+          Temp: pct(hours.filter((h) => isNum(h.temp)).length, hours.length),
+          HR: pct(hours.filter((h) => isNum(h.rh)).length, hours.length),
+          Viento: pct(hours.filter((h) => isNum(h.wsp)).length, hours.length),
+          Dir: pct(hours.filter((h) => isNum(h.wds)).length, hours.length),
+        };
+
+        return { year: y, hours, days, avail, isNew };
+      }
+
+      function initData() {
+        YEARS.forEach((y) => {
+          const d = buildYear(y);
+          if (d) DATA[y] = d;
+        });
+        const loaded = Object.keys(DATA).map(Number).sort((a, b) => a - b);
+        if (!loaded.length) {
+          alert("No se encontraron archivos datos_*.js en la carpeta Datos.");
           return;
         }
-        const isComp = activeYear === "comp";
-        const ctxText =
-          (activeMonth === 0 ? "Anual" : mN[activeMonth]) +
-          " " +
-          (isComp ? "(Comparativa 2024 vs 2023)" : activeYear);
-        $$(".lbl-ctx").forEach((el) => (el.textContent = ctxText));
-        $("#granularity-container").style.display =
-          isComp && activeMonth === 0 ? "flex" : "none";
-
-        renderResumen(isComp);
-        renderCmp();
-        renderCal(isComp);
-        renderTrend(isComp);
-        initSim(isComp);
+        state.baseYear = loaded.includes(2024) ? 2024 : loaded[loaded.length - 1];
+        state.compareYear = loaded.includes(2023) ? 2023 : loaded.length > 1 ? loaded[loaded.length - 2] : null;
+        state.focusYear = state.baseYear;
+        buildYearSelectors(loaded);
       }
 
-      function renderResumen(isComp) {
-        const d1 = getD(isComp ? 2024 : activeYear);
-        const d2 = isComp ? getD(2023) : null;
+      function buildYearSelectors(loaded) {
+        const base = $("#year-base");
+        const comp = $("#year-compare");
+        base.innerHTML = loaded
+          .slice()
+          .reverse()
+          .map((y) => `<option value="${y}" ${y === state.baseYear ? "selected" : ""}>${y}</option>`)
+          .join("");
+        comp.innerHTML =
+          `<option value="">Sin comparación</option>` +
+          loaded
+            .slice()
+            .reverse()
+            .map((y) => `<option value="${y}" ${y === state.compareYear ? "selected" : ""}>${y}</option>`)
+            .join("");
+      }
 
-        const c1 = [0, 0, 0, 0, 0],
-          p1 = { PM10: 0, PM25: 0, O3: 0, CO: 0 };
+      function getHours(y, month = state.activeMonth) {
+        if (!DATA[y]) return [];
+        return month === 0 ? DATA[y].hours : DATA[y].hours.filter((h) => h.month === month);
+      }
+      function getDays(y, month = state.activeMonth) {
+        if (!DATA[y]) return [];
+        return month === 0 ? DATA[y].days : DATA[y].days.filter((d) => d.month === month);
+      }
+      const isComp = () => state.compareYear != null && state.compareYear !== state.baseYear;
+
+      function contextText() {
+        const period = state.activeMonth === 0 ? "Anual" : mN[state.activeMonth];
+        return `${period} ${state.baseYear}${isComp() ? ` vs ${state.compareYear}` : ""}`;
+      }
+
+      function updateContextLabels() {
+        const txt = contextText();
+        $$(".lbl-ctx").forEach((el) => (el.textContent = txt));
+      }
+
+      /* ===================== Gráficas genéricas ===================== */
+      function lineChart(id, o) {
+        const W = o.W || 800;
+        const H = o.H || 220;
+        const X0 = o.X0 || 52;
+        const Y0 = o.Y0 || 16;
+        const Wc = W - X0 - 16;
+        const Hc = H - Y0 - 34;
+        const n = Math.max(1, o.n || 1);
+        const vals = o.series.flatMap((s) => s.arr.filter(isNum));
+        if (!vals.length) {
+          $("#" + id).innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="#9DB6CB" font-size="13">Sin datos suficientes para esta combinación</text>`;
+          return;
+        }
+        const minVal = o.min != null ? o.min : 0;
+        const maxRaw = o.max != null ? o.max : Math.max(...vals);
+        const maxVal = maxRaw > minVal ? maxRaw * 1.12 : minVal + 1;
+        const yf = (v) => Y0 + Hc - ((v - minVal) / (maxVal - minVal)) * Hc;
+        const xf = (i) => X0 + (n > 1 ? i / (n - 1) : 0) * Wc;
+        let s = "";
+
+        (o.ybands || []).forEach((b) => {
+          if (b.lo < maxVal) {
+            const hi = Math.min(b.hi, maxVal);
+            s += `<rect x="${X0}" y="${yf(hi)}" width="${Wc}" height="${yf(b.lo) - yf(hi)}" fill="${b.color}" opacity="0.12"/>`;
+          }
+        });
+        (o.xbands || []).forEach((b) => {
+          s += `<rect x="${xf(b.a)}" y="${Y0}" width="${xf(b.b) - xf(b.a)}" height="${Hc}" fill="#fff" opacity="0.06"/>
+                <text x="${(xf(b.a) + xf(b.b)) / 2}" y="${Y0 + 12}" text-anchor="middle" font-size="10.5" fill="#C7D9E8">${b.label}</text>`;
+        });
+
+        for (let i = 0; i <= 4; i++) {
+          const v = minVal + ((maxVal - minVal) * i) / 4;
+          s += `<line x1="${X0}" x2="${X0 + Wc}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
+                <text x="${X0 - 8}" y="${yf(v) + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${o.dg ? v.toFixed(o.dg) : Math.round(v)}</text>`;
+        }
+        (o.xl || []).forEach(([i, t]) => {
+          s += `<text x="${xf(i)}" y="${Y0 + Hc + 20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${t}</text>`;
+        });
+        (o.ylines || []).forEach((i) => {
+          s += `<line x1="${xf(i)}" x2="${xf(i)}" y1="${Y0}" y2="${Y0 + Hc}" stroke="rgba(255,255,255,0.08)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+        });
+
+        o.series.forEach((se) => {
+          let d = "";
+          let pen = false;
+          se.arr.forEach((v, i) => {
+            if (!isNum(v)) {
+              pen = false;
+              return;
+            }
+            d += (pen ? "L" : "M") + xf(i).toFixed(1) + " " + yf(v).toFixed(1);
+            pen = true;
+          });
+          s += `<path d="${d}" fill="none" stroke="${se.color}" stroke-width="${se.w || 2.5}" ${se.dash ? 'stroke-dasharray="6 4"' : ""} stroke-linejoin="round" opacity="${se.opacity != null ? se.opacity : 1}"/>`;
+        });
+
+        (o.notes || []).forEach((nt) => {
+          const anchor = nt.i < 2 ? "start" : nt.i > n - 3 ? "end" : "middle";
+          if (nt.dot !== false) s += `<circle cx="${xf(nt.i)}" cy="${yf(nt.v)}" r="4" fill="${nt.color}" stroke="#071626" stroke-width="1.5"/>`;
+          s += `<text x="${xf(nt.i)}" y="${yf(nt.v) + (nt.dy != null ? nt.dy : -9)}" text-anchor="${anchor}" font-size="12" font-weight="700" fill="${nt.color}">${nt.text}</text>`;
+        });
+
+        $("#" + id).innerHTML = s;
+      }
+
+      function scatter(id, o) {
+        const W = 420;
+        const H = 230;
+        const X0 = 52;
+        const Y0 = 10;
+        const Wc = W - X0 - 14;
+        const xf = (v) => X0 + ((v - o.xmin) / (o.xmax - o.xmin)) * Wc;
+        const yf = (v) => Y0 + H - ((v - o.ymin) / (o.ymax - o.ymin)) * H;
+        let s = "";
+        for (let i = 0; i <= 4; i++) {
+          const v = o.ymin + ((o.ymax - o.ymin) * i) / 4;
+          s += `<line x1="${X0}" x2="${X0 + Wc}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
+                <text x="${X0 - 6}" y="${yf(v) + 4}" text-anchor="end" font-size="10.5" fill="#9DB6CB">${o.yd ? v.toFixed(o.yd) : Math.round(v)}</text>`;
+        }
+        for (let i = 0; i <= 5; i++) {
+          const v = o.xmin + ((o.xmax - o.xmin) * i) / 5;
+          s += `<text x="${xf(v)}" y="${Y0 + H + 16}" text-anchor="middle" font-size="10.5" fill="#9DB6CB">${Math.round(v)}</text>`;
+        }
+        s += `<text x="${X0 + Wc / 2}" y="${Y0 + H + 34}" text-anchor="middle" font-size="11.5" fill="#C7D9E8">${o.xl}</text>`;
+        s += `<text x="12" y="${Y0 + H / 2}" transform="rotate(-90 12 ${Y0 + H / 2})" text-anchor="middle" font-size="11.5" fill="#C7D9E8">${o.yl}</text>`;
+
+        let hasPoints = false;
+        o.series.forEach((se) => {
+          let pts = "";
+          const bins = {};
+          for (let i = 0; i < se.data.length; i++) {
+            const x = se.data[i][o.x];
+            const y = se.data[i][o.y];
+            if (!isNum(x) || !isNum(y) || x < o.xmin || x > o.xmax) continue;
+            hasPoints = true;
+            (bins[Math.floor(x / o.bin)] = bins[Math.floor(x / o.bin)] || []).push(y);
+            if (i % 3 === 0 && y <= o.ymax) pts += `M${xf(x).toFixed(1)} ${yf(y).toFixed(1)}h0.1`;
+          }
+          s += `<path d="${pts}" stroke="${se.color}" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+          let ln = "";
+          Object.keys(bins)
+            .map(Number)
+            .sort((a, b) => a - b)
+            .forEach((b) => {
+              if (bins[b].length < 15) return;
+              const m = bins[b].reduce((a, v) => a + v, 0) / bins[b].length;
+              ln += (ln ? "L" : "M") + xf((b + 0.5) * o.bin).toFixed(1) + " " + yf(Math.min(m, o.ymax)).toFixed(1);
+            });
+          s += `<path d="${ln}" fill="none" stroke="${se.color}" stroke-width="3.5" stroke-linejoin="round" ${se.dash ? 'stroke-dasharray="6 4"' : ""}/>`;
+        });
+        if (!hasPoints) {
+          s += `<text x="${W / 2}" y="${Y0 + H / 2}" text-anchor="middle" fill="#9DB6CB" font-size="12">Sin pares válidos (variable meteorológica ausente)</text>`;
+        }
+        $("#" + id).innerHTML = s;
+      }
+
+      function corr(data, cx, cy) {
+        const p = data.filter((r) => isNum(r[cx]) && isNum(r[cy]));
+        if (p.length < 3) return null;
+        const mx = mean(p.map((r) => r[cx]));
+        const my = mean(p.map((r) => r[cy]));
+        let sxy = 0;
+        let sxx = 0;
+        let syy = 0;
+        p.forEach((r) => {
+          sxy += (r[cx] - mx) * (r[cy] - my);
+          sxx += (r[cx] - mx) ** 2;
+          syy += (r[cy] - my) ** 2;
+        });
+        if (!sxx || !syy) return null;
+        return sxy / Math.sqrt(sxx * syy);
+      }
+
+      function linreg(xs, ys) {
+        const p = xs.map((x, i) => [x, ys[i]]).filter((v) => isNum(v[1]));
+        if (p.length < 2) return null;
+        const mx = mean(p.map((v) => v[0]));
+        const my = mean(p.map((v) => v[1]));
+        let num = 0;
+        let den = 0;
+        p.forEach(([x, y]) => {
+          num += (x - mx) * (y - my);
+          den += (x - mx) ** 2;
+        });
+        if (!den) return null;
+        const slope = num / den;
+        return { slope, intercept: my - slope * mx };
+      }
+
+      /* ===================== Resumen ===================== */
+      function renderResumen() {
+        const d1 = getDays(state.baseYear);
+        const d2 = isComp() ? getDays(state.compareYear) : null;
+        if (!d1.length) {
+          $("#kpis").innerHTML = `<div class="card kpi"><small>Sin datos</small><b>—</b></div>`;
+          return;
+        }
+        const c1 = [0, 0, 0, 0, 0];
+        const p1 = { PM10: 0, PM25: 0, O3: 0, CO: 0 };
         d1.forEach((x) => {
           if (x.c >= 0) c1[x.c]++;
           x.r.forEach((p) => {
             if (p1[p] != null) p1[p]++;
           });
         });
-
-        const c2 = [0, 0, 0, 0, 0],
-          p2 = { PM10: 0, PM25: 0, O3: 0, CO: 0 };
-        if (d2)
+        const c2 = [0, 0, 0, 0, 0];
+        const p2 = { PM10: 0, PM25: 0, O3: 0, CO: 0 };
+        if (d2) {
           d2.forEach((x) => {
             if (x.c >= 0) c2[x.c]++;
             x.r.forEach((p) => {
               if (p2[p] != null) p2[p]++;
             });
           });
-
-        const mx = Math.max(d1.length, d2 ? d2.length : 0) || 1;
+        }
+        const mx = Math.max(d1.length, d2 ? d2.length : 0, 1);
         const modeIdx = c1.indexOf(Math.max(...c1));
-        const riskCounts = Object.fromEntries(
-          Object.keys(p1).map((p) => [p, p1[p] + (d2 ? p2[p] : 0)]),
-        );
-        const topP = Object.entries(riskCounts).sort(
-          (a, b) => b[1] - a[1],
-        )[0][0];
-        const daysAnalyzed = d1.length + (d2 ? d2.length : 0);
-        const daysAtRisk =
-          c1[2] + c1[3] + c1[4] + (d2 ? c2[2] + c2[3] + c2[4] : 0);
+        const risk = { ...p1 };
+        if (d2) Object.keys(risk).forEach((p) => (risk[p] += p2[p]));
+        const topP = Object.entries(risk).sort((a, b) => b[1] - a[1])[0][0];
+        const daysAtRisk = c1[2] + c1[3] + c1[4];
 
         $("#kpis").innerHTML = [
           [
-            `${isComp ? daysAnalyzed : d1.length} días`,
-            isComp ? "Días Analizados (Total)" : "Periodo Analizado",
+            `${d1.length} días`,
+            `Días analizados · ${state.baseYear}${d2 ? ` (+${d2.length} en ${state.compareYear})` : ""}`,
             "var(--sun)",
           ],
-          [
-            CAT[modeIdx] || "N/A",
-            `Calidad Predominante`,
-            COL[modeIdx] || "#fff",
-          ],
-          [
-            P[topP] ? P[topP].n : "N/A",
-            isComp
-              ? "Principal riesgo en ambos años"
-              : `Principal Riesgo (${p1[topP]} d)`,
-            "var(--sky)",
-          ],
-          [daysAtRisk, `Días en Riesgo`, "var(--cat-mala)"],
+          [CAT[modeIdx] || "N/A", `Calidad predominante · ${state.baseYear}`, COL[modeIdx] || "#fff"],
+          [P[topP] ? P[topP].n : "N/A", `Principal riesgo · ${state.baseYear}`, "var(--sky)"],
+          [daysAtRisk, `Días Mala o peor · ${state.baseYear}`, "var(--cat-mala)"],
         ]
-          .map(
-            (k) =>
-              `<div class="card kpi" style="--c:${k[2]}"><small>${k[1]}</small><b>${k[0]}</b></div>`,
-          )
+          .map((k) => `<div class="card kpi" style="--c:${k[2]}"><small>${k[1]}</small><b>${k[0]}</b></div>`)
           .join("");
 
         $("#dist-cat").innerHTML = CAT.map((n, i) => {
           if (!c1[i] && (!d2 || !c2[i])) return "";
           return `
           <div style="margin-bottom: 12px; font-size: 14px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; gap:8px;">
               <span>${n}</span>
-              <span><b>${c1[i]} d</b> ${d2 ? `<span style="color:var(--mut)">/ ${c2[i]} d ('23)</span>` : ""}</span>
+              <span><b>${c1[i]} d</b> ${d2 ? `<span style="color:var(--mut)">/ ${c2[i]} d (${state.compareYear})</span>` : ""}</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
               <div style="width:100%; background:rgba(0,0,0,0.3); height:12px; border-radius:4px; overflow:hidden;">
                 <div style="width:${(c1[i] / mx) * 100}%; background:${COL[i]}; height:100%;"></div>
               </div>
-              ${
-                d2
-                  ? `<div style="width:100%; background:rgba(0,0,0,0.3); height:8px; border-radius:4px; overflow:hidden;">
-                        <div style="width:${(c2[i] / mx) * 100}%; background:rgba(255,255,255,0.5); border-bottom: 2px solid ${COL[i]}; height:100%;"></div>
-                      </div>`
-                  : ""
-              }
+              ${d2 ? `<div style="width:100%; background:rgba(0,0,0,0.3); height:8px; border-radius:4px; overflow:hidden;">
+                <div style="width:${(c2[i] / mx) * 100}%; background:rgba(255,255,255,0.55); border-bottom: 2px solid ${COL[i]}; height:100%;"></div>
+              </div>` : ""}
             </div>
           </div>`;
         }).join("");
@@ -1165,353 +2070,27 @@
           if (!p1[k] && (!d2 || !p2[k])) return "";
           return `
           <div style="margin-bottom: 12px; font-size: 14px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; gap:8px;">
               <span>${P[k].n}</span>
-              <span><b>${p1[k]} d</b> ${d2 ? `<span style="color:var(--mut)">/ ${p2[k]} d ('23)</span>` : ""}</span>
+              <span><b>${p1[k]} d</b> ${d2 ? `<span style="color:var(--mut)">/ ${p2[k]} d (${state.compareYear})</span>` : ""}</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
               <div style="width:100%; background:rgba(0,0,0,0.3); height:12px; border-radius:4px; overflow:hidden;">
                 <div style="width:${(p1[k] / mx) * 100}%; background:${P[k].c}; height:100%;"></div>
               </div>
-              ${
-                d2
-                  ? `<div style="width:100%; background:rgba(0,0,0,0.3); height:8px; border-radius:4px; overflow:hidden;">
-                        <div style="width:${(p2[k] / mx) * 100}%; background:rgba(255,255,255,0.5); border-bottom: 2px solid ${P[k].c}; height:100%;"></div>
-                      </div>`
-                  : ""
-              }
+              ${d2 ? `<div style="width:100%; background:rgba(0,0,0,0.3); height:8px; border-radius:4px; overflow:hidden;">
+                <div style="width:${(p2[k] / mx) * 100}%; background:rgba(255,255,255,0.55); border-bottom: 2px solid ${P[k].c}; height:100%;"></div>
+              </div>` : ""}
             </div>
           </div>`;
         }).join("");
       }
 
-      function renderCal(isComp) {
-        const master = $("#cal-master");
-        master.innerHTML = "";
-
-        if (!isComp) {
-          const d = getD(activeYear);
-          const cols =
-            activeMonth === 0
-              ? "repeat(auto-fill, minmax(65px, 1fr))"
-              : "repeat(7, 1fr)";
-          master.innerHTML = `
-          <div class="cal-grid" style="grid-template-columns: ${cols};">
-            ${d
-              .map(
-                (x, i) => `
-              <div class="cal-item c${x.c}" onclick="setSimDay(${i}, true)" onmouseenter="showTip(event, '${x.d} de ${mN[x.m]}<br>Categoría: ${CAT[x.c]}')" onmouseleave="hideTip()">
-                <b>${x.d}</b><small>${mN[x.m]}</small>
-              </div>
-            `,
-              )
-              .join("")}
-          </div>`;
-        } else {
-          const d4 = getD(2024);
-          const d3 = getD(2023);
-
-          const renderBlock = (dataArr, yearLabel, color) => {
-            let html = `
-            <div style="margin-top: 16px;">
-              <h4 style="color: ${color}; border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 12px; font-size: 18px;">Evolución ${yearLabel}</h4>
-              <div class="cal-grid" style="grid-template-columns: repeat(auto-fill, minmax(${granularity === "meses" && activeMonth === 0 ? "80px" : "65px"}, 1fr));">`;
-
-            if (activeMonth !== 0 || granularity === "dias") {
-              html += dataArr
-                .map(
-                  (x, i) => `
-              <div class="cal-item c${x.c}" onclick="setSimDay(${i}, true)" onmouseenter="showTip(event, '${x.d} de ${mN[x.m]} ${yearLabel}<br>Categoría: ${CAT[x.c]}')" onmouseleave="hideTip()">
-                <b>${x.d}</b><small>${mN[x.m]}</small>
-              </div>`,
-                )
-                .join("");
-            } else if (granularity === "meses") {
-              for (let m = 1; m <= 12; m++) {
-                const mData = dataArr.filter((x) => x.m === m);
-                if (!mData.length) continue;
-                const v = getModeCat(mData.map((x) => x.c));
-                const firstDayIdx = dataArr.findIndex((x) => x.m === m);
-                html += `
-                <div class="cal-item c${v}" onclick="setSimDay(${Math.max(0, firstDayIdx)}, true)" onmouseenter="showTip(event, '${mN[m]} ${yearLabel}<br>Cat. predominante: ${CAT[v]}')" onmouseleave="hideTip()">
-                  <b style="font-size:16px; margin-top:6px">${mN[m]}</b>
-                </div>`;
-              }
-            } else if (granularity === "semanas") {
-              for (let w = 0; w < 52; w++) {
-                const wData = dataArr.slice(w * 7, w * 7 + 7);
-                if (!wData.length) continue;
-                const v = getModeCat(wData.map((x) => x.c));
-                html += `
-                <div class="cal-item c${v}" onclick="setSimDay(${w * 7}, true)" onmouseenter="showTip(event, 'Semana ${w + 1} ${yearLabel}<br>Cat. predominante: ${CAT[v]}')" onmouseleave="hideTip()">
-                  <b style="font-size:15px; margin-top:6px">Sem ${w + 1}</b>
-                </div>`;
-              }
-            }
-            html += `</div></div>`;
-            return html;
-          };
-
-          master.innerHTML =
-            renderBlock(d4, "2024", "#4CC9F0") +
-            renderBlock(d3, "2023", "#FFC83D");
-        }
+      /* ===================== Comparativo ===================== */
+      function meanOfHours(hours, key) {
+        return meanValid(hours.map((h) => h[key]));
       }
 
-      // LÓGICA GRÁFICA TENDENCIAS CONTINUAS ACTUALIZADA
-      function renderTrend(isComp) {
-        const isTemp = activeTrendVar === "TEMP";
-        const vIdx = isTemp ? 7 : P[activeTrendVar].i;
-        const tName = isTemp
-          ? "Temperatura Media (°C)"
-          : P[activeTrendVar].n +
-            " Máximo Diario (" +
-            P[activeTrendVar].u +
-            ")";
-        const tColor = isTemp ? "#FF7A2F" : P[activeTrendVar].c;
-
-        const getAgg = (yearArray) => {
-          let res = [];
-          const days = Math.floor(yearArray.length / 24);
-          for (let i = 0; i < days; i++) {
-            let chunk = yearArray
-              .slice(i * 24, (i + 1) * 24)
-              .map((h) => h[vIdx])
-              .filter((v) => v != null && !isNaN(v));
-            if (chunk.length === 0) {
-              res.push(null);
-              continue;
-            }
-            // Promedio para Temp, Máximo para Contaminantes
-            res.push(
-              isTemp
-                ? chunk.reduce((a, b) => a + b, 0) / chunk.length
-                : Math.max(...chunk),
-            );
-          }
-          return res;
-        };
-
-        const h1 = getH(isComp ? 2024 : activeYear);
-        const arr1 = getAgg(h1);
-        const arr2 = isComp ? getAgg(getH(2023)) : null;
-
-        // NUEVOS LÍMITES: X0 de 45px aleja la curva del eje Y, dejando espacio para los números
-        const W = 800,
-          H = 160,
-          X0 = 45,
-          Y0 = 10;
-        const W_chart = W - X0 - 15; // 15px de respiro a la derecha
-
-        const allVals = [
-          ...arr1.filter((v) => v != null),
-          ...(arr2 ? arr2.filter((v) => v != null) : []),
-        ];
-        const maxVal = allVals.length ? Math.max(...allVals) * 1.15 : 100;
-        const yf = (val) => Y0 + H - (val / maxVal) * H;
-
-        let svgStr = "";
-
-        // Grid Horizontal y Textos del Eje Y
-        for (let i = 0; i <= 4; i++) {
-          const v = (maxVal * i) / 4;
-          svgStr += `<line x1="${X0}" x2="${X0 + W_chart}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
-                   <text x="${X0 - 8}" y="${yf(v) + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${isTemp ? v.toFixed(1) : P[activeTrendVar].dg ? v.toFixed(P[activeTrendVar].dg) : Math.round(v)}</text>`;
-        }
-
-        // Eje X y Líneas Verticales Divisorias (NUEVO)
-        const isAnnual = activeMonth === 0;
-        if (isAnnual) {
-          // Marcadores por mes en vista anual
-          const daysPerMonth = [
-            31,
-            activeYear === 2024 ? 29 : 28,
-            31,
-            30,
-            31,
-            30,
-            31,
-            31,
-            30,
-            31,
-            30,
-            31,
-          ];
-          let currentDay = 0;
-          for (let m = 0; m < 12; m++) {
-            let midDay = currentDay + daysPerMonth[m] / 2;
-            let xPos = X0 + (midDay / Math.max(1, arr1.length)) * W_chart;
-            let xLine = X0 + (currentDay / Math.max(1, arr1.length)) * W_chart;
-
-            if (m > 0) {
-              // Guía divisoria de inicio de mes
-              svgStr += `<line x1="${xLine}" x2="${xLine}" y1="${Y0}" y2="${Y0 + H}" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
-            }
-            svgStr += `<text x="${xPos}" y="${Y0 + H + 22}" text-anchor="middle" font-size="11" font-weight="600" fill="#9DB6CB">${mN[m + 1]}</text>`;
-            currentDay += daysPerMonth[m];
-          }
-        } else {
-          // Marcadores por día en vista mensual (cada 5 días)
-          const totalDays = arr1.length;
-          for (let d = 0; d < totalDays; d++) {
-            if (d === 0 || (d + 1) % 5 === 0 || d === totalDays - 1) {
-              let xPos = X0 + (d / Math.max(1, totalDays - 1)) * W_chart;
-              // Guía divisoria sutil para días seleccionados
-              svgStr += `<line x1="${xPos}" x2="${xPos}" y1="${Y0}" y2="${Y0 + H}" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
-              svgStr += `<text x="${xPos}" y="${Y0 + H + 22}" text-anchor="middle" font-size="11" font-weight="600" fill="#9DB6CB">${d + 1}</text>`;
-            }
-          }
-        }
-
-        const step = W_chart / Math.max(1, arr1.length - 1);
-        const genPath = (arr) => {
-          let path = "",
-            pen = false;
-          arr.forEach((v, idx) => {
-            if (v == null) {
-              pen = false;
-              return;
-            }
-            path +=
-              (pen ? "L" : "M") +
-              (X0 + idx * step).toFixed(1) +
-              " " +
-              yf(v).toFixed(1);
-            pen = true;
-          });
-          return path;
-        };
-
-        if (arr2) {
-          svgStr += `<path d="${genPath(arr2)}" fill="none" stroke="#FFC83D" stroke-dasharray="4 4" stroke-width="2" opacity="0.8"/>`;
-        }
-        svgStr += `<path d="${genPath(arr1)}" fill="none" stroke="${isComp ? "#4CC9F0" : tColor}" stroke-width="2.5" stroke-linejoin="round"/>`;
-
-        $("#trend-chart").innerHTML = svgStr;
-
-        // Leyenda
-        if (isComp) {
-          $("#trend-legend").innerHTML =
-            `<span style="color:#4CC9F0;">■ 2024: ${tName}</span><span style="color:#FFC83D;">-- 2023: ${tName}</span>`;
-        } else {
-          $("#trend-legend").innerHTML =
-            `<span style="color:${tColor};">■ ${activeYear}: ${tName}</span>`;
-        }
-      }
-
-      /* ===== COMPARATIVO INTERANUAL 2023 vs 2024 ===== */
-      const C23 = "#FFC83D",
-        C24 = "#4CC9F0";
-      const RAW = { PM10: 4, PM25: 5, O3: 0, CO: 6 }; // columnas de lectura horaria
-      const fmtN = (v, d) => (v == null || isNaN(v) ? "—" : v.toFixed(d));
-      const hhmm = (i) => String(i).padStart(2, "0") + ":00";
-
-      function colMean(h, c) {
-        let s = 0,
-          n = 0;
-        for (const r of h) {
-          const v = r[c];
-          if (v != null && !isNaN(v)) {
-            s += v;
-            n++;
-          }
-        }
-        return n ? s / n : null;
-      }
-      function pctValid(h, c) {
-        let n = 0;
-        for (const r of h) if (r[c] != null && !isNaN(r[c])) n++;
-        return (100 * n) / (h.length || 1);
-      }
-      function corrXY(h, cx, cy) {
-        const p = h.filter(
-          (r) =>
-            r[cx] != null && r[cy] != null && !isNaN(r[cx]) && !isNaN(r[cy]),
-        );
-        if (p.length < 3) return null;
-        const mx = p.reduce((a, r) => a + r[cx], 0) / p.length;
-        const my = p.reduce((a, r) => a + r[cy], 0) / p.length;
-        let sxy = 0,
-          sxx = 0,
-          syy = 0;
-        p.forEach((r) => {
-          sxy += (r[cx] - mx) * (r[cy] - my);
-          sxx += (r[cx] - mx) ** 2;
-          syy += (r[cy] - my) ** 2;
-        });
-        return sxy / Math.sqrt(sxx * syy);
-      }
-      const barH = (w, c, h) =>
-        `<div style="background:rgba(0,0,0,0.3);height:${h}px;border-radius:4px;overflow:hidden;margin-top:2px"><div style="width:${Math.max(0, Math.min(100, w))}%;background:${c};height:100%"></div></div>`;
-
-      // Gráfica de líneas genérica (SVG)
-      function drawLines(id, o) {
-        const W = 800,
-          Hh = 200,
-          X0 = 50,
-          Y0 = 14,
-          Wc = W - X0 - 15,
-          n = o.n;
-        const vals = o.series.flatMap((s) =>
-          s.arr.filter((v) => v != null && !isNaN(v)),
-        );
-        const maxVal =
-          o.max != null ? o.max : (vals.length ? Math.max(...vals) : 1) * 1.18;
-        const yf = (v) => Y0 + Hh - (v / maxVal) * Hh;
-        const xf = (i) => X0 + (n > 1 ? i / (n - 1) : 0) * Wc;
-        let s = "";
-        (o.ybands || []).forEach((b) => {
-          if (b.lo < maxVal) {
-            const hi = Math.min(b.hi, maxVal);
-            s += `<rect x="${X0}" y="${yf(hi)}" width="${Wc}" height="${yf(b.lo) - yf(hi)}" fill="${b.color}" opacity="0.13"/>`;
-          }
-        });
-        (o.xbands || []).forEach((b) => {
-          s += `<rect x="${xf(b.a)}" y="${Y0}" width="${xf(b.b) - xf(b.a)}" height="${Hh}" fill="#fff" opacity="0.07"/>
-                <text x="${(xf(b.a) + xf(b.b)) / 2}" y="${Y0 + 12}" text-anchor="middle" font-size="10.5" fill="#C7D9E8">${b.label}</text>`;
-        });
-        for (let i = 0; i <= 4; i++) {
-          const v = (maxVal * i) / 4;
-          s += `<line x1="${X0}" x2="${X0 + Wc}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
-                <text x="${X0 - 8}" y="${yf(v) + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${o.dg ? v.toFixed(o.dg) : Math.round(v)}</text>`;
-        }
-        o.xl.forEach(([i, t]) => {
-          s += `<text x="${xf(i)}" y="${Y0 + Hh + 20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${t}</text>`;
-        });
-        o.series.forEach((se) => {
-          let d = "",
-            pen = false;
-          se.arr.forEach((v, i) => {
-            if (v == null || isNaN(v)) {
-              pen = false;
-              return;
-            }
-            d += (pen ? "L" : "M") + xf(i).toFixed(1) + " " + yf(v).toFixed(1);
-            pen = true;
-          });
-          s += `<path d="${d}" fill="none" stroke="${se.color}" stroke-width="${se.w || 2.5}" ${se.dash ? 'stroke-dasharray="6 4"' : ""} stroke-linejoin="round" opacity="${se.dash ? 0.9 : 1}"/>`;
-        });
-        (o.notes || []).forEach((nt) => {
-          const anchor = nt.i < 2 ? "start" : nt.i > n - 3 ? "end" : "middle";
-          if (nt.dot !== false)
-            s += `<circle cx="${xf(nt.i)}" cy="${yf(nt.v)}" r="4" fill="${nt.color}" stroke="#071626" stroke-width="1.5"/>`;
-          s += `<text x="${xf(nt.i)}" y="${yf(nt.v) + (nt.dy != null ? nt.dy : -9)}" text-anchor="${anchor}" font-size="12" font-weight="700" fill="${nt.color}">${nt.text}</text>`;
-        });
-        $("#" + id).innerHTML = s;
-      }
-
-      function renderCmp() {
-        if (!H23.length || !H24.length) return;
-        renderMeansCmp();
-        renderAvail();
-        renderHoursCat();
-        renderSeason();
-        renderProfile();
-        renderMeteo();
-        renderNY();
-      }
-
-      // 1) Promedios anuales
       function renderMeansCmp() {
         const items = [
           ["PM10", "PM₁₀", "µg/m³", 2],
@@ -1521,155 +2100,133 @@
         ];
         $("#cmp-means").innerHTML = items
           .map(([k, n, u, d]) => {
-            const a = colMean(H23, RAW[k]),
-              b = colMean(H24, RAW[k]);
-            const ch = ((b - a) / a) * 100;
-            const good = ch < -0.5;
-            const flat = Math.abs(ch) <= 5;
-            const chipC =
-              good && !flat ? "#2ECC71" : flat ? "#9DB6CB" : "#FF7A2F";
-            const note =
-              k === "PM10"
-                ? '<div style="font-size:11.5px;color:var(--mut);margin-top:4px">2023 sin datos de ago–oct</div>'
-                : "";
+            const a = meanOfHours(getHours(state.baseYear), P[k].key);
+            const b = isComp() ? meanOfHours(getHours(state.compareYear), P[k].key) : null;
+            let chip = "";
+            if (isNum(a) && isNum(b) && a !== 0) {
+              const ch = ((b - a) / a) * 100;
+              const flat = Math.abs(ch) <= 5;
+              const chipC = flat ? "#9DB6CB" : ch < 0 ? "#2ECC71" : "#FF7A2F";
+              chip = `<span style="margin-left:8px;padding:2px 8px;border-radius:6px;background:${chipC};color:#071626;font-weight:700;font-size:12.5px">${ch > 0 ? "+" : ""}${ch.toFixed(1)}%</span>`;
+            }
             return `<div class="card kpi" style="--c:${P[k].c}">
-              <small>Promedio anual ${n} (${u})</small>
-              <b>${fmtN(b, d)}</b>
-              <div style="font-size:13.5px;color:var(--mut)">2023: <b style="display:inline;font:700 14px 'Outfit';color:#FFC83D;margin:0">${fmtN(a, d)}</b>
-              <span style="margin-left:8px;padding:2px 8px;border-radius:6px;background:${chipC};color:#071626;font-weight:700;font-size:12.5px">${ch > 0 ? "+" : ""}${ch.toFixed(1)}%</span></div>${note}
+              <small>Promedio ${state.activeMonth === 0 ? "anual" : mN[state.activeMonth]} ${n} (${u})</small>
+              <b>${fmt(a, d)}</b>
+              <div style="font-size:13.5px;color:var(--mut)">${isComp() ? `${state.compareYear}: <b style="display:inline;font:700 14px 'Outfit';color:#FFC83D;margin:0">${fmt(b, d)}</b>${chip}` : `Año base ${state.baseYear}`}</div>
             </div>`;
           })
           .join("");
       }
 
-      // 2) Disponibilidad de datos
       function renderAvail() {
         const rows = [
-          ["O₃", 0],
-          ["CO", 6],
-          ["PM₁₀", 4],
-          ["PM₂.₅", 5],
-          ["Temperatura", 7],
-          ["Humedad relativa", 9],
-          ["Viento", 10],
-        ].map(([n, c]) => [n, pctValid(H23, c), pctValid(H24, c)]);
-        rows.push(["SO₂ *", 96.5, 0], ["NO / NO₂ / NOx *", 0, 30.9]);
+          ["O₃", "O3"],
+          ["CO", "CO"],
+          ["PM₁₀", "PM10"],
+          ["PM₂.₅", "PM25"],
+          ["NO₂", "NO2"],
+          ["SO₂", "SO2"],
+          ["Temperatura", "Temp"],
+          ["Humedad relativa", "HR"],
+          ["Viento", "Viento"],
+        ];
+        const av1 = DATA[state.baseYear].avail;
+        const av2 = isComp() ? DATA[state.compareYear].avail : null;
         $("#cmp-avail").innerHTML = rows
-          .map(
-            ([n, a, b]) => `<div style="margin-bottom:10px;font-size:13.5px">
-              <div style="display:flex;justify-content:space-between"><span>${n}</span>
-              <span><b style="color:${C24}">${b.toFixed(1)}%</b> <span style="color:${C23}">/ ${a.toFixed(1)}% ('23)</span></span></div>
-              ${barH(b, C24, 9)}${barH(a, C23, 6)}</div>`,
-          )
+          .map(([n, key]) => {
+            const a = av1[key] || 0;
+            const b = av2 ? av2[key] || 0 : null;
+            return `<div style="margin-bottom:9px;font-size:13px">
+              <div style="display:flex;justify-content:space-between;gap:8px"><span>${n}</span>
+              <span><b style="color:#4CC9F0">${a.toFixed(1)}%</b> ${av2 ? `<span style="color:#FFC83D">/ ${b.toFixed(1)}% (${state.compareYear})</span>` : ""}</span></div>
+              <div style="background:rgba(0,0,0,0.3);height:9px;border-radius:4px;overflow:hidden;margin-top:2px"><div style="width:${a}%;background:#4CC9F0;height:100%"></div></div>
+              ${av2 ? `<div style="background:rgba(0,0,0,0.3);height:6px;border-radius:4px;overflow:hidden;margin-top:2px"><div style="width:${b}%;background:#FFC83D;height:100%"></div></div>` : ""}
+            </div>`;
+          })
           .join("");
+        $("#cmp-avail-note").innerHTML =
+          `Lectura: 0 % significa ausencia total de la variable en ese año. ` +
+          `La temperatura no está disponible en 2015–2022; PM₂.₅ falta en 2015–2016 y es intermitente en 2017–2022; ` +
+          `NO₂/SO₂ no están integrados en los archivos de 2023–2024. Estas discontinuidades limitan las comparaciones y se reportan como limitación.`;
       }
 
-      // 3) Horas por categoría
+      function hourCat(k, h) {
+        if (k === "CO") return cat("CO", h.co8);
+        return cat(k, h[P[k].key]);
+      }
+
       function renderHoursCat() {
-        $("#cmp-legend-cat").innerHTML = CAT.map(
-          (n, i) => `<span style="color:${COL[i]}">■ ${n}</span>`,
-        ).join("");
+        $("#cmp-legend-cat").innerHTML = CAT.map((n, i) => `<span style="color:${COL[i]}">■ ${n}</span>`).join("");
         const out = [];
-        ["PM10", "PM25", "O3", "CO"].forEach((k) =>
-          [2023, 2024].forEach((y) => {
-            const h = y === 2023 ? H23 : H24;
+        KS.forEach((k) => {
+          [state.baseYear, isComp() ? state.compareYear : null].filter(Boolean).forEach((y) => {
+            const h = getHours(y);
             const c = [0, 0, 0, 0, 0];
             h.forEach((r) => {
-              const v = r[P[k].i];
-              if (v != null && !isNaN(v)) c[cat(k, v)]++;
+              const v = hourCat(k, r);
+              if (v >= 0) c[v]++;
             });
-            const t = c.reduce((a, b) => a + b, 0) || 1;
-            out.push(`<div style="display:grid;grid-template-columns:92px 1fr 128px;gap:10px;align-items:center;margin-bottom:8px;font-size:13px">
-              <span style="font-weight:600;color:${y === 2024 ? C24 : C23}">${P[k].n} ${y}</span>
+            const total = c.reduce((a, b) => a + b, 0);
+            const t = total || 1;
+            out.push(`<div style="display:grid;grid-template-columns:96px 1fr 132px;gap:10px;align-items:center;margin-bottom:8px;font-size:12.5px">
+              <span style="font-weight:700;color:${y === state.baseYear ? "#4CC9F0" : "#FFC83D"}">${P[k].n} ${y}</span>
               <div style="display:flex;height:16px;border-radius:4px;overflow:hidden;background:#000">
-                ${c.map((x, i) => `<div title="${CAT[i]}: ${x} h" style="width:${(x / t) * 100}%;background:${COL[i]}"></div>`).join("")}
+                ${total ? c.map((x, i) => `<div title="${CAT[i]}: ${x} h" style="width:${(x / t) * 100}%;background:${COL[i]}"></div>`).join("") : `<span style="display:flex;align-items:center;justify-content:center;width:100%;font-size:11px;color:#9DB6CB">Sin datos</span>`}
               </div>
-              <span style="color:var(--mut)">Buena: <b style="color:#fff">${c[0].toLocaleString("es-MX")} h</b></span></div>`);
-          }),
-        );
+              <span style="color:var(--mut)">${total ? `Buena: <b style="color:#fff">${c[0].toLocaleString("es-MX")} h</b>` : "—"}</span></div>`);
+          });
+        });
         $("#cmp-hours").innerHTML = out.join("");
       }
 
-      // 4) Estacionalidad mensual
-      function renderSeason() {
-        const k = $("#cmp-var").value,
-          c = RAW[k];
-        const mm = (h) =>
-          Array.from({ length: 12 }, (_, m) =>
-            colMean(
-              h.filter((r) => r[11] === m + 1),
-              c,
-            ),
-          );
-        const a23 = mm(H23),
-          a24 = mm(H24);
-        const dg = k === "O3" ? 3 : 1;
-        const top = Math.max(
-          ...a23.filter((v) => v != null),
-          ...a24.filter((v) => v != null),
+      function monthlyMean(y, key) {
+        return Array.from({ length: 12 }, (_, m) =>
+          meanValid(DATA[y].hours.filter((h) => h.month === m + 1).map((h) => h[key])),
         );
-        const notes = [
-          {
-            i: 0,
-            v: a24[0],
-            text: fmtN(a24[0], dg),
-            color: C24,
-            dy: a24[0] >= a23[0] ? -10 : 18,
-          },
-          {
-            i: 0,
-            v: a23[0],
-            text: fmtN(a23[0], dg),
-            color: C23,
-            dy: a23[0] > a24[0] ? -10 : 18,
-          },
-        ];
-        if (a23.some((v) => v == null)) {
-          const firstNull = a23.findIndex((v) => v == null);
-          notes.push({
-            i: Math.min(11, firstNull + 1),
-            v: top * 0.12,
-            text: "2023 sin datos",
-            color: "#9DB6CB",
-            dot: false,
-            dy: 0,
-          });
+      }
+
+      function renderSeason() {
+        const k = $("#cmp-var").value;
+        const key = P[k].key;
+        const a = monthlyMean(state.baseYear, key);
+        const b = isComp() ? monthlyMean(state.compareYear, key) : null;
+        const dg = k === "O3" ? 3 : 1;
+        const series = [{ arr: a, color: yearColor(state.baseYear), w: 3 }];
+        if (b) series.push({ arr: b, color: yearColor(state.compareYear), dash: true, w: 2.5 });
+        const all = [...a, ...(b || [])].filter(isNum);
+        const notes = [];
+        const maxI = a.reduce((best, v, i) => (isNum(v) && (!isNum(a[best]) || v > a[best]) ? i : best), 0);
+        if (isNum(a[maxI])) notes.push({ i: maxI, v: a[maxI], text: `${state.baseYear}: ${fmt(a[maxI], dg)}`, color: yearColor(state.baseYear) });
+        if (b) {
+          const maxB = b.reduce((best, v, i) => (isNum(v) && (!isNum(b[best]) || v > b[best]) ? i : best), 0);
+          if (isNum(b[maxB])) notes.push({ i: maxB, v: b[maxB], text: `${state.compareYear}: ${fmt(b[maxB], dg)}`, color: yearColor(state.compareYear), dy: 20 });
         }
-        drawLines("cmp-season", {
+        lineChart("cmp-season", {
           n: 12,
           dg,
-          series: [
-            { arr: a23, color: C23, dash: true, w: 2.5 },
-            { arr: a24, color: C24, w: 3 },
-          ],
+          series,
           xl: mN.slice(1).map((t, i) => [i, t]),
           notes,
         });
+        $("#cmp-season-legend").innerHTML =
+          `<span style="color:${yearColor(state.baseYear)}">■ ${state.baseYear} (sólida)</span>` +
+          (b ? `<span style="color:${yearColor(state.compareYear)}">-- ${state.compareYear} (punteada)</span>` : "") +
+          `<span style="color:var(--mut)">Variable: ${P[k].n}</span>`;
       }
 
-      // 5) Perfil horario
+      function hourlyProfile(y, key) {
+        const h = getHours(y);
+        return Array.from({ length: 24 }, (_, hr) => meanValid(h.filter((r) => r.hour === hr).map((r) => r[key])));
+      }
+
       function renderProfile() {
-        const k = $("#cmp-var").value,
-          c = RAW[k];
-        const prof = (h) =>
-          Array.from({ length: 24 }, (_, hr) => {
-            let s = 0,
-              n = 0;
-            for (let i = hr; i < h.length; i += 24) {
-              const v = h[i][c];
-              if (v != null && !isNaN(v)) {
-                s += v;
-                n++;
-              }
-            }
-            return n ? s / n : null;
-          });
-        const p23 = prof(getH(2023)),
-          p24 = prof(getH(2024));
+        const k = $("#cmp-var").value;
+        const key = P[k].key;
+        const a = hourlyProfile(state.baseYear, key);
+        const b = isComp() ? hourlyProfile(state.compareYear, key) : null;
         const dg = k === "O3" ? 3 : 1;
-        const valid = p24.map((v, i) => [v, i]).filter((x) => x[0] != null);
-        const mx = valid.reduce((a, b) => (b[0] > a[0] ? b : a));
-        const mn = valid.reduce((a, b) => (b[0] < a[0] ? b : a));
+        const series = [{ arr: a, color: yearColor(state.baseYear), w: 3 }];
+        if (b) series.push({ arr: b, color: yearColor(state.compareYear), dash: true, w: 2.5 });
         const xb =
           k === "O3"
             ? [
@@ -1677,102 +2234,39 @@
                 { a: 13, b: 15, label: "Pico O₃" },
               ]
             : [
-                { a: 7, b: 9, label: "Hora pico AM" },
-                { a: 19, b: 22, label: "Hora pico PM" },
+                { a: 7, b: 9, label: "Pico AM" },
+                { a: 19, b: 22, label: "Pico PM" },
               ];
-        drawLines("cmp-profile", {
+        const validA = a.map((v, i) => [v, i]).filter((x) => isNum(x[0]));
+        const notes = [];
+        if (validA.length) {
+          const mx = validA.reduce((x, y) => (y[0] > x[0] ? y : x));
+          const mn = validA.reduce((x, y) => (y[0] < x[0] ? y : x));
+          notes.push({ i: mx[1], v: mx[0], text: `máx ${hhmm(mx[1])} · ${fmt(mx[0], dg)}`, color: yearColor(state.baseYear) });
+          notes.push({ i: mn[1], v: mn[0], text: `mín ${hhmm(mn[1])} · ${fmt(mn[0], dg)}`, color: yearColor(state.baseYear), dy: 20 });
+        }
+        lineChart("cmp-profile", {
           n: 24,
           dg,
           xbands: xb,
-          series: [
-            { arr: p23, color: C23, dash: true, w: 2.5 },
-            { arr: p24, color: C24, w: 3 },
-          ],
+          series,
           xl: [0, 3, 6, 9, 12, 15, 18, 21, 23].map((i) => [i, hhmm(i)]),
-          notes: [
-            {
-              i: mx[1],
-              v: mx[0],
-              text: `máx ${hhmm(mx[1])} · ${fmtN(mx[0], dg)}`,
-              color: C24,
-            },
-            {
-              i: mn[1],
-              v: mn[0],
-              text: `mín ${hhmm(mn[1])} · ${fmtN(mn[0], dg)}`,
-              color: C24,
-              dy: 20,
-            },
-          ],
+          notes,
         });
+        $("#cmp-profile-legend").innerHTML =
+          `<span style="color:${yearColor(state.baseYear)}">■ ${state.baseYear} (sólida)</span>` +
+          (b ? `<span style="color:${yearColor(state.compareYear)}">-- ${state.compareYear} (punteada)</span>` : "") +
+          `<span style="color:var(--mut)">Variable: ${P[k].n}</span>`;
       }
 
-      // 6) Meteorología (dispersión + promedio por rango)
-      function scatter(id, o) {
-        const W = 420,
-          Hh = 230,
-          X0 = 50,
-          Y0 = 10,
-          Wc = W - X0 - 12;
-        const xf = (v) => X0 + ((v - o.xmin) / (o.xmax - o.xmin)) * Wc;
-        const yf = (v) => Y0 + Hh - ((v - o.ymin) / (o.ymax - o.ymin)) * Hh;
-        let s = "";
-        for (let i = 0; i <= 4; i++) {
-          const v = o.ymin + ((o.ymax - o.ymin) * i) / 4;
-          s += `<line x1="${X0}" x2="${X0 + Wc}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
-                <text x="${X0 - 6}" y="${yf(v) + 4}" text-anchor="end" font-size="10.5" fill="#9DB6CB">${o.yd ? v.toFixed(o.yd) : Math.round(v)}</text>`;
-        }
-        for (let i = 0; i <= 5; i++) {
-          const v = o.xmin + ((o.xmax - o.xmin) * i) / 5;
-          s += `<text x="${xf(v)}" y="${Y0 + Hh + 16}" text-anchor="middle" font-size="10.5" fill="#9DB6CB">${Math.round(v)}</text>`;
-        }
-        s += `<text x="${X0 + Wc / 2}" y="${Y0 + Hh + 34}" text-anchor="middle" font-size="11.5" fill="#C7D9E8">${o.xl}</text>`;
-        s += `<text x="12" y="${Y0 + Hh / 2}" transform="rotate(-90 12 ${Y0 + Hh / 2})" text-anchor="middle" font-size="11.5" fill="#C7D9E8">${o.yl}</text>`;
-        [
-          [getH(2023), C23, 0.3],
-          [getH(2024), C24, 0.3],
-        ].forEach(([h, col, op]) => {
-          let pts = "";
-          const bins = {};
-          for (let i = 0; i < h.length; i++) {
-            const x = h[i][o.x],
-              y = h[i][o.y];
-            if (
-              x == null ||
-              y == null ||
-              isNaN(x) ||
-              isNaN(y) ||
-              x < o.xmin ||
-              x > o.xmax
-            )
-              continue;
-            (bins[Math.floor(x / o.bin)] =
-              bins[Math.floor(x / o.bin)] || []).push(y);
-            if (i % 3 === 0 && y <= o.ymax)
-              pts += `M${xf(x).toFixed(1)} ${yf(y).toFixed(1)}h0.1`;
-          }
-          s += `<path d="${pts}" stroke="${col}" stroke-opacity="${op}" stroke-width="3" stroke-linecap="round" fill="none"/>`;
-          let ln = "";
-          Object.keys(bins)
-            .map(Number)
-            .sort((a, b) => a - b)
-            .forEach((b) => {
-              if (bins[b].length < 15) return;
-              const m = bins[b].reduce((a, v) => a + v, 0) / bins[b].length;
-              ln +=
-                (ln ? "L" : "M") +
-                xf((b + 0.5) * o.bin).toFixed(1) +
-                " " +
-                yf(Math.min(m, o.ymax)).toFixed(1);
-            });
-          s += `<path d="${ln}" fill="none" stroke="${col}" stroke-width="3.5" stroke-linejoin="round" ${col === C23 ? 'stroke-dasharray="6 4"' : ""}/>`;
-        });
-        $("#" + id).innerHTML = s;
-      }
       function renderMeteo() {
+        const h1 = getHours(state.baseYear);
+        const h2 = isComp() ? getHours(state.compareYear) : null;
+        const series = [{ data: h1, color: yearColor(state.baseYear), dash: false }];
+        if (h2) series.push({ data: h2, color: yearColor(state.compareYear), dash: true });
         scatter("cmp-sc1", {
-          x: 7,
-          y: 0,
+          x: "temp",
+          y: "o3",
           xmin: 5,
           xmax: 40,
           ymin: 0,
@@ -1781,10 +2275,11 @@
           bin: 2,
           xl: "Temperatura (°C)",
           yl: "O₃ (ppm)",
+          series,
         });
         scatter("cmp-sc2", {
-          x: 10,
-          y: 4,
+          x: "wsp",
+          y: "pm10",
           xmin: 0,
           xmax: 14,
           ymin: 0,
@@ -1793,354 +2288,1263 @@
           bin: 1,
           xl: "Viento (m/s) · eje PM₁₀ recortado a 250",
           yl: "PM₁₀ (µg/m³)",
+          series,
         });
-        const r = (cx, cy) =>
-          [2023, 2024]
-            .map((y) => {
-              const v = corrXY(getH(y), cx, cy);
-              return `<span style="color:${y === 2024 ? C24 : C23}">r ${y} = ${v == null ? "—" : v.toFixed(2)}</span>`;
-            })
-            .join("");
+        const rLabel = (cx, cy, label) => {
+          const a = corr(h1, cx, cy);
+          const b = h2 ? corr(h2, cx, cy) : null;
+          return (
+            `<span style="color:${yearColor(state.baseYear)}">r(${label}) ${state.baseYear} = ${a == null ? "—" : a.toFixed(2)}</span>` +
+            (h2
+              ? `<span style="color:${yearColor(state.compareYear)}">r(${label}) ${state.compareYear} = ${b == null ? "—" : b.toFixed(2)}</span>`
+              : "")
+          );
+        };
         $("#cmp-sc1-r").innerHTML =
-          r(7, 0) +
-          '<span style="color:var(--mut)">A mayor temperatura, más ozono</span>';
+          rLabel("temp", "o3", "Temperatura vs O₃") +
+          '<span style="color:var(--mut)">r de Pearson: a mayor temperatura suele aumentar el ozono, pero no es el único factor.</span>';
         $("#cmp-sc2-r").innerHTML =
-          r(10, 4) +
-          '<span style="color:var(--mut)">Relación débil: el viento ayuda a diluir, pero no es el único factor</span>';
+          rLabel("wsp", "pm10", "Viento vs PM₁₀") +
+          '<span style="color:var(--mut)">r de Pearson: el viento puede diluir partículas, aunque la relación es débil y depende de otras variables.</span>';
       }
 
-      // 7) Evento Año Nuevo
       function renderNY() {
-        const a23 = H23.slice(0, 24).map((r) => r[4]);
-        const a24 = H24.slice(0, 24).map((r) => r[4]);
-        const peak = (a) =>
-          a.reduce((b, v, i) => (v != null && v > b[0] ? [v, i] : b), [-1, 0]);
-        const p23 = peak(a23),
-          p24 = peak(a24);
-        const b = P.PM10.b;
-        drawLines("cmp-ny", {
+        const a = DATA[state.baseYear].hours.slice(0, 24).map((r) => r.pm10);
+        const b = isComp() ? DATA[state.compareYear].hours.slice(0, 24).map((r) => r.pm10) : null;
+        const peak = (arr) =>
+          arr.reduce((best, v, i) => (isNum(v) && (best[0] < 0 || v > best[0]) ? [v, i] : best), [-1, 0]);
+        const pA = peak(a);
+        const pB = b ? peak(b) : [-1, 0];
+        const bands = [
+          { lo: 0, hi: P.PM10.b[0], color: COL[0] },
+          { lo: P.PM10.b[0], hi: P.PM10.b[1], color: COL[1] },
+          { lo: P.PM10.b[1], hi: P.PM10.b[2], color: COL[2] },
+          { lo: P.PM10.b[2], hi: P.PM10.b[3], color: COL[3] },
+          { lo: P.PM10.b[3], hi: 1e9, color: COL[4] },
+        ];
+        const series = [{ arr: a, color: yearColor(state.baseYear), w: 3 }];
+        if (b) series.push({ arr: b, color: yearColor(state.compareYear), dash: true, w: 2.5 });
+        const notes = [];
+        if (pA[0] >= 0) notes.push({ i: pA[1], v: pA[0], text: `${state.baseYear}: ${Math.round(pA[0])} µg/m³ · ${hhmm(pA[1])}`, color: yearColor(state.baseYear) });
+        if (b && pB[0] >= 0) notes.push({ i: pB[1], v: pB[0], text: `${state.compareYear}: ${Math.round(pB[0])} µg/m³ · ${hhmm(pB[1])}`, color: yearColor(state.compareYear), dy: 20 });
+        lineChart("cmp-ny", {
           n: 24,
           dg: 0,
-          ybands: [
-            { lo: 0, hi: b[0], color: COL[0] },
-            { lo: b[0], hi: b[1], color: COL[1] },
-            { lo: b[1], hi: b[2], color: COL[2] },
-            { lo: b[2], hi: b[3], color: COL[3] },
-            { lo: b[3], hi: 1e9, color: COL[4] },
-          ],
-          series: [
-            { arr: a23, color: C23, dash: true, w: 2.5 },
-            { arr: a24, color: C24, w: 3.5 },
-          ],
-          xl: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 23].map((i) => [
-            i,
-            hhmm(i),
-          ]),
-          notes: [
-            {
-              i: p24[1],
-              v: p24[0],
-              text: `${p24[0]} µg/m³ · ${hhmm(p24[1])}`,
-              color: C24,
-            },
-            {
-              i: p23[1],
-              v: p23[0],
-              text: `${p23[0]} µg/m³ · ${hhmm(p23[1])}`,
-              color: C23,
-            },
-          ],
+          ybands: bands,
+          series,
+          xl: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 23].map((i) => [i, hhmm(i)]),
+          notes,
         });
-        $("#ny-text").textContent =
-          `2024 alcanzó ${p24[0]} µg/m³ a las ${hhmm(p24[1])}, frente a ${p23[0]} µg/m³ de 2023 (${(p24[0] / p23[0]).toFixed(1)} veces más). Pirotecnia y fogatas + inversión térmica matutina.`;
+        $("#cmp-ny-legend").innerHTML =
+          `<span style="color:${yearColor(state.baseYear)}">■ 1 ene ${state.baseYear} (sólida)</span>` +
+          (b ? `<span style="color:${yearColor(state.compareYear)}">-- 1 ene ${state.compareYear} (punteada)</span>` : "") +
+          `<span style="color:var(--mut)">PM₁₀ horario; fondo = categorías NOM-172</span>`;
+        let text = "";
+        if (pA[0] >= 0) {
+          text = `El 1 de enero de ${state.baseYear} el PM₁₀ alcanzó ${Math.round(pA[0])} µg/m³ a las ${hhmm(pA[1])}.`;
+          if (b && pB[0] > 0) {
+            const ratio = pA[0] / pB[0];
+            text += ` En ${state.compareYear} el pico fue ${Math.round(pB[0])} µg/m³ a las ${hhmm(pB[1])} (${ratio.toFixed(1)} veces).`;
+          }
+          text += " La pirotecnia y las fogatas de Año Nuevo, junto con la inversión térmica matutina, son factores consistentes con este tipo de pico.";
+        } else {
+          text = "No hay suficientes datos de PM₁₀ para el 1 de enero en los años seleccionados.";
+        }
+        $("#ny-text").textContent = text;
       }
 
-      function goNewYear() {
-        activeMonth = 0;
-        $("#month-selector").value = "0";
-        setMode("comp");
-        simPol = "PM10";
-        updateSimPolButtons();
-        setSimDay(0, true);
-      }
-      $("#cmp-var").addEventListener("change", () => {
+      function renderCmp() {
+        if (!DATA[state.baseYear]) return;
+        renderMeansCmp();
+        renderAvail();
+        renderHoursCat();
         renderSeason();
         renderProfile();
-      });
+        renderMeteo();
+        renderNY();
+      }
 
-      let simDay = 0,
-        simPol = "PM10",
-        simTime = 8;
-      let isPlaying = false,
-        animReq,
-        lastRenderedHour = -1;
-      let lastFrameTime = performance.now();
-
-      function initSim(isComp) {
-        $("#sim-pols").innerHTML = KS.map(
-          (k) => `
-        <button class="btn" style="background:${simPol === k ? "var(--sun)" : "var(--bg-card)"}; color:${simPol === k ? "#000" : "var(--tx)"}; border-color:${simPol === k ? "var(--sun)" : "var(--line)"}" 
-                onclick="simPol='${k}'; updateSimPolButtons(); drawSimChart(${isComp}); renderSimFrame(${isComp});">
-          ${P[k].n}
-        </button>`,
-        ).join("");
-
-        const refD = getD(isComp ? 2024 : activeYear);
-        $("#sel-sim-day").innerHTML = refD
-          .map((x, i) => `<option value="${i}">${x.d} ${mN[x.m]}</option>`)
-          .join("");
-
-        // Corrección de Bug: Evitar el scroll indeseado y forzar refresco
-        $("#sel-sim-day").onchange = (e) => setSimDay(+e.target.value, false);
-
-        $("#sim-legend").style.display = isComp ? "block" : "none";
-        $("#sim-gauges").style.display = isComp ? "none" : "grid";
-
-        if (!$("#btn-play").hasListener) {
-          $("#btn-play").addEventListener("click", () => {
-            isPlaying = !isPlaying;
-            $("#btn-play").textContent = isPlaying ? "⏸ Pausa" : "▶ Iniciar";
-            if (isPlaying) {
-              lastFrameTime = performance.now();
-              requestAnimationFrame(loopSim);
-            }
-          });
-          $("#btn-play").hasListener = true;
+      /* ===================== Calendario ===================== */
+      function renderCal() {
+        const master = $("#cal-master");
+        master.innerHTML = "";
+        const d1 = getDays(state.baseYear);
+        if (!d1.length) {
+          master.innerHTML = `<p class="note">Sin días válidos para el periodo seleccionado.</p>`;
+          return;
         }
 
-        $("#sim-range").oninput = (e) => {
-          simTime = +e.target.value;
-          isPlaying = false;
-          $("#btn-play").textContent = "▶ Iniciar";
-          renderSimFrame(activeYear === "comp");
+        const block = (dataArr, year, color) => {
+          let html = `
+            <div style="margin-top: 16px;">
+              <h4 style="color:${color}; border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 12px; font-size: 18px;">Calendario ${year}</h4>
+              <div class="cal-grid" style="grid-template-columns: repeat(auto-fill, minmax(${state.granularity === "meses" && state.activeMonth === 0 ? "80px" : "62px"}, 1fr));">`;
+
+          if (state.granularity === "dias") {
+            html += dataArr
+              .map(
+                (x) => `
+              <div class="cal-item c${x.c >= 0 ? x.c : "n"}" onclick="jumpSim(${x.di}, ${year})" onmouseenter="showTip(event, '${x.day} de ${mN[x.month]} ${year}<br>Categoría: ${CAT[x.c] || "Sin datos"}')" onmouseleave="hideTip()">
+                <b>${x.day}</b><small>${mN[x.month]}</small>
+              </div>`,
+              )
+              .join("");
+          } else if (state.granularity === "meses") {
+            for (let m = 1; m <= 12; m++) {
+              const mData = dataArr.filter((x) => x.month === m);
+              if (!mData.length) continue;
+              const v = modeCat(mData.map((x) => x.c));
+              const first = mData[0];
+              html += `
+                <div class="cal-item c${v >= 0 ? v : "n"}" onclick="jumpSim(${first.di}, ${year})" onmouseenter="showTip(event, '${mN[m]} ${year}<br>Cat. predominante: ${CAT[v] || "Sin datos"}')" onmouseleave="hideTip()">
+                  <b style="font-size:16px; margin-top:6px">${mN[m]}</b>
+                </div>`;
+            }
+          } else {
+            for (let w = 0; w < dataArr.length; w += 7) {
+              const wData = dataArr.slice(w, w + 7);
+              if (!wData.length) continue;
+              const v = modeCat(wData.map((x) => x.c));
+              const first = wData[0];
+              html += `
+                <div class="cal-item c${v >= 0 ? v : "n"}" onclick="jumpSim(${first.di}, ${year})" onmouseenter="showTip(event, 'Semana del ${first.day} ${mN[first.month]} ${year}<br>Cat. predominante: ${CAT[v] || "Sin datos"}')" onmouseleave="hideTip()">
+                  <b style="font-size:14px; margin-top:6px">${first.day} ${mN[first.month]}</b>
+                </div>`;
+            }
+          }
+          html += `</div></div>`;
+          return html;
         };
 
-        setSimDay(0, false);
+        master.innerHTML =
+          block(d1, state.baseYear, yearColor(state.baseYear)) +
+          (isComp() ? block(getDays(state.compareYear), state.compareYear, yearColor(state.compareYear)) : "");
       }
 
-      function updateSimPolButtons() {
-        $$("#sim-pols button").forEach((b) => {
-          const isActive = b.textContent.includes(P[simPol].n);
-          b.style.background = isActive ? "var(--sun)" : "var(--bg-card)";
-          b.style.color = isActive ? "#000" : "var(--tx)";
-          b.style.borderColor = isActive ? "var(--sun)" : "var(--line)";
-        });
-      }
+      /* ===================== Tendencias ===================== */
+      function renderTrend() {
+        const isTemp = state.activeTrendVar === "TEMP";
+        const key = isTemp ? "temp" : P[state.activeTrendVar].key;
+        const d1 = getDays(state.baseYear);
+        const d2 = isComp() ? getDays(state.compareYear) : null;
+        const arr1 = d1.map((d) => d[key]);
+        const arr2 = d2 ? d2.map((d) => d[key]) : null;
+        const n = Math.max(arr1.length, arr2 ? arr2.length : 0, 1);
+        while (arr1.length < n) arr1.push(null);
+        if (arr2) while (arr2.length < n) arr2.push(null);
+        const dg = isTemp ? 1 : state.activeTrendVar === "O3" ? 3 : state.activeTrendVar === "CO" ? 2 : 0;
+        const color = isTemp ? "#FF7A2F" : P[state.activeTrendVar].c;
+        const metricName = isTemp
+          ? "Temperatura media diaria (°C)"
+          : state.activeTrendVar === "O3" || state.activeTrendVar === "CO"
+            ? `${P[state.activeTrendVar].n} máximo diario (${P[state.activeTrendVar].u})`
+            : `${P[state.activeTrendVar].n} promedio diario (${P[state.activeTrendVar].u})`;
+        const series = [{ arr: arr1, color: isComp() ? yearColor(state.baseYear) : color, w: 2.5 }];
+        if (arr2) series.push({ arr: arr2, color: yearColor(state.compareYear), dash: true, w: 2 });
 
-      function setSimDay(index, autoScroll = true) {
-        simDay = index;
-        lastRenderedHour = -1; // REINICIO FORZADO PARA GARANTIZAR ACTUALIZACIÓN DEL PANEL
-        $("#sel-sim-day").value = index;
-
-        const isComp = activeYear === "comp";
-        drawSimChart(isComp);
-        renderSimFrame(isComp);
-
-        if (autoScroll) {
-          $("#simulador").scrollIntoView({
-            behavior: "smooth",
-            block: "start",
+        const xl = [];
+        const ylines = [];
+        if (state.activeMonth === 0) {
+          const seen = {};
+          d1.forEach((d, i) => {
+            if (!seen[d.month]) {
+              seen[d.month] = true;
+              if (i > 0) ylines.push(i);
+            }
           });
+          for (let m = 1; m <= 12; m++) {
+            const idx = d1.findIndex((d) => d.month === m);
+            if (idx >= 0) {
+              const next = d1.findIndex((d) => d.month === m + 1);
+              const mid = next < 0 ? Math.min(n - 1, idx + 15) : (idx + next) / 2;
+              xl.push([mid, mN[m]]);
+            }
+          }
+        } else {
+          for (let i = 0; i < n; i++) {
+            if (i === 0 || (i + 1) % 5 === 0 || i === n - 1) {
+              xl.push([i, String(d1[i] ? d1[i].day : i + 1)]);
+            }
+          }
+        }
+        const vals = arr1.filter(isNum);
+        const notes = [];
+        if (vals.length) {
+          const mx = Math.max(...vals);
+          const mn = Math.min(...vals);
+          const imx = arr1.indexOf(mx);
+          const imn = arr1.indexOf(mn);
+          notes.push({ i: imx, v: mx, text: `máx ${fmt(mx, dg)}`, color: isComp() ? yearColor(state.baseYear) : color });
+          notes.push({ i: imn, v: mn, text: `mín ${fmt(mn, dg)}`, color: isComp() ? yearColor(state.baseYear) : color, dy: 20 });
+        }
+        lineChart("trend-chart", {
+          W: 800,
+          H: 170,
+          X0: 48,
+          Y0: 10,
+          n,
+          dg,
+          series,
+          xl,
+          ylines,
+          notes,
+        });
+        $("#trend-legend").innerHTML =
+          `<span style="color:${isComp() ? yearColor(state.baseYear) : color}">■ ${state.baseYear}: ${metricName}</span>` +
+          (arr2 ? `<span style="color:${yearColor(state.compareYear)}">-- ${state.compareYear}: ${metricName}</span>` : "");
+      }
+
+      /* ===================== Histórico 10 años ===================== */
+      function histKey() {
+        return state.activeHistVar === "TEMP" ? "temp" : P[state.activeHistVar].key;
+      }
+      function histUnit() {
+        return state.activeHistVar === "TEMP" ? "°C" : P[state.activeHistVar].u;
+      }
+      function histDg() {
+        return state.activeHistVar === "TEMP" ? 1 : state.activeHistVar === "O3" ? 3 : state.activeHistVar === "CO" ? 2 : 0;
+      }
+      function annualMean(y, key) {
+        if (!DATA[y]) return null;
+        return meanValid(DATA[y].hours.map((h) => h[key]));
+      }
+      function lerpHex(a, b, t) {
+        const pa = a.match(/[0-9a-f]{2}/gi).map((x) => parseInt(x, 16));
+        const pb = b.match(/[0-9a-f]{2}/gi).map((x) => parseInt(x, 16));
+        const c = pa.map((v, i) => Math.round(v + (pb[i] - v) * t));
+        return "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
+      }
+      function heatColor(v, min, max) {
+        if (!isNum(v)) return "#23364a";
+        const t = max > min ? Math.max(0, Math.min(1, (v - min) / (max - min))) : 0.5;
+        const stops = ["#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c"];
+        const pos = t * (stops.length - 1);
+        const i = Math.min(stops.length - 2, Math.floor(pos));
+        return lerpHex(stops[i], stops[i + 1], pos - i);
+      }
+      function availColor(v) {
+        if (!isNum(v) || v <= 0) return "#23364a";
+        const stops = ["#d7191c", "#fdae61", "#ffffbf", "#abd9e9", "#2c7bb6"];
+        const t = Math.max(0, Math.min(1, v / 100));
+        const pos = t * (stops.length - 1);
+        const i = Math.min(stops.length - 2, Math.floor(pos));
+        return lerpHex(stops[i], stops[i + 1], pos - i);
+      }
+
+      function renderHistAnnual() {
+        const key = histKey();
+        const dg = histDg();
+        const vals = YEARS.map((y) => annualMean(y, key));
+        const validPairs = YEARS.map((y, i) => [y, vals[i]]).filter((x) => isNum(x[1]));
+        const lr = validPairs.length >= 2 ? linreg(validPairs.map((x) => x[0]), validPairs.map((x) => x[1])) : null;
+        const trend = lr ? YEARS.map((y) => lr.intercept + lr.slope * y) : YEARS.map(() => null);
+        const notes = [];
+        if (validPairs.length) {
+          const mx = validPairs.reduce((a, b) => (b[1] > a[1] ? b : a));
+          const mn = validPairs.reduce((a, b) => (b[1] < a[1] ? b : a));
+          notes.push({ i: YEARS.indexOf(mx[0]), v: mx[1], text: `máx ${mx[0]}: ${fmt(mx[1], dg)}`, color: "#FFC83D" });
+          notes.push({ i: YEARS.indexOf(mn[0]), v: mn[1], text: `mín ${mn[0]}: ${fmt(mn[1], dg)}`, color: "#4CC9F0", dy: 20 });
+        }
+        lineChart("hist-annual", {
+          n: YEARS.length,
+          dg,
+          series: [
+            { arr: vals, color: "#FFC83D", w: 3 },
+            ...(lr ? [{ arr: trend, color: "#9B5DE5", dash: true, w: 2 }] : []),
+          ],
+          xl: YEARS.map((y, i) => [i, String(y)]),
+          notes,
+        });
+        $("#hist-annual-legend").innerHTML =
+          `<span style="color:#FFC83D">■ Promedio anual observado</span>` +
+          (lr ? `<span style="color:#9B5DE5">-- Tendencia lineal</span>` : "") +
+          `<span style="color:var(--mut)">Variable: ${state.activeHistVar === "TEMP" ? "Temperatura" : P[state.activeHistVar].n} (${histUnit()})</span>`;
+        if (lr) {
+          const dir = lr.slope > 0 ? "aumento" : lr.slope < 0 ? "descenso" : "sin cambio";
+          const step = Math.abs(lr.slope) < 0.001 ? lr.slope.toExponential(2) : lr.slope.toFixed(histDg() === 3 ? 5 : 2);
+          $("#hist-trend-note").textContent =
+            `Tendencia lineal: ${dir} de ${step} ${histUnit()}/año entre ${validPairs[0][0]} y ${validPairs[validPairs.length - 1][0]}. ` +
+            `Es una lectura descriptiva; no se evaluó significancia estadística ni causalidad.`;
+        } else {
+          $("#hist-trend-note").textContent = "No hay suficientes años con datos para estimar una tendencia lineal.";
         }
       }
 
-      function drawSimChart(isComp) {
-        const p = P[simPol];
-        const offset = simDay * 24;
-        const X0 = 50,
-          W = 670,
-          Y0 = 20,
-          H_box = 200;
+      function renderHistCats() {
+        $("#hist-cats").innerHTML = YEARS.map((y) => {
+          const days = DATA[y] ? DATA[y].days : [];
+          const c = [0, 0, 0, 0, 0];
+          days.forEach((d) => {
+            if (d.c >= 0) c[d.c]++;
+          });
+          const total = c.reduce((a, b) => a + b, 0) || 1;
+          const risk = c[2] + c[3] + c[4];
+          return `<div class="hist-cat-row">
+            <span>${y}</span>
+            <div class="hist-cat-bar">
+              ${c.map((x, i) => `<span title="${CAT[i]}: ${x} días" style="width:${(x / total) * 100}%;background:${COL[i]}"></span>`).join("")}
+            </div>
+            <span style="color:${risk / total >= 0.3 ? "#FF7A2F" : "var(--mut)"}">${((risk / total) * 100).toFixed(0)}% riesgo</span>
+          </div>`;
+        }).join("");
+        $("#hist-cats-legend").innerHTML = CAT.map((n, i) => `<span style="color:${COL[i]}">■ ${n}</span>`).join("");
+      }
 
-        const h1 = getH(isComp ? 2024 : activeYear);
-        const h2 = isComp ? getH(2023) : null;
-
-        const arr1 = [],
-          arr2 = [];
-        for (let h = 0; h < 24; h++) {
-          arr1.push((h1[offset + h] || [])[p.i]);
-          if (h2) arr2.push((h2[offset + h] || [])[p.i]);
-        }
-
-        const allVals = [
-          ...arr1.filter((v) => v != null),
-          ...(arr2 ? arr2.filter((v) => v != null) : []),
-        ];
-        const maxVal = Math.max(...allVals, p.b[0] * 1.15) * 1.15;
-        const yf = (val) => Y0 + H_box - (val / maxVal) * H_box;
-
-        let svgStr = "";
-
-        [...p.b.slice(0, 3), maxVal].forEach((th, i, arr) => {
-          const prevTh = i === 0 ? 0 : arr[i - 1];
-          if (prevTh < maxVal) {
-            const tCapped = Math.min(th, maxVal);
-            svgStr += `<rect x="${X0}" y="${yf(tCapped)}" width="${W}" height="${yf(prevTh) - yf(tCapped)}" fill="${COL[i]}" opacity="0.12"/>`;
+      function renderHistHeatmap() {
+        const key = histKey();
+        const dg = histDg();
+        const unit = histUnit();
+        const data = YEARS.map((y) => monthlyMean(y, key));
+        const all = data.flat().filter(isNum);
+        const min = all.length ? Math.min(...all) : 0;
+        const max = all.length ? Math.max(...all) : 1;
+        let html = `<div class="heatmap" style="grid-template-columns: 52px repeat(12, 1fr)">`;
+        html += `<div></div>`;
+        for (let m = 1; m <= 12; m++) html += `<div class="hm-head">${mN[m]}</div>`;
+        YEARS.forEach((y, yi) => {
+          html += `<div class="hm-row-label">${y}</div>`;
+          for (let m = 0; m < 12; m++) {
+            const v = data[yi][m];
+            const bg = heatColor(v, min, max);
+            html += `<div class="heat-cell ${isNum(v) ? "" : "empty"}" style="background:${bg}" title="${y} · ${mN[m + 1]}: ${fmt(v, dg)} ${unit}">${isNum(v) ? fmt(v, dg) : "—"}</div>`;
           }
         });
+        html += `</div>`;
+        $("#hist-heatmap").innerHTML = html;
+        const monthly = Array.from({ length: 12 }, (_, m) => meanValid(YEARS.map((y) => data[YEARS.indexOf(y)][m])));
+        const best = monthly.reduce((a, v, i) => (isNum(v) && (a < 0 || v > monthly[a]) ? i : a), -1);
+        $("#hist-critical").textContent =
+          best >= 0
+            ? `Periodo crítico: ${mN[best + 1]} presenta el mayor promedio multianual (${fmt(monthly[best], dg)} ${unit}). ` +
+              `Las celdas grises indican meses sin datos suficientes y no deben interpretarse como concentraciones bajas.`
+            : "No hay suficientes datos mensuales para identificar un periodo crítico.";
+      }
 
+      function renderHistAvail() {
+        const vars = [
+          ["O₃", "O3"],
+          ["CO", "CO"],
+          ["PM₁₀", "PM10"],
+          ["PM₂.₅", "PM25"],
+          ["Temp", "Temp"],
+          ["HR", "HR"],
+          ["Viento", "Viento"],
+        ];
+        let html = `<div class="heatmap" style="grid-template-columns: 52px repeat(7, 1fr)">`;
+        html += `<div></div>`;
+        vars.forEach(([n]) => (html += `<div class="hm-head">${n}</div>`));
+        YEARS.forEach((y) => {
+          html += `<div class="hm-row-label">${y}</div>`;
+          vars.forEach(([n, key]) => {
+            const v = DATA[y] ? DATA[y].avail[key] || 0 : 0;
+            html += `<div class="heat-cell" style="background:${availColor(v)};color:${v > 55 ? "#071626" : "#fff"}" title="${n} ${y}: ${v.toFixed(1)}% de horas válidas">${Math.round(v)}%</div>`;
+          });
+        });
+        html += `</div>`;
+        $("#hist-avail").innerHTML = html;
+      }
+
+      function renderHistAtypical() {
+        const key = histKey();
+        const dg = histDg();
+        const unit = histUnit();
+        const pairs = YEARS.map((y) => [y, annualMean(y, key)]).filter((x) => isNum(x[1]));
+        if (pairs.length < 3) {
+          $("#hist-atypical").innerHTML = `<p class="note">No hay suficientes años con datos para evaluar años atípicos.</p>`;
+        } else {
+          const m = mean(pairs.map((x) => x[1]));
+          const sd = Math.sqrt(mean(pairs.map((x) => (x[1] - m) ** 2))) || 1;
+          const atyp = pairs
+            .map(([y, v]) => ({ y, v, z: (v - m) / sd }))
+            .filter((x) => Math.abs(x.z) >= 1)
+            .sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+          $("#hist-atypical").innerHTML = atyp.length
+            ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">${atyp
+                .map((x) => `<span class="chip" style="background:${x.z > 0 ? "#FF7A2F" : "#4CC9F0"}">${x.y}: ${fmt(x.v, dg)} ${unit} · z=${x.z.toFixed(2)}</span>`)
+                .join("")}</div>
+                <p class="note">Criterio descriptivo: promedio anual a más de una desviación estándar de la media histórica. No implica significancia estadística.</p>`
+            : `<p class="note">No se identifican años con promedio anual a más de una desviación estándar de la media histórica para ${state.activeHistVar === "TEMP" ? "temperatura" : P[state.activeHistVar].n}.</p>`;
+        }
+
+        const events = [];
+        YEARS.forEach((y) => {
+          (DATA[y] ? DATA[y].days : []).forEach((d) => {
+            const v = d[key];
+            if (isNum(v)) events.push({ y, m: d.month, day: d.day, v, c: state.activeHistVar === "TEMP" ? -1 : cat(state.activeHistVar, v) });
+          });
+        });
+        events.sort((a, b) => b.v - a.v);
+        const top = events.slice(0, 5);
+        $("#hist-events").innerHTML = `
+          <thead><tr><th>#</th><th>Fecha</th><th>Valor</th><th>Categoría del contaminante</th></tr></thead>
+          <tbody>${top
+            .map(
+              (e, i) => `<tr>
+                <td>${i + 1}</td>
+                <td>${e.day} ${mN[e.m]} ${e.y}</td>
+                <td class="num">${fmt(e.v, dg)} ${unit}</td>
+                <td>${e.c >= 0 ? `<span class="chip" style="background:${COL[e.c]}">${CAT[e.c]}</span>` : "—"}</td>
+              </tr>`,
+            )
+            .join("")}</tbody>`;
+        $("#hist-events-note").textContent =
+          "Los eventos se ordenan por la concentración diaria de la variable seleccionada. El reporte complementa este listado con el análisis de atípicos por IQR y la revisión de inconsistencias.";
+      }
+
+      function renderHistReading() {
+        const key = histKey();
+        const dg = histDg();
+        const unit = histUnit();
+        const pairs = YEARS.map((y) => [y, annualMean(y, key)]).filter((x) => isNum(x[1]));
+        const cats = YEARS.map((y) => {
+          const days = DATA[y] ? DATA[y].days : [];
+          const validDays = days.filter((d) => d.c >= 0);
+          const risk = validDays.filter((d) => d.c >= 2).length;
+          return [y, validDays.length ? (100 * risk) / validDays.length : null];
+        }).filter((x) => isNum(x[1]));
+        const first = pairs[0];
+        const last = pairs[pairs.length - 1];
+        const trend = first && last ? last[1] - first[1] : null;
+        const riskFirst = cats[0];
+        const riskLast = cats[cats.length - 1];
+        const bullets = [];
+        if (first && last) {
+          bullets.push(
+            `Entre ${first[0]} y ${last[0]}, el promedio anual de ${state.activeHistVar === "TEMP" ? "temperatura" : P[state.activeHistVar].n} pasó de ${fmt(first[1], dg)} a ${fmt(last[1], dg)} ${unit} (${trend > 0 ? "+" : ""}${fmt(trend, dg)} ${unit}).`,
+          );
+        }
+        if (riskFirst && riskLast) {
+          bullets.push(
+            `El porcentaje de días en categoría Mala o peor pasó de ${riskFirst[1].toFixed(0)}% en ${riskFirst[0]} a ${riskLast[1].toFixed(0)}% en ${riskLast[0]}.`,
+          );
+        }
+        bullets.push(
+          "Limitación: 2015–2022 no incluye temperatura; PM₂.₅ falta en 2015–2016 y es intermitente en 2017–2022. Por ello, las comparaciones meteorológicas y de partículas finas no tienen la misma solidez en todos los años.",
+        );
+        bullets.push(
+          "Homologación normativa: para comparar los diez años se aplican los mismos umbrales NOM-172-SEMARNAT-2023. Los años previos a 2024 pudieron haber sido evaluados originalmente con otra versión de la norma; esta diferencia debe considerarse al interpretar los cambios de categoría.",
+        );
+        bullets.push(
+          "Uso sugerido: priorizar vigilancia en los meses críticos del mapa de calor y revisar la disponibilidad antes de declarar una tendencia como consolidada.",
+        );
+        $("#hist-reading").innerHTML = `<ul style="padding-left:18px;display:grid;gap:8px">${bullets.map((b) => `<li>${b}</li>`).join("")}</ul>`;
+      }
+
+      function renderHistory() {
+        renderHistAnnual();
+        renderHistCats();
+        renderHistHeatmap();
+        renderHistAvail();
+        renderHistAtypical();
+        renderHistReading();
+      }
+
+      /* ===================== Modelo predictivo ===================== */
+      const FEATURE_LABELS = [
+        "valor actual",
+        "rezago 1 h",
+        "rezago 2 h",
+        "rezago 3 h",
+        "media móvil 6 h",
+        "media móvil 24 h",
+        "temperatura",
+        "humedad relativa",
+        "velocidad del viento",
+        "hora (seno)",
+        "hora (coseno)",
+        "mes (seno)",
+        "mes (coseno)",
+      ];
+      const PRED_CACHE = {};
+      const PRED_COLORS = ["#4CC9F0", "#FFC83D", "#FF7A2F"];
+
+      function targetKey(target) {
+        return target === "TEMP" ? "temp" : P[target].key;
+      }
+      function targetDg(target) {
+        return target === "O3" ? 3 : target === "CO" ? 2 : 0;
+      }
+      function targetUnit(target) {
+        return target === "TEMP" ? "°C" : P[target].u;
+      }
+
+      function rollingMeanAt(hours, i, win, key, minValid) {
+        let s = 0;
+        let n = 0;
+        for (let j = Math.max(0, i - win + 1); j <= i; j++) {
+          const v = hours[j][key];
+          if (isNum(v)) {
+            s += v;
+            n++;
+          }
+        }
+        return n >= minValid ? s / n : null;
+      }
+
+      function featureVector(hours, i, key) {
+        const h = hours[i];
+        if (!h || !isNum(h[key])) return null;
+        const l1 = hours[i - 1] ? hours[i - 1][key] : null;
+        const l2 = hours[i - 2] ? hours[i - 2][key] : null;
+        const l3 = hours[i - 3] ? hours[i - 3][key] : null;
+        if (!isNum(l1) || !isNum(l2) || !isNum(l3)) return null;
+        const r6 = rollingMeanAt(hours, i, 6, key, 3);
+        const r24 = rollingMeanAt(hours, i, 24, key, 12);
+        if (!isNum(r6) || !isNum(r24)) return null;
+        return [
+          h[key],
+          l1,
+          l2,
+          l3,
+          r6,
+          r24,
+          h.temp,
+          h.rh,
+          h.wsp,
+          Math.sin((2 * Math.PI * h.hour) / 24),
+          Math.cos((2 * Math.PI * h.hour) / 24),
+          Math.sin((2 * Math.PI * (h.month - 1)) / 12),
+          Math.cos((2 * Math.PI * (h.month - 1)) / 12),
+        ];
+      }
+
+      function buildOrigins(key, years) {
+        const out = [];
+        years.forEach((y) => {
+          const hours = DATA[y] ? DATA[y].hours : [];
+          for (let i = 3; i < hours.length - 4; i++) {
+            const x = featureVector(hours, i, key);
+            if (!x) continue;
+            out.push({ x, hours, i, y, hour: hours[i].hour, month: hours[i].month, date: hours[i].date });
+          }
+        });
+        return out;
+      }
+
+      function dot(a, b) {
+        let s = 0;
+        for (let i = 0; i < a.length; i++) s += a[i] * b[i];
+        return s;
+      }
+
+      function solveLinear(A, b) {
+        const n = A.length;
+        const M = A.map((row) => row.slice());
+        const v = b.slice();
+        for (let i = 0; i < n; i++) {
+          let max = i;
+          for (let k = i + 1; k < n; k++) if (Math.abs(M[k][i]) > Math.abs(M[max][i])) max = k;
+          if (max !== i) {
+            [M[i], M[max]] = [M[max], M[i]];
+            [v[i], v[max]] = [v[max], v[i]];
+          }
+          const piv = M[i][i] || 1e-12;
+          for (let k = i + 1; k < n; k++) {
+            const f = M[k][i] / piv;
+            if (!f) continue;
+            for (let j = i; j < n; j++) M[k][j] -= f * M[i][j];
+            v[k] -= f * v[i];
+          }
+        }
+        const x = Array(n).fill(0);
+        for (let i = n - 1; i >= 0; i--) {
+          let s = v[i];
+          for (let j = i + 1; j < n; j++) s -= M[i][j] * x[j];
+          x[i] = s / (M[i][i] || 1e-12);
+        }
+        return x;
+      }
+
+      function ridgeSolve(X, y, lambda) {
+        const d = X[0].length;
+        const A = Array.from({ length: d }, () => Array(d).fill(0));
+        const b = Array(d).fill(0);
+        for (let n = 0; n < X.length; n++) {
+          const xi = X[n];
+          for (let j = 0; j < d; j++) {
+            b[j] += xi[j] * y[n];
+            for (let k = 0; k < d; k++) A[j][k] += xi[j] * xi[k];
+          }
+        }
+        for (let j = 1; j < d; j++) A[j][j] += lambda;
+        return solveLinear(A, b);
+      }
+
+      function trainPrediction(target, base) {
+        const key = targetKey(target);
+        const trainYears = YEARS.filter((y) => y !== base && DATA[y]);
+        const testYear = base;
+        const trainOrigins = buildOrigins(key, trainYears);
+        const testOrigins = buildOrigins(key, [testYear]);
+        if (trainOrigins.length < 100 || testOrigins.length < 20) {
+          return {
+            target,
+            base,
+            trainYears,
+            testYear,
+            error:
+              `Datos insuficientes para entrenar/evaluar ${target === "TEMP" ? "temperatura" : P[target].n} con ${state.baseYear} como año de prueba. ` +
+              `Se requieren al menos 100 muestras de entrenamiento y 20 de prueba.`,
+          };
+        }
+        const d = trainOrigins[0].x.length;
+        const means = Array(d).fill(0);
+        const stds = Array(d).fill(1);
+        for (let j = 0; j < d; j++) {
+          const vals = trainOrigins.map((o) => o.x[j]).filter(isNum);
+          means[j] = vals.length ? mean(vals) : 0;
+          const sd = vals.length ? Math.sqrt(mean(vals.map((v) => (v - means[j]) ** 2))) : 1;
+          stds[j] = sd || 1;
+        }
+        const scale = (x) => [1, ...x.map((v, j) => (isNum(v) ? (v - means[j]) / stds[j] : 0))];
+        const results = {};
+
+        for (let h = 1; h <= 3; h++) {
+          const trainRows = trainOrigins.filter((o) => isNum(o.hours[o.i + h] ? o.hours[o.i + h][key] : null));
+          const testRows = testOrigins.filter((o) => isNum(o.hours[o.i + h] ? o.hours[o.i + h][key] : null));
+          if (trainRows.length < 100 || testRows.length < 10) {
+            results[h] = { error: "Muestras insuficientes para este horizonte." };
+            continue;
+          }
+          const X = trainRows.map((o) => scale(o.x));
+          const y = trainRows.map((o) => o.hours[o.i + h][key]);
+          const beta = ridgeSolve(X, y, 1.0);
+          const obs = testRows.map((o) => o.hours[o.i + h][key]);
+          const preds = testRows.map((o) => Math.max(0, dot(beta, scale(o.x))));
+          let sae = 0;
+          let sse = 0;
+          for (let i = 0; i < obs.length; i++) {
+            const e = obs[i] - preds[i];
+            sae += Math.abs(e);
+            sse += e * e;
+          }
+          const mae = sae / obs.length;
+          const rmse = Math.sqrt(sse / obs.length);
+          const ybar = mean(obs);
+          let sst = 0;
+          for (let i = 0; i < obs.length; i++) sst += (obs[i] - ybar) ** 2;
+          const r2 = sst > 0 ? 1 - sse / sst : null;
+          const maxPts = 240;
+          const step = Math.max(1, Math.ceil(testRows.length / maxPts));
+          const chart = [];
+          for (let k = 0; k < testRows.length; k += step) {
+            chart.push({
+              obs: obs[k],
+              pred: preds[k],
+              err: Math.abs(obs[k] - preds[k]),
+              date: testRows[k].date,
+              hour: testRows[k].hour,
+            });
+          }
+          const importance = FEATURE_LABELS.map((label, j) => ({ label, coef: beta[j + 1] }))
+            .sort((a, b) => Math.abs(b.coef) - Math.abs(a.coef))
+            .slice(0, 5);
+          results[h] = {
+            mae,
+            rmse,
+            r2,
+            nTrain: trainRows.length,
+            nTest: testRows.length,
+            obs,
+            preds,
+            chart,
+            importance,
+          };
+        }
+        return { target, base, trainYears, testYear, nTrain: trainOrigins.length, nTest: testOrigins.length, results };
+      }
+
+      function getPredModel(target, base) {
+        const k = target + "|" + base;
+        if (!PRED_CACHE[k]) PRED_CACHE[k] = trainPrediction(target, base);
+        return PRED_CACHE[k];
+      }
+
+      function renderPrediction() {
+        const target = $("#sel-pred-var").value;
+        const model = getPredModel(target, state.baseYear);
+        $("#pred-model-note").innerHTML =
+          `<b>Modelo elegido:</b> regresión lineal múltiple con regularización Ridge y modelos directos para +1, +2 y +3 h. ` +
+          `Se eligió por su interpretabilidad, bajo costo computacional y porque permite incorporar concentraciones históricas, meteorología y variables temporales. ` +
+          `Alternativas como ARIMA no incorporan fácilmente variables externas y modelos como Random Forest o LSTM requieren más ajuste y menor interpretabilidad. ` +
+          `Limitaciones: supone relaciones lineales, no anticipa bien eventos extremos y depende de la continuidad de los sensores.`;
+        if (model.error) {
+          $("#pred-status").textContent = model.error;
+          $("#pred-metrics").innerHTML = "";
+          $("#pred-charts").innerHTML = `<div class="pred-chart-card"><p class="note">${model.error}</p></div>`;
+          $("#pred-error").innerHTML = `<text x="400" y="115" text-anchor="middle" fill="#9DB6CB" font-size="13">Sin datos suficientes</text>`;
+          $("#pred-error-legend").innerHTML = "";
+          $("#pred-reliability").innerHTML = `<p class="note">No es posible evaluar el modelo con la combinación seleccionada.</p>`;
+          $("#pred-importance").innerHTML = "";
+          return;
+        }
+        const trainTxt = model.trainYears.join(", ");
+        $("#pred-status").textContent =
+          `Entrenamiento: ${trainTxt} (${model.nTrain.toLocaleString("es-MX")} muestras). ` +
+          `Prueba: ${model.testYear} (${model.nTest.toLocaleString("es-MX")} muestras). ` +
+          `Variable: ${target === "TEMP" ? "Temperatura" : P[target].n} (${targetUnit(target)}).`;
+
+        $("#pred-metrics").innerHTML = [1, 2, 3]
+          .map((h) => {
+            const r = model.results[h];
+            if (!r || r.error) {
+              return `<div class="metric-card"><small>+${h} h</small><b style="font-size:16px;color:var(--mut)">Sin datos</b><p class="note">${r ? r.error : ""}</p></div>`;
+            }
+            return `<div class="metric-card">
+              <small>+${h} hora${h > 1 ? "s" : ""}</small>
+              <b>MAE ${fmt(r.mae, targetDg(target))}</b>
+              <div style="font-size:12.5px;color:var(--mut);margin-top:4px">RMSE <b style="color:#fff;font:700 14px 'Outfit'">${fmt(r.rmse, targetDg(target))}</b> · R² <b style="color:#fff;font:700 14px 'Outfit'">${r.r2 == null ? "—" : r.r2.toFixed(3)}</b></div>
+              <div style="font-size:11.5px;color:var(--mut);margin-top:4px">n prueba: ${r.nTest.toLocaleString("es-MX")}</div>
+            </div>`;
+          })
+          .join("");
+
+        $("#pred-charts").innerHTML = [1, 2, 3]
+          .map((h) => {
+            const r = model.results[h];
+            if (!r || r.error) {
+              return `<div class="pred-chart-card"><h4>+${h} h</h4><p class="note">${r ? r.error : "Sin datos"}</p></div>`;
+            }
+            return `<div class="pred-chart-card">
+              <h4>+${h} h</h4>
+              <p>Observado vs predicho en ${model.testYear}</p>
+              <svg id="pred-h${h}" viewBox="0 0 420 220" style="width:100%;overflow:visible"></svg>
+              <div class="obs-pred-legend">
+                <span style="color:#E8F1F8">■ Observado</span>
+                <span style="color:${PRED_COLORS[h - 1]}">-- Predicho +${h} h</span>
+              </div>
+            </div>`;
+          })
+          .join("");
+
+        [1, 2, 3].forEach((h) => {
+          const r = model.results[h];
+          if (!r || r.error) return;
+          const n = r.chart.length;
+          const xl = [0, Math.floor(n * 0.25), Math.floor(n * 0.5), Math.floor(n * 0.75), n - 1]
+            .filter((v, i, a) => v >= 0 && a.indexOf(v) === i)
+            .map((i) => [i, `${r.chart[i].date.getUTCDate()} ${mN[r.chart[i].date.getUTCMonth() + 1]}`]);
+          lineChart(`pred-h${h}`, {
+            W: 420,
+            H: 220,
+            X0: 46,
+            Y0: 12,
+            n,
+            dg: targetDg(target),
+            series: [
+              { arr: r.chart.map((x) => x.obs), color: "#E8F1F8", w: 2 },
+              { arr: r.chart.map((x) => x.pred), color: PRED_COLORS[h - 1], dash: true, w: 2.2 },
+            ],
+            xl,
+          });
+        });
+
+        const maxLen = Math.max(...[1, 2, 3].map((h) => (model.results[h] && model.results[h].chart ? model.results[h].chart.length : 0)));
+        lineChart("pred-error", {
+          W: 800,
+          H: 230,
+          X0: 52,
+          Y0: 14,
+          n: maxLen || 1,
+          dg: targetDg(target),
+          series: [1, 2, 3]
+            .filter((h) => model.results[h] && model.results[h].chart)
+            .map((h) => ({
+              arr: model.results[h].chart.map((x) => x.err),
+              color: PRED_COLORS[h - 1],
+              w: 2,
+            })),
+          xl: [],
+        });
+        $("#pred-error-legend").innerHTML = [1, 2, 3]
+          .filter((h) => model.results[h] && model.results[h].chart)
+          .map((h) => `<span style="color:${PRED_COLORS[h - 1]}">■ Error absoluto +${h} h</span>`)
+          .join("");
+
+        const r1 = model.results[1];
+        const r3 = model.results[3];
+        const rel = (r) => (r && r.r2 != null ? (r.r2 >= 0.7 ? "alta" : r.r2 >= 0.4 ? "moderada" : "baja") : "no disponible");
+        let relText = "";
+        if (r1 && r3 && r1.r2 != null && r3.r2 != null) {
+          relText = `La confiabilidad es <b>${rel(r1)}</b> a +1 h y <b>${rel(r3)}</b> a +3 h. `;
+          relText += r3.r2 < r1.r2
+            ? `El R² cae de ${r1.r2.toFixed(3)} a ${r3.r2.toFixed(3)} y el RMSE aumenta de ${fmt(r1.rmse, targetDg(target))} a ${fmt(r3.rmse, targetDg(target))}; esto indica que el desempeño se degrada al aumentar el horizonte, como es esperable.`
+            : `El R² no cae entre +1 h y +3 h (${r1.r2.toFixed(3)} → ${r3.r2.toFixed(3)}), pero el RMSE cambia de ${fmt(r1.rmse, targetDg(target))} a ${fmt(r3.rmse, targetDg(target))}; revisa la estabilidad del modelo y los eventos extremos.`;
+        } else {
+          relText = "No hay métricas suficientes para comparar los horizontes.";
+        }
+        relText += " La predicción debe leerse como apoyo y no como sustituto del monitoreo continuo.";
+        $("#pred-reliability").innerHTML = `<p>${relText}</p>`;
+
+        const imp = r1 && r1.importance ? r1.importance : [];
+        $("#pred-importance").innerHTML = imp.length
+          ? imp
+              .map(
+                (x) =>
+                  `<span>${x.label}: <b style="color:${x.coef >= 0 ? "#FFC83D" : "#4CC9F0"}">${x.coef >= 0 ? "+" : ""}${x.coef.toFixed(3)}</b></span>`,
+              )
+              .join("")
+          : `<span class="note">Sin coeficientes disponibles.</span>`;
+      }
+
+      /* ===================== Simulador ===================== */
+      function simFocusDays() {
+        return DATA[state.focusYear] ? DATA[state.focusYear].days : [];
+      }
+      function otherSimYear() {
+        if (!isComp()) return null;
+        return state.focusYear === state.baseYear ? state.compareYear : state.baseYear;
+      }
+      function hourWorst(rec) {
+        let c = -1;
+        let k = null;
+        KS.forEach((key) => {
+          const v = key === "CO" ? rec.co8 : rec[P[key].key];
+          const ci = cat(key, v);
+          if (ci > c) {
+            c = ci;
+            k = key;
+          }
+        });
+        return { c, k };
+      }
+      function setSimPol(k) {
+        state.simPol = k;
+        updateSimPolButtons();
+        drawSimChart();
+        renderSimFrame();
+      }
+      function updateSimPolButtons() {
+        $("#sim-pols").innerHTML = KS.map(
+          (k) => `<button class="btn" style="background:${state.simPol === k ? "var(--sun)" : "var(--bg-card)"};color:${state.simPol === k ? "#071626" : "var(--tx)"};border-color:${state.simPol === k ? "var(--sun)" : "var(--line)"}" onclick="setSimPol('${k}')">${P[k].n}</button>`,
+        ).join("");
+      }
+      function updateSimYearChips() {
+        const b = $("#sim-year-base");
+        const c = $("#sim-year-compare");
+        b.textContent = state.baseYear;
+        b.classList.toggle("active", state.focusYear === state.baseYear);
+        b.classList.toggle("dim", state.focusYear !== state.baseYear);
+        if (isComp()) {
+          c.style.display = "";
+          c.textContent = state.compareYear;
+          c.classList.toggle("active", state.focusYear === state.compareYear);
+          c.classList.toggle("dim", state.focusYear !== state.compareYear);
+        } else {
+          c.style.display = "none";
+        }
+        $("#sim-focus-label").textContent = `Año foco: ${state.focusYear}`;
+      }
+      function populateSimDays() {
+        const days = simFocusDays();
+        $("#sel-sim-day").innerHTML = days
+          .map((d) => `<option value="${d.di}">${String(d.day).padStart(2, "0")} ${mN[d.month]} · ${CAT[d.c] || "Sin datos"}</option>`)
+          .join("");
+        $("#sel-sim-day").value = String(state.simDay);
+      }
+      function setSimFocus(y) {
+        if (!y || !DATA[y]) return;
+        state.focusYear = y;
+        state.simDay = Math.max(0, Math.min(state.simDay, DATA[y].days.length - 1));
+        state.lastRenderedHour = -1;
+        updateSimYearChips();
+        populateSimDays();
+        drawSimChart();
+        renderSimFrame();
+      }
+      function setSimDay(index, scroll = true, year = null) {
+        if (year && DATA[year]) state.focusYear = year;
+        const days = simFocusDays();
+        if (!days.length) return;
+        state.simDay = Math.max(0, Math.min(days.length - 1, index));
+        state.lastRenderedHour = -1;
+        $("#sel-sim-day").value = String(state.simDay);
+        updateSimYearChips();
+        drawSimChart();
+        renderSimFrame();
+        if (scroll) $("#simulador").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      function jumpSim(index, year) {
+        setSimDay(index, true, year);
+      }
+      function goNewYear() {
+        state.activeMonth = 0;
+        $("#month-selector").value = "0";
+        state.focusYear = state.baseYear;
+        state.simTime = 0;
+        renderAll();
+        state.simPol = "PM10";
+        updateSimPolButtons();
+        drawSimChart();
+        renderSimFrame();
+        setSimDay(0, true, state.baseYear);
+      }
+      function pauseSim() {
+        state.isPlaying = false;
+        $("#sim-continue").textContent = "▶ Continuar";
+      }
+      function togglePlay() {
+        if (state.isPlaying) {
+          pauseSim();
+          return;
+        }
+        if (state.simTime >= 23.99) state.simTime = 0;
+        state.isPlaying = true;
+        state.lastFrameTime = performance.now();
+        $("#sim-continue").textContent = "⏸ Pausa";
+        requestAnimationFrame(loopSim);
+      }
+
+      function drawSimChart() {
+        const p = P[state.simPol];
+        const key = p.key;
+        const focus = DATA[state.focusYear] ? DATA[state.focusYear].hours.slice(state.simDay * 24, (state.simDay + 1) * 24) : [];
+        const oy = otherSimYear();
+        const other = oy ? DATA[oy].hours.slice(Math.min(state.simDay, DATA[oy].days.length - 1) * 24, Math.min(state.simDay, DATA[oy].days.length - 1) * 24 + 24) : null;
+        const arr1 = Array.from({ length: 24 }, (_, h) => (focus[h] ? focus[h][key] : null));
+        const arr2 = other ? Array.from({ length: 24 }, (_, h) => (other[h] ? other[h][key] : null)) : null;
+        const all = [...arr1, ...(arr2 || [])].filter(isNum);
+        if (!all.length) {
+          $("#sim-chart").innerHTML = `<text x="380" y="130" text-anchor="middle" fill="#9DB6CB" font-size="13">Sin datos para este día y contaminante</text>`;
+          $("#sim-legend").style.display = "none";
+          return;
+        }
+        const X0 = 50;
+        const W = 670;
+        const Y0 = 20;
+        const H = 200;
+        const maxVal = Math.max(...all, p.b[0] * 1.15) * 1.15;
+        const yf = (v) => Y0 + H - (v / maxVal) * H;
+        let s = "";
+        [...p.b.slice(0, 3), maxVal].forEach((th, i, arr) => {
+          const prev = i === 0 ? 0 : arr[i - 1];
+          if (prev < maxVal) {
+            const cap = Math.min(th, maxVal);
+            s += `<rect x="${X0}" y="${yf(cap)}" width="${W}" height="${yf(prev) - yf(cap)}" fill="${COL[i]}" opacity="0.12"/>`;
+          }
+        });
         for (let i = 0; i <= 4; i++) {
           const v = (maxVal * i) / 4;
-          svgStr += `<line x1="${X0}" x2="${X0 + W}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
-                   <text x="${X0 - 8}" y="${yf(v) + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${p.dg ? v.toFixed(p.dg) : Math.round(v)}</text>`;
+          s += `<line x1="${X0}" x2="${X0 + W}" y1="${yf(v)}" y2="${yf(v)}" stroke="#25506F" stroke-width="0.5"/>
+                <text x="${X0 - 8}" y="${yf(v) + 4}" text-anchor="end" font-size="11" fill="#9DB6CB">${p.dg ? v.toFixed(p.dg) : Math.round(v)}</text>`;
         }
         for (let h = 0; h <= 24; h += 3) {
-          svgStr += `<text x="${X0 + (h / 24) * W}" y="${Y0 + H_box + 20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${String(h).padStart(2, "0")}:00</text>`;
+          s += `<text x="${X0 + (h / 24) * W}" y="${Y0 + H + 20}" text-anchor="middle" font-size="11" fill="#9DB6CB">${String(h).padStart(2, "0")}:00</text>`;
         }
-
-        const genPath = (arr) => {
-          let path = "",
-            pen = false;
+        const path = (arr) => {
+          let d = "";
+          let pen = false;
           arr.forEach((v, h) => {
-            if (v == null || isNaN(v)) {
+            if (!isNum(v)) {
               pen = false;
               return;
             }
-            path +=
-              (pen ? "L" : "M") +
-              (X0 + (h / 24) * W).toFixed(1) +
-              " " +
-              yf(v).toFixed(1);
+            d += (pen ? "L" : "M") + (X0 + (h / 24) * W).toFixed(1) + " " + yf(v).toFixed(1);
             pen = true;
           });
-          return path;
+          return d;
         };
-
-        if (h2) {
-          svgStr += `<path d="${genPath(arr2)}" fill="none" stroke="#FFC83D" stroke-dasharray="6 4" stroke-width="2.5" opacity="0.9"/>`;
+        if (arr2) s += `<path d="${path(arr2)}" fill="none" stroke="${yearColor(oy)}" stroke-dasharray="6 4" stroke-width="2.5" opacity="0.9"/>`;
+        s += `<path d="${path(arr1)}" fill="none" stroke="${yearColor(state.focusYear)}" stroke-width="3.5" stroke-linejoin="round"/>`;
+        s += `<line id="sim-timeline" y1="${Y0}" y2="${Y0 + H}" stroke="#FFF" stroke-width="2"/>`;
+        $("#sim-chart").innerHTML = s;
+        if (arr2) {
+          $("#sim-legend").style.display = "flex";
+          $("#sim-legend").innerHTML =
+            `<span style="color:${yearColor(state.focusYear)}">■ ${state.focusYear} (foco, sólida)</span>` +
+            `<span style="color:${yearColor(oy)}">-- ${oy} (referencia, punteada)</span>` +
+            `<span style="color:var(--mut)">Variable: ${p.n} (${p.u})</span>`;
+        } else {
+          $("#sim-legend").style.display = "flex";
+          $("#sim-legend").innerHTML = `<span style="color:${yearColor(state.focusYear)}">■ ${state.focusYear} · ${p.n} (${p.u})</span>`;
         }
-        svgStr += `<path d="${genPath(arr1)}" fill="none" stroke="${isComp ? "#4CC9F0" : p.c}" stroke-width="3.5" stroke-linejoin="round"/>`;
-
-        svgStr += `<line id="sim-timeline" y1="${Y0}" y2="${Y0 + H_box}" stroke="#FFF" stroke-width="2"/>`;
-
-        $("#sim-chart").innerHTML = svgStr;
       }
 
-      function renderSimFrame(isComp) {
-        const h = Math.floor(simTime);
-        const offset = simDay * 24;
-        const X0 = 50,
-          W = 670;
+      function renderSimFrame() {
+        const h = Math.floor(state.simTime);
+        const focusHours = DATA[state.focusYear] ? DATA[state.focusYear].hours.slice(state.simDay * 24, (state.simDay + 1) * 24) : [];
+        const oy = otherSimYear();
+        const otherHours = oy ? DATA[oy].hours.slice(Math.min(state.simDay, DATA[oy].days.length - 1) * 24, Math.min(state.simDay, DATA[oy].days.length - 1) * 24 + 24) : [];
+        const rec = focusHours[h] || {};
+        const otherRec = otherHours[h] || null;
 
-        if (h !== lastRenderedHour) {
-          lastRenderedHour = h;
-
-          const h1 = getH(isComp ? 2024 : activeYear)[offset + h] || [];
-          const h2 = (isComp ? getH(2023) : [])[offset + h] || [];
-
-          if (!isComp) {
-            $("#sim-ban").innerHTML = `
-            <b style="font-size:18px; color:var(--sun)">${String(h).padStart(2, "0")}:00 hrs</b><br>
-            <p style="margin-top:8px; color: #C7D9E8;">
-              <b>Meteorología local:</b><br>
-              Temperatura: <span style="color:#FFF; font-weight:600;">${h1[7] != null ? h1[7].toFixed(1) : "—"} °C</span> &nbsp;|&nbsp; 
-              Humedad: <span style="color:#FFF; font-weight:600;">${h1[9] != null ? h1[9].toFixed(1) : "—"} %</span> &nbsp;|&nbsp; 
-              Viento: <span style="color:#FFF; font-weight:600;">${h1[10] != null ? h1[10].toFixed(1) : "—"} m/s</span>
-            </p>`;
-
-            $("#sim-gauges").innerHTML = KS.map((k) => {
-              const val = h1[P[k].i];
-              const cIdx = cat(k, val);
-              return `
-              <div class="gc" style="--c:${P[k].c}">
-                <small>${P[k].n} (${P[k].u})</small>
-                <b>${val != null ? (P[k].dg ? val.toFixed(P[k].dg) : Math.round(val)) : "—"}</b>
-                <div style="font-size:11.5px; font-weight:600; color:${cIdx >= 0 ? COL[cIdx] : "#fff"}; margin-bottom: 6px;">
-                  ${cIdx >= 0 ? CAT[cIdx] : "Sin datos"}
-                </div>
-                <div class="gb">
-                  <span style="width:${(P[k].b[0] / P[k].b[3]) * 100}%; background:var(--cat-buena)"></span>
-                  <span style="width:${((P[k].b[1] - P[k].b[0]) / P[k].b[3]) * 100}%; background:var(--cat-aceptable)"></span>
-                  <span style="width:${((P[k].b[2] - P[k].b[1]) / P[k].b[3]) * 100}%; background:var(--cat-mala)"></span>
-                  <span style="width:${((P[k].b[3] - P[k].b[2]) / P[k].b[3]) * 100}%; background:var(--cat-muymala)"></span>
-                  <i style="left:${val != null ? Math.min(val / P[k].b[3], 1) * 100 : 0}%"></i>
-                </div>
-              </div>`;
-            }).join("");
-          } else {
-            // ETIQUETAS DINÁMICAS NOM-172 EN COMPARATIVA
-            const val1 = h1[P[simPol].i];
-            const val2 = h2[P[simPol].i];
-            const cIdx1 = cat(simPol, val1);
-            const cIdx2 = cat(simPol, val2);
-
-            const tag1 =
-              cIdx1 >= 0
-                ? `<span style="background:${COL[cIdx1]}; color:${cIdx1 >= 2 ? "#fff" : "#111"}; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">${CAT[cIdx1]}</span>`
-                : `<span style="background:var(--cat-nodata); color:#fff; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">Sin datos</span>`;
-
-            const tag2 =
-              cIdx2 >= 0
-                ? `<span style="background:${COL[cIdx2]}; color:${cIdx2 >= 2 ? "#fff" : "#111"}; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">${CAT[cIdx2]}</span>`
-                : `<span style="background:var(--cat-nodata); color:#fff; padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle;">Sin datos</span>`;
-
-            $("#sim-ban").innerHTML = `
-            <b style="font-size:18px; color:var(--sun)">${String(h).padStart(2, "0")}:00 hrs (Cruce Meteorológico)</b>
-            <div style="margin-top: 12px; display: grid; gap: 12px;">
-              <div style="background: rgba(76, 201, 240, 0.08); padding: 12px; border-radius: 8px; border-left: 4px solid #4CC9F0;">
-                <b style="color:#4CC9F0; font-size: 15px;">Año 2024:</b><br>
-                <div style="margin: 6px 0;">${P[simPol].n}: <b style="font-size: 15.5px;">${val1 != null ? val1.toFixed(P[simPol].dg) : "—"} ${P[simPol].u}</b> ${tag1}</div>
-                <span style="color: var(--mut)">Temp: ${h1[7] != null ? h1[7].toFixed(1) : "—"}°C | Viento: ${h1[10] != null ? h1[10].toFixed(1) : "—"} m/s</span>
-              </div>
-              <div style="background: rgba(255, 200, 61, 0.08); padding: 12px; border-radius: 8px; border-left: 4px solid #FFC83D;">
-                <b style="color:#FFC83D; font-size: 15px;">Año 2023:</b><br>
-                <div style="margin: 6px 0;">${P[simPol].n}: <b style="font-size: 15.5px;">${val2 != null ? val2.toFixed(P[simPol].dg) : "—"} ${P[simPol].u}</b> ${tag2}</div>
-                <span style="color: var(--mut)">Temp: ${h2[7] != null ? h2[7].toFixed(1) : "—"}°C | Viento: ${h2[10] != null ? h2[10].toFixed(1) : "—"} m/s</span>
+        if (h !== state.lastRenderedHour) {
+          state.lastRenderedHour = h;
+          $("#sim-gauges").innerHTML = KS.map((k) => {
+            const val = rec[P[k].key];
+            const ci = cat(k, val);
+            return `<div class="gc" style="--c:${P[k].c}">
+              <small>${P[k].n} (${P[k].u})</small>
+              <b>${isNum(val) ? (P[k].dg ? val.toFixed(P[k].dg) : Math.round(val)) : "—"}</b>
+              <div style="font-size:11.5px;font-weight:600;color:${ci >= 0 ? COL[ci] : "#fff"};margin-bottom:6px">${ci >= 0 ? CAT[ci] : "Sin datos"}</div>
+              <div class="gb">
+                <span style="width:${(P[k].b[0] / P[k].b[3]) * 100}%;background:var(--cat-buena)"></span>
+                <span style="width:${((P[k].b[1] - P[k].b[0]) / P[k].b[3]) * 100}%;background:var(--cat-aceptable)"></span>
+                <span style="width:${((P[k].b[2] - P[k].b[1]) / P[k].b[3]) * 100}%;background:var(--cat-mala)"></span>
+                <span style="width:${((P[k].b[3] - P[k].b[2]) / P[k].b[3]) * 100}%;background:var(--cat-muymala)"></span>
+                <i style="left:${isNum(val) ? Math.min(val / P[k].b[3], 1) * 100 : 0}%"></i>
               </div>
             </div>`;
+          }).join("");
+
+          const fw = hourWorst(rec);
+          const ow = otherRec ? hourWorst(otherRec) : null;
+          let banner = `<b style="font-size:18px;color:var(--sun)">${hhmm(h)} · ${fw.c >= 0 ? CAT[fw.c] : "Sin datos"}</b>`;
+          banner += `<div style="margin-top:6px;color:#C7D9E8">${fw.c >= 0 ? CAT_REC[fw.c] : "No hay lecturas suficientes para determinar una categoría en esta hora."}</div>`;
+          banner += `<div style="margin-top:6px;font-size:12.5px;color:var(--mut)">Contaminante determinante: <b style="color:#fff">${fw.k ? P[fw.k].n : "—"}</b> · Año foco: <b style="color:#fff">${state.focusYear}</b></div>`;
+          if (otherRec) {
+            banner += `<div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mut)">
+              ${oy}: ${P[state.simPol].n} <b style="color:${yearColor(oy)}">${fmt(otherRec[P[state.simPol].key], P[state.simPol].dg)} ${P[state.simPol].u}</b> · ${ow && ow.c >= 0 ? CAT[ow.c] : "Sin datos"} · Temp ${fmt(otherRec.temp, 1)} °C · Viento ${fmt(otherRec.wsp, 1)} m/s
+            </div>`;
           }
+          $("#sim-ban").innerHTML = banner;
         }
 
+        updateScene(rec, oy, otherRec);
         const tl = $("#sim-timeline");
-        if (tl)
-          tl.setAttribute(
-            "transform",
-            `translate(${X0 + (simTime / 24) * W}, 0)`,
-          );
+        if (tl) tl.setAttribute("transform", `translate(${50 + (state.simTime / 24) * 670}, 0)`);
+        $("#sim-range").value = state.simTime;
+        $("#sim-clock").textContent = String(h).padStart(2, "0") + ":" + String(Math.floor((state.simTime - h) * 60)).padStart(2, "0");
+      }
 
-        $("#sim-range").value = simTime;
-        $("#sim-clock").textContent =
-          String(h).padStart(2, "0") +
-          ":" +
-          String(Math.floor((simTime - h) * 60)).padStart(2, "0");
+      function sceneSky(t) {
+        const stops = [
+          [0, "#071626", "#0b1f33"],
+          [0.22, "#071626", "#0b1f33"],
+          [0.3, "#3b2f4a", "#d97a4a"],
+          [0.38, "#2e6f9e", "#9fd3e8"],
+          [0.68, "#2e6f9e", "#9fd3e8"],
+          [0.76, "#4a2f4a", "#d9793a"],
+          [0.84, "#071626", "#0b1f33"],
+          [1, "#071626", "#0b1f33"],
+        ];
+        let a = stops[0];
+        let b = stops[stops.length - 1];
+        for (let i = 0; i < stops.length - 1; i++) {
+          if (t >= stops[i][0] && t <= stops[i + 1][0]) {
+            a = stops[i];
+            b = stops[i + 1];
+            break;
+          }
+        }
+        const f = b[0] > a[0] ? (t - a[0]) / (b[0] - a[0]) : 0;
+        return { top: lerpHex(a[1], b[1], f), bottom: lerpHex(a[2], b[2], f) };
+      }
+
+      function updateScene(rec, oy, otherRec) {
+        const t = state.simTime / 24;
+        const sky = sceneSky(t);
+        const top = $("#skyTop");
+        const bottom = $("#skyBottom");
+        if (top) top.setAttribute("stop-color", sky.top);
+        if (bottom) bottom.setAttribute("stop-color", sky.bottom);
+        const isDay = t > 0.28 && t < 0.78;
+        const isNight = !isDay;
+        const riuText = $("#riuText");
+        if (riuText) riuText.setAttribute("filter", isNight ? "url(#riuGlow)" : "none");
+        document.querySelectorAll(".car-light").forEach((light) => {
+          light.style.filter = isNight ? "url(#carLightGlow)" : "none";
+          light.setAttribute("opacity", isNight ? "1" : "0.4");
+        });
+        const sun = $("#sun");
+        const glow = $("#sunGlowCircle");
+        if (sun) {
+          sun.setAttribute("cx", 60 + t * 640);
+          sun.setAttribute("cy", 210 - Math.sin(Math.PI * t) * 150);
+          sun.setAttribute("fill", isDay ? "#ffc83d" : "#dbeaf5");
+          sun.setAttribute("opacity", isDay ? "1" : "0.9");
+        }
+        if (glow) {
+          glow.setAttribute("cx", 60 + t * 640);
+          glow.setAttribute("cy", 210 - Math.sin(Math.PI * t) * 150);
+          glow.setAttribute("opacity", isDay ? "1" : "0.15");
+        }
+        const stars = $("#stars");
+        if (stars) stars.setAttribute("opacity", isDay ? "0" : "0.8");
+        const clouds = $("#clouds");
+        if (clouds) clouds.setAttribute("opacity", isDay ? "0.55" : "0.18");
+
+        const pm = rec.pm10;
+        const ci = cat("PM10", pm);
+        const hazeColor = ci >= 0 ? COL[ci] : "#9DB6CB";
+        const hazeStop = document.querySelector("#hazeGrad stop:last-child");
+        if (hazeStop) hazeStop.setAttribute("stop-color", hazeColor);
+        const haze = $("#haze");
+        if (haze) haze.setAttribute("opacity", isNum(pm) ? Math.min(0.42, 0.06 + (pm / 300) * 0.36) : 0.06);
+
+        const car1 = $("#car1");
+        const car2 = $("#car2");
+        const car3 = $("#car3");
+        const carLoop = 780;
+        if (car1) car1.setAttribute("transform", `translate(${((t * 900 + 60) % carLoop) - 20},0)`);
+        if (car2) car2.setAttribute("transform", `translate(${((t * 760 + 240) % carLoop) - 20},0)`);
+        if (car3) car3.setAttribute("transform", `translate(${((t * 620 + 380) % carLoop) - 20},0)`);
+
+        $("#scene-temp").textContent = `${fmt(rec.temp, 1)} °C`;
+        $("#scene-wind").textContent = `Humedad ${fmt(rec.rh, 1)} % · Viento ${fmt(rec.wsp, 1)} m/s`;
+        $("#scene-pm").textContent = `PM₁₀: ${fmt(pm, 0)} µg/m³ · ${ci >= 0 ? CAT[ci] : "Sin datos"}`;
       }
 
       function loopSim(timestamp) {
-        if (!isPlaying) return;
-
+        if (!state.isPlaying) return;
         if (!timestamp) timestamp = performance.now();
-        const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.1);
-        lastFrameTime = timestamp;
-        simTime += dt * 2.5;
-
-        if (simTime >= 23.99) {
-          simTime = 0;
-          const refD = getD(activeYear === "comp" ? 2024 : activeYear);
-          if (simDay < refD.length - 1) {
-            setSimDay(simDay + 1, false);
+        const dt = Math.min((timestamp - state.lastFrameTime) / 1000, 0.1);
+        state.lastFrameTime = timestamp;
+        state.simTime += dt * 2.5 * state.simSpeed;
+        if (state.simTime >= 24) {
+          const days = simFocusDays();
+          if (state.autoFollow && state.simDay < days.length - 1) {
+            state.simTime = 0;
+            setSimDay(state.simDay + 1, false);
           } else {
-            isPlaying = false;
-            $("#btn-play").textContent = "▶ Iniciar";
+            state.simTime = 23.99;
+            pauseSim();
           }
         }
+        renderSimFrame();
+        if (state.isPlaying) requestAnimationFrame(loopSim);
+      }
 
-        renderSimFrame(activeYear === "comp");
-        animReq = requestAnimationFrame(loopSim);
+      function initStars() {
+        const g = $("#stars");
+        if (!g) return;
+        let s = "";
+        for (let i = 0; i < 34; i++) {
+          const x = (i * 97 + 31) % 740;
+          const y = (i * 43 + 17) % 150;
+          const r = i % 5 === 0 ? 1.4 : 0.9;
+          s += `<circle cx="${x}" cy="${y}" r="${r}" fill="#dbeaf5" opacity="${0.45 + (i % 4) * 0.12}"/>`;
+        }
+        g.innerHTML = s;
+      }
+
+      function initSim() {
+        if (!DATA[state.focusYear]) state.focusYear = state.baseYear;
+        if (state.focusYear !== state.baseYear && state.focusYear !== state.compareYear) state.focusYear = state.baseYear;
+        state.simDay = Math.max(0, Math.min(state.simDay, simFocusDays().length - 1));
+        updateSimYearChips();
+        populateSimDays();
+        updateSimPolButtons();
+        $("#sim-continue").textContent = state.isPlaying ? "⏸ Pausa" : "▶ Continuar";
+        $("#sim-prev").onclick = () => {
+          pauseSim();
+          setSimDay(state.simDay - 1, false);
+        };
+        $("#sim-next").onclick = () => {
+          pauseSim();
+          setSimDay(state.simDay + 1, false);
+        };
+        $("#sim-continue").onclick = togglePlay;
+        $("#sel-sim-day").onchange = (e) => {
+          pauseSim();
+          setSimDay(+e.target.value, false);
+        };
+        $("#sim-range").oninput = (e) => {
+          pauseSim();
+          state.simTime = +e.target.value;
+          renderSimFrame();
+        };
+        $$(".speed-group button").forEach((b) => {
+          b.classList.toggle("active", +b.dataset.speed === state.simSpeed);
+          b.onclick = () => {
+            state.simSpeed = +b.dataset.speed;
+            $$(".speed-group button").forEach((x) => x.classList.toggle("active", +x.dataset.speed === state.simSpeed));
+          };
+        });
+        $("#sim-auto").checked = state.autoFollow;
+        $("#sim-auto").onchange = (e) => (state.autoFollow = e.target.checked);
+        $("#sim-year-base").onclick = () => setSimFocus(state.baseYear);
+        $("#sim-year-compare").onclick = () => {
+          if (isComp()) setSimFocus(state.compareYear);
+        };
+        drawSimChart();
+        renderSimFrame();
+      }
+
+      /* ===================== Eventos e inicio ===================== */
+      function syncYearSelectors() {
+        $("#year-base").value = String(state.baseYear);
+        $("#year-compare").value = state.compareYear ? String(state.compareYear) : "";
+      }
+
+      function renderAll() {
+        if (!DATA[state.baseYear]) return;
+        if (state.compareYear && !DATA[state.compareYear]) state.compareYear = null;
+        if (state.compareYear === state.baseYear) state.compareYear = null;
+        if (!isComp() && state.focusYear !== state.baseYear) state.focusYear = state.baseYear;
+        updateContextLabels();
+        renderResumen();
+        renderCmp();
+        renderCal();
+        renderTrend();
+        renderHistory();
+        renderPrediction();
+        initSim();
       }
 
       function showTip(e, txt) {
         const t = $("#tip");
         t.innerHTML = txt;
         t.style.display = "block";
-        t.style.left = Math.min(e.clientX + 14, window.innerWidth - 200) + "px";
+        t.style.left = Math.min(e.clientX + 14, window.innerWidth - 230) + "px";
         t.style.top = e.clientY + 14 + "px";
       }
       function hideTip() {
         $("#tip").style.display = "none";
       }
 
+      function bindControls() {
+        $("#year-base").addEventListener("change", (e) => {
+          state.baseYear = +e.target.value;
+          if (state.compareYear === state.baseYear) state.compareYear = null;
+          state.focusYear = state.baseYear;
+          syncYearSelectors();
+          renderAll();
+        });
+        $("#year-compare").addEventListener("change", (e) => {
+          let v = e.target.value ? +e.target.value : null;
+          if (v === state.baseYear) v = null;
+          state.compareYear = v;
+          state.focusYear = state.baseYear;
+          syncYearSelectors();
+          renderAll();
+        });
+        $("#month-selector").addEventListener("change", (e) => {
+          state.activeMonth = +e.target.value;
+          renderAll();
+        });
+        $("#sel-granularity").addEventListener("change", (e) => {
+          state.granularity = e.target.value;
+          renderCal();
+        });
+        $("#sel-trend-var").addEventListener("change", (e) => {
+          state.activeTrendVar = e.target.value;
+          renderTrend();
+        });
+        $("#cmp-var").addEventListener("change", () => {
+          renderSeason();
+          renderProfile();
+        });
+        $("#sel-hist-var").addEventListener("change", (e) => {
+          state.activeHistVar = e.target.value;
+          renderHistory();
+        });
+        $("#sel-pred-var").addEventListener("change", (e) => {
+          state.activePredVar = e.target.value;
+          renderPrediction();
+        });
+      }
+
       window.onload = () => {
-        setTimeout(renderAll, 150);
+        initData();
+        if (!Object.keys(DATA).length) return;
+        state.focusYear = state.baseYear;
+        state.simTime = 8;
+        state.simDay = 0;
+        syncYearSelectors();
+        initStars();
+        bindControls();
+        renderAll();
       };
     </script>
   </body>
