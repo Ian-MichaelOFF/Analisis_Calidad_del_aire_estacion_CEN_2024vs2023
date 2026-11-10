@@ -151,6 +151,3 @@ El análisis aplica estrictamente la **NOM-172-SEMARNAT-2023** (vigente desde en
 
 ---
 
-## Uso de IA Generativa
-
-El equipo utilizó herramientas de Inteligencia Artificial Generativa (Gemini y Claude) como soporte para la investigación técnica de lineamientos normativos de la NOM-172-SEMARNAT-2023, la estructuración de la documentación y la optimización de componentes interactivos en JavaScript y CSS. El equipo revisó, auditó y validó la totalidad de los datos, cálculos e interpretaciones técnicas, asumiendo plena responsabilidad del producto final.
